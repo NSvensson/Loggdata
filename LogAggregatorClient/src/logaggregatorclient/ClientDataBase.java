@@ -1,4 +1,4 @@
-package clientlogcollector;
+package logaggregatorclient;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

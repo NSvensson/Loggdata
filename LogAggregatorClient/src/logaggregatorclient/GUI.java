@@ -1,4 +1,4 @@
-package clientlogcollector;
+package logaggregatorclient;
 
 import java.util.List;
 import javafx.application.Application;

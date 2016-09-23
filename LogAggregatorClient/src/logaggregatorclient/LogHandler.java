@@ -1,4 +1,4 @@
-package clientlogcollector;
+package logaggregatorclient;
 
 public class LogHandler {
     /*
