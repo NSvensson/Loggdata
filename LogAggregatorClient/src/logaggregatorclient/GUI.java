@@ -32,7 +32,7 @@ public class GUI extends Application {
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
         
-        Text login_title = new Text("Login");
+        Text login_title = new Text("Test");
         login_title.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         grid.add(login_title, 0, 0, 2, 1);
         
