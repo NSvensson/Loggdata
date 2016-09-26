@@ -1,3 +1,10 @@
 LogAggregatorClient/test/*
 LogAggregatorClient/build/*
 /LogAggregatorClient/dist/
+/LogAggregatorClient/nbproject/private/
+/LogAggregatorClient/build/
+/NetBeansProjects/Project_test/nbproject/private/
+/NetBeansProjects/Project_test/build/
+/Downloads/CodeCoverageDemo/nbproject/private/
+/NetBeansProjects/code_coverage/nbproject/private/
+/NetBeansProjects/code_coverage/build/
