@@ -1,7 +1,7 @@
 LogAggregatorClient/test/*
 LogAggregatorClient/build/*
 /LogAggregatorClient/dist/
-/LogAggregatorClient/nbproject/private/
+LogAggregatorClient/nbproject/private/*
 /LogAggregatorClient/build/
 /NetBeansProjects/Project_test/nbproject/private/
 /NetBeansProjects/Project_test/build/
