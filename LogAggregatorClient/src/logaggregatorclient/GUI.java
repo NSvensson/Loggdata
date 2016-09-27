@@ -106,6 +106,12 @@ public class GUI extends Application {
             }
         });
         
+        Button exportbtn = new Button("Export");
+        grid.add(exportbtn, 0, 4);
+        
+        Button logout = new Button("Logout");
+        grid.add(logout,1,4);
+        logout.setOnAction(e -> primaryStage.setScene(login(primaryStage)));
        
         Scene app = new Scene(grid,350,270);
         
