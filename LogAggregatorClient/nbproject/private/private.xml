@@ -3,7 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/josanbir/LogAggregatorClient/src/logaggregatorclient/LogHandler.java</file>
+            <file>file:/home/max/NetBeansProjects/LogAggregator/LogAggregatorClient/src/logaggregatorclient/GUI.java</file>
+            <file>file:/home/max/NetBeansProjects/LogAggregator/LogAggregatorClient/src/logaggregatorclient/Connections.java</file>
+            <file>file:/home/max/NetBeansProjects/LogAggregator/LogAggregatorClient/test/JUnitTezd.java</file>
         </group>
     </open-files>
 </project-private>
