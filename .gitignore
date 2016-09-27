@@ -1,3 +1,6 @@
 LogAggregatorClient/test/*
 LogAggregatorClient/build/*
-/LogAggregatorClient/dist/
+LogAggregatorClient/nbproject/*
+LogAggregatorClient/dist/*
+LogAggregatorClient/build/*
+
