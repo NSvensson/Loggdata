@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS `loggdatacollector`.`application` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NOT NULL,
   `log_name` VARCHAR(45) NOT NULL,
+  `log_type` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
@@ -56,6 +57,7 @@ CREATE TABLE IF NOT EXISTS `loggdatacollector`.`company` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NOT NULL,
   `website` VARCHAR(45) NOT NULL,
+  `extra_incase` VARCHAR(45) NOT NULL,
   `user_id` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_company_user1_idx` (`user_id` ASC),
@@ -76,6 +78,7 @@ CREATE TABLE IF NOT EXISTS `loggdatacollector`.`log` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `dateTime` DATETIME NOT NULL,
   `event` VARCHAR(65000) NOT NULL,
+  `special_event` VARCHAR(45) NOT NULL,
   `application_id` INT UNSIGNED NOT NULL,
   `company_id` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`id`),
