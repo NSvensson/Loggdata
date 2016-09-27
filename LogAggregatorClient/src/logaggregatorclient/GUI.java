@@ -1,7 +1,10 @@
 package logaggregatorclient;
 
+import java.io.File;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -14,6 +17,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class GUI extends Application {
@@ -65,6 +69,8 @@ public class GUI extends Application {
         return login;
 }
    private Scene app(Stage primaryStage){
+       final FileChooser fileChooser = new FileChooser();
+       
        primaryStage.setTitle("Register service");
        GridPane grid = new GridPane();
         grid.setAlignment(Pos.TOP_CENTER);
@@ -88,6 +94,18 @@ public class GUI extends Application {
         
         Button browse = new Button("Browse");
         grid.add(browse, 1, 3);
+        browse.setOnAction(new EventHandler<ActionEvent>(){
+            @Override
+            public void handle(final ActionEvent e){
+                File logfile = fileChooser.showOpenDialog(primaryStage);
+                if (logfile != null){
+//                  texser = logfile.getAbsolutePath();
+                  texser.setText(logfile.getAbsolutePath());
+                }
+                
+            }
+        });
+        
        
         Scene app = new Scene(grid,350,270);
         
