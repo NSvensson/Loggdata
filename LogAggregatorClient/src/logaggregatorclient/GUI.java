@@ -58,27 +58,36 @@ public class GUI extends Application {
         login_button_hbox.getChildren().add(login_button);
         grid.add(login_button_hbox, 1, 4);
         
-        login_button.setOnAction(e-> primaryStage.setScene(app()));
+        login_button.setOnAction(e-> primaryStage.setScene(app(primaryStage)));
         
         Scene login = new Scene(grid, 350, 270);
         
         return login;
 }
-   private Scene app(){
+   private Scene app(Stage primaryStage){
+       primaryStage.setTitle("Register service");
        GridPane grid = new GridPane();
         grid.setAlignment(Pos.TOP_CENTER);
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
         
-        Label company = new Label("Test Company");
+        Label company = new Label("Company");
         grid.add(company, 0, 0);
+        Label inter = new Label("Interval");
+        grid.add(inter, 1, 0);      
+        Label servname = new Label("Source");
+        grid.add(servname, 0, 2);
         
-        Label updinter = new Label("Test interval");
-        grid.add(updinter, 1, 0);
+        TextField texcom = new TextField();
+        grid.add(texcom,0,1);
+        TextField texint = new TextField();
+        grid.add(texint, 1, 1);
+        TextField texser = new TextField();
+        grid.add(texser,0,3);
         
-        Label servname = new Label("Test service");
-        grid.add(servname, 2, 0);
+        Button browse = new Button("Browse");
+        grid.add(browse, 1, 3);
        
         Scene app = new Scene(grid,350,270);
         
