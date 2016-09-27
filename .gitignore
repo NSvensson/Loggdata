@@ -5,3 +5,9 @@ LogAggregatorClient/build/built-jar.properties
 LogAggregatorClient/dist/*
 LogAggregatorClient/build/*
 
+LogAggregatorServer/target/*
+LogAggregatorServer/nb-configuration.xml
+LogAggregatorServer/README.md
+LogAggregatorServer/src/test/*
+LogAggregatorServer/src/main/resources/*
+LogAggregatorServer/src/test/webapp/*
