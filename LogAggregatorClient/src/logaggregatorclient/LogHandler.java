@@ -1,26 +1,72 @@
 package logaggregatorclient;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
 public class LogHandler {
     /*
     This class will focus on reading, sorting and then passing on 
     the log files given.
     */
     
-    public void add_new_log(String source_URI, String service, int update_frequency) {
-        /*
-        This method will only be called to when there's a new service being
-        being added to the database. It will not deal with the the .log file,
-        it will instead prepare the necessary additions to the database to
-        make way for the .log file to be sent.
+    public static void packLog(String[][] stringArray) {
+        try {
+            String logg = "";
 
-        The source_URI will point to the .log file stored on the clients device.
+            for (String[] row : stringArray) {
+                for (String value : row) {
+                    logg += value + " ";
+                }
+                logg += "\n";
+            }
+
+            File file = new File("./filename.txt");
+
+            // if file doesnt exists, then create it
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+
+            FileWriter fw = new FileWriter(file.getAbsoluteFile());
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write(logg);
+            bw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         
-        The service will be the service id pointing towards which service this
-        .log information will be stored to.
-        
-        The update_frequency will be the amount of seconds inbetween everytime
-        the .log will be sent to the database server.
-        */
+        byte[] buffer = new byte[1024];
+
+        try {
+
+            FileOutputStream fos = new FileOutputStream("./MyFile.zip");
+            ZipOutputStream zos = new ZipOutputStream(fos);
+            ZipEntry ze = new ZipEntry("filename.txt");
+            zos.putNextEntry(ze);
+            FileInputStream in = new FileInputStream("./filename.txt");
+
+            int len;
+            while ((len = in.read(buffer)) > 0) {
+                zos.write(buffer, 0, len);
+            }
+
+            in.close();
+            zos.closeEntry();
+
+            //remember close it
+            zos.close();
+
+            System.out.println("Done");
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
     
     public void read(String source_URI, String service, String last_line) {
