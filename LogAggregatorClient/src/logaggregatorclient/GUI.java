@@ -9,6 +9,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -43,7 +44,7 @@ public class GUI extends Application {
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
         
-        Text login_title = new Text("Hej och välkommen");
+        Text login_title = new Text("Welcome");
         login_title.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         grid.add(login_title, 0, 0, 2, 1);
         
@@ -70,7 +71,12 @@ public class GUI extends Application {
 }
    private Scene app(Stage primaryStage){
        final FileChooser fileChooser = new FileChooser();
-       
+       final ComboBox interval = new ComboBox();
+            interval.getItems().addAll("Hour",
+                    "Minute",
+                    "Second");
+            interval.getSelectionModel().selectFirst();
+            
        primaryStage.setTitle("Register service");
        GridPane grid = new GridPane();
         grid.setAlignment(Pos.TOP_CENTER);
@@ -87,10 +93,11 @@ public class GUI extends Application {
         
         TextField texcom = new TextField();
         grid.add(texcom,0,1);
-        TextField texint = new TextField();
-        grid.add(texint, 1, 1);
         TextField texser = new TextField();
+        TextField texint = new TextField();
+        grid.add(texint,1,1);
         grid.add(texser,0,3);
+        grid.add(interval,1,2);
         
         Button browse = new Button("Browse");
         grid.add(browse, 1, 3);
