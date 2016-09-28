@@ -12,3 +12,5 @@ LogAggregatorServer/src/test/*
 LogAggregatorServer/src/main/resources/*
 LogAggregatorServer/src/test/webapp/*
 /LogAggregatorServer/nbproject/
+
+*.properties
