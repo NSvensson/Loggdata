@@ -106,7 +106,7 @@ public class ServerDataBase {
         }
     }
     
-    public List<List<String>> select(String[] columns, String table, String designated_column, Object designated_value){
+    public String[][] select(String[] columns, String table, String designated_column, Object designated_value){
         /*
         This method will be used to select and return the values from the
         columns provided by the columns array from the provided table.
@@ -151,13 +151,15 @@ public class ServerDataBase {
             }
             rs = stmt.executeQuery();
 
+            List<String> row;
             while (rs.next()) {
-                List<String> row = new ArrayList<>(columns.length);
+                row = new ArrayList<>(columns.length);
                 
                 for (String column : columns) {
                     row.add(rs.getString(column));
                 }
                 results.add(row);
+                row = null;
             }
         } catch (SQLException se) {
             error_SQL = se;
@@ -175,44 +177,51 @@ public class ServerDataBase {
                 error_message = se.getMessage();
             }
         }
-        return results;
+        
+        String[][] resultsArray = new String[results.size()][];
+        for (int i = 0; i < results.size(); i++) {
+            List<String> row = results.get(i);
+            resultsArray[i] = row.toArray(new String[row.size()]);
+        }
+        
+        return resultsArray;
     }
 
-    public List<List<String>> select(String[] columns, String table){
+    public String[][] select(String[] columns, String table){
         return this.select(columns, table, null, null);
     }
     
-    public void create_table(String service) {
-        /*
-        If a new service is being added, this method will be called upon to
-        create a table to store the logs from the new service.
-
-        This method is currently only useful for the creation of new tables
-        to store the logs in.
-        */
-        String query = "CREATE TABLE " + 
-                service + " (" +
-                "id INTEGER NOT NULL AUTO_INCREMENT, " +
-                "date DATETIME NOT NULL, " +
-                "action VARCHAR(255) NOT NULL, " +
-                "PRIMARY KEY (id));";
-        
-        PreparedStatement stmt = null;
-        try {
-            stmt = database_connection.prepareStatement(query);
-            stmt.executeUpdate();
-
-        } catch (SQLException se) {
-            error_SQL = se;
-            error_message = se.getMessage();
-        } finally {
-            try { if (stmt != null) stmt.close(); }
-            catch (SQLException se) {
-                error_SQL = se;
-                error_message = se.getMessage();
-            }
-        }
-    }
+//    public void create_table(String service) {
+//        /*
+//        If a new service is being added, this method will be called upon to
+//        create a table to store the logs from the new service.
+//
+//        This method is currently only useful for the creation of new tables
+//        to store the logs in.
+//        */
+//        String query = "CREATE TABLE " + 
+//                service + " (" +
+//                "id INTEGER NOT NULL AUTO_INCREMENT, " +
+//                "date DATETIME NOT NULL, " +
+//                "action VARCHAR(255) NOT NULL, " +
+//                "PRIMARY KEY (id));";
+//        
+//        PreparedStatement stmt = null;
+//        try {
+//            stmt = database_connection.prepareStatement(query);
+//            stmt.executeUpdate();
+//
+//        } catch (SQLException se) {
+//            error_SQL = se;
+//            error_message = se.getMessage();
+//        } finally {
+//            try { if (stmt != null) stmt.close(); }
+//            catch (SQLException se) {
+//                error_SQL = se;
+//                error_message = se.getMessage();
+//            }
+//        }
+//    }
 
     public void insert(String[] columns, Object[][] values, String table) {
         /*
@@ -347,31 +356,31 @@ public class ServerDataBase {
         this.update(columns, values, table, null, null);
     }
 
-    public void drop_table(String table) {
-        /*
-        This method will be used when removing a table from the database
-        is desired. Removing a table is irreversible, use with caution.
-        
-        The string table will contain the name of the desired table to drop.
-        */
-        String query = "DROP TABLE " + table + ";";
-        
-        PreparedStatement stmt = null;
-        try {
-            stmt = database_connection.prepareStatement(query);
-            stmt.executeUpdate();
-
-        } catch (SQLException se) {
-            error_SQL = se;
-            error_message = se.getMessage();
-        } finally {
-            try { if (stmt != null) stmt.close(); }
-            catch (SQLException se) {
-                error_SQL = se;
-                error_message = se.getMessage();
-            }
-        }
-    }
+//    public void drop_table(String table) {
+//        /*
+//        This method will be used when removing a table from the database
+//        is desired. Removing a table is irreversible, use with caution.
+//        
+//        The string table will contain the name of the desired table to drop.
+//        */
+//        String query = "DROP TABLE " + table + ";";
+//        
+//        PreparedStatement stmt = null;
+//        try {
+//            stmt = database_connection.prepareStatement(query);
+//            stmt.executeUpdate();
+//
+//        } catch (SQLException se) {
+//            error_SQL = se;
+//            error_message = se.getMessage();
+//        } finally {
+//            try { if (stmt != null) stmt.close(); }
+//            catch (SQLException se) {
+//                error_SQL = se;
+//                error_message = se.getMessage();
+//            }
+//        }
+//    }
     
     public void delete_row(String table, String designated_column, Object designated_value) {
         /*

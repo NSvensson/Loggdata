@@ -76,13 +76,13 @@ public class MyUI extends UI {
         
         vdb.connect();
         String[] test = {"first_name", "brashibnik", "last_name"};
-        List<List<String>> results = vdb.select(test, "test_table");
+        String[][] results = vdb.select(test, "test_table");
 
         grid.setColumns(test);
         vdb.close();
 
-        for (List<String> row: results) {
-            grid.addRow(row.toArray());
+        for (String[] row: results) {
+            grid.addRow(row);
         }
         
         Button button = new Button("Click Me");
