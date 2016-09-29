@@ -1,0 +1,9 @@
+LogAggregatorServer/target/*
+LogAggregatorServer/nb-configuration.xml
+LogAggregatorServer/README.md
+LogAggregatorServer/src/test/*
+LogAggregatorServer/src/main/resources/*
+LogAggregatorServer/src/test/webapp/*
+LogAggregatorServer/nbproject/*
+
+*.properties
