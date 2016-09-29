@@ -1,16 +1,16 @@
-LogAggregatorClient/test/*
-LogAggregatorClient/build/*
-LogAggregatorClient/nbproject/*
-LogAggregatorClient/build/built-jar.properties
-LogAggregatorClient/dist/*
-LogAggregatorClient/build/*
+LogAggregator/LogAggregatorClient/test/*
+LogAggregator/LogAggregatorClient/build/*
+LogAggregator/LogAggregatorClient/nbproject/*
+LogAggregator/LogAggregatorClient/build/built-jar.properties
+LogAggregator/LogAggregatorClient/dist/*
+LogAggregator/LogAggregatorClient/build/*
 
-LogAggregatorServer/target/*
-LogAggregatorServer/nb-configuration.xml
-LogAggregatorServer/README.md
-LogAggregatorServer/src/test/*
-LogAggregatorServer/src/main/resources/*
-LogAggregatorServer/src/test/webapp/*
-/LogAggregatorServer/nbproject/
+LogAggregator/LogAggregatorServer/target/*
+LogAggregator/LogAggregatorServer/nb-configuration.xml
+LogAggregator/LogAggregatorServer/README.md
+LogAggregator/LogAggregatorServer/src/test/*
+LogAggregator/LogAggregatorServer/src/main/resources/*
+LogAggregator/LogAggregatorServer/src/test/webapp/*
+LogAggregator/LogAggregatorServer/nbproject/*
 
 *.properties

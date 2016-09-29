@@ -39,22 +39,6 @@ public class MyUI extends UI {
     
     @Override
     protected void init(VaadinRequest vaadinRequest) {
-        System.out.println("Snoop dogg: " + vaadinRequest);
-        System.out.println("Tezd: ");
-        String exempel = "dagensLogg.log";
-        if (exempel.endsWith(".log") || exempel.endsWith(".log2")) {
-            
-        }
-//    }
-//        getPage().addUriFragmentChangedListener(
-//            new UriFragmentChangedListener() {
-//                public void uriFragmentChanged(
-//                UriFragmentChangedEvent source) {
-//                    enter(source.getUriFragment());
-//                }
-//            });
-//        
-//        enter(getPage().getUriFragment());
         final VerticalLayout vLayout = new VerticalLayout();
         final VerticalLayout vSubLayout = new VerticalLayout();
         final HorizontalLayout hLayout = new HorizontalLayout();
