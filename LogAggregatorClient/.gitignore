@@ -3,6 +3,5 @@ LogAggregatorClient/build/*
 LogAggregatorClient/nbproject/*
 LogAggregatorClient/build/built-jar.properties
 LogAggregatorClient/dist/*
-LogAggregatorClient/build/*
 
 *.properties
