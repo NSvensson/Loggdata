@@ -6,7 +6,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class ServerDataBase {
     /*
@@ -106,7 +109,7 @@ public class ServerDataBase {
         }
     }
     
-    public List<List<String>> select(String[] columns, String table, String designated_column, Object designated_value){
+    public String[][] select(String[] columns, String table, HashMap designation){
         /*
         This method will be used to select and return the values from the
         columns provided by the columns array from the provided table.
@@ -136,9 +139,7 @@ public class ServerDataBase {
             query += columns[0] + " FROM " + table;
         }
         
-        if (designated_column != null && designated_value != null) {
-            query += " WHERE " + designated_column + "=?";
-        }
+        if (designation != null) query += whereQuery(designation);
         
         query += ";";
         
@@ -146,18 +147,17 @@ public class ServerDataBase {
         ResultSet rs = null;
         try {
             stmt = database_connection.prepareStatement(query);
-            if (designated_column != null && designated_value != null) {
-                stmt.setObject(1, designated_value);
-            }
             rs = stmt.executeQuery();
 
+            List<String> row;
             while (rs.next()) {
-                List<String> row = new ArrayList<>(columns.length);
+                row = new ArrayList<>(columns.length);
                 
                 for (String column : columns) {
                     row.add(rs.getString(column));
                 }
                 results.add(row);
+                row = null;
             }
         } catch (SQLException se) {
             error_SQL = se;
@@ -175,44 +175,51 @@ public class ServerDataBase {
                 error_message = se.getMessage();
             }
         }
-        return results;
+        
+        String[][] resultsArray = new String[results.size()][];
+        for (int i = 0; i < results.size(); i++) {
+            List<String> row = results.get(i);
+            resultsArray[i] = row.toArray(new String[row.size()]);
+        }
+        
+        return resultsArray;
     }
 
-    public List<List<String>> select(String[] columns, String table){
-        return this.select(columns, table, null, null);
+    public String[][] select(String[] columns, String table){
+        return this.select(columns, table, null);
     }
     
-    public void create_table(String service) {
-        /*
-        If a new service is being added, this method will be called upon to
-        create a table to store the logs from the new service.
-
-        This method is currently only useful for the creation of new tables
-        to store the logs in.
-        */
-        String query = "CREATE TABLE " + 
-                service + " (" +
-                "id INTEGER NOT NULL AUTO_INCREMENT, " +
-                "date DATETIME NOT NULL, " +
-                "action VARCHAR(255) NOT NULL, " +
-                "PRIMARY KEY (id));";
-        
-        PreparedStatement stmt = null;
-        try {
-            stmt = database_connection.prepareStatement(query);
-            stmt.executeUpdate();
-
-        } catch (SQLException se) {
-            error_SQL = se;
-            error_message = se.getMessage();
-        } finally {
-            try { if (stmt != null) stmt.close(); }
-            catch (SQLException se) {
-                error_SQL = se;
-                error_message = se.getMessage();
-            }
-        }
-    }
+//    public void create_table(String service) {
+//        /*
+//        If a new service is being added, this method will be called upon to
+//        create a table to store the logs from the new service.
+//
+//        This method is currently only useful for the creation of new tables
+//        to store the logs in.
+//        */
+//        String query = "CREATE TABLE " + 
+//                service + " (" +
+//                "id INTEGER NOT NULL AUTO_INCREMENT, " +
+//                "date DATETIME NOT NULL, " +
+//                "action VARCHAR(255) NOT NULL, " +
+//                "PRIMARY KEY (id));";
+//        
+//        PreparedStatement stmt = null;
+//        try {
+//            stmt = database_connection.prepareStatement(query);
+//            stmt.executeUpdate();
+//
+//        } catch (SQLException se) {
+//            error_SQL = se;
+//            error_message = se.getMessage();
+//        } finally {
+//            try { if (stmt != null) stmt.close(); }
+//            catch (SQLException se) {
+//                error_SQL = se;
+//                error_message = se.getMessage();
+//            }
+//        }
+//    }
 
     public void insert(String[] columns, Object[][] values, String table) {
         /*
@@ -287,7 +294,7 @@ public class ServerDataBase {
         }
     }
     
-    public void update(String[] columns, Object[] values, String table, String designated_column, Object designated_value) {
+    public void update(String[] columns, Object[] values, String table, HashMap designation) {
         /*
         This method will be used to change values on the designated row in the
         provided table.
@@ -312,9 +319,7 @@ public class ServerDataBase {
             query = query.substring(0, query.length() - 2);
         }
         
-        if (designated_column != null && designated_value != null) {
-            query += " WHERE " + designated_column + "=?";
-        }
+        if (designation != null) query += whereQuery(designation);
         
         query += ";";
         
@@ -322,12 +327,8 @@ public class ServerDataBase {
         try {
             stmt = database_connection.prepareStatement(query);
             
-            int i;
-            for (i = 0; i < values.length; i++) {
+            for (int i = 0; i < values.length; i++) {
                 stmt.setObject(i + 1, values[i]);
-            }
-            if (designated_column != null && designated_value != null) {
-                stmt.setObject(i + 1, designated_value);
             }
             stmt.executeUpdate();
 
@@ -344,36 +345,36 @@ public class ServerDataBase {
     }
     
     public void update(String[] columns, Object[] values, String table) {
-        this.update(columns, values, table, null, null);
+        this.update(columns, values, table, null);
     }
 
-    public void drop_table(String table) {
-        /*
-        This method will be used when removing a table from the database
-        is desired. Removing a table is irreversible, use with caution.
-        
-        The string table will contain the name of the desired table to drop.
-        */
-        String query = "DROP TABLE " + table + ";";
-        
-        PreparedStatement stmt = null;
-        try {
-            stmt = database_connection.prepareStatement(query);
-            stmt.executeUpdate();
-
-        } catch (SQLException se) {
-            error_SQL = se;
-            error_message = se.getMessage();
-        } finally {
-            try { if (stmt != null) stmt.close(); }
-            catch (SQLException se) {
-                error_SQL = se;
-                error_message = se.getMessage();
-            }
-        }
-    }
+//    public void drop_table(String table) {
+//        /*
+//        This method will be used when removing a table from the database
+//        is desired. Removing a table is irreversible, use with caution.
+//        
+//        The string table will contain the name of the desired table to drop.
+//        */
+//        String query = "DROP TABLE " + table + ";";
+//        
+//        PreparedStatement stmt = null;
+//        try {
+//            stmt = database_connection.prepareStatement(query);
+//            stmt.executeUpdate();
+//
+//        } catch (SQLException se) {
+//            error_SQL = se;
+//            error_message = se.getMessage();
+//        } finally {
+//            try { if (stmt != null) stmt.close(); }
+//            catch (SQLException se) {
+//                error_SQL = se;
+//                error_message = se.getMessage();
+//            }
+//        }
+//    }
     
-    public void delete_row(String table, String designated_column, Object designated_value) {
+    public void delete_row(String table, HashMap designation) {
         /*
         This method will be called upon when it is desired to delete
         the designated row from the chosen table.
@@ -384,13 +385,11 @@ public class ServerDataBase {
         Such a removal is not required in this application, thus it will only be
         implemented if the need for it arises.
         */
-        String query = "DELETE FROM " + table + 
-                " WHERE " + designated_column + "=?;";
+        String query = "DELETE FROM " + table + whereQuery(designation) + ";";
         
         PreparedStatement stmt = null;
         try {
             stmt = database_connection.prepareStatement(query);
-            stmt.setObject(1, designated_value);
             stmt.executeUpdate();
 
         } catch (SQLException se) {
@@ -405,40 +404,53 @@ public class ServerDataBase {
         }
     }
     
-    public boolean connection_is_valid() {
-        return this.database_connection != null && 
-                (this.error_message == null || this.error_SQL == null);
-    }
-    
-    public List<List<String>> user_privileges() {
-        List<List<String>> results = new ArrayList();
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            System.out.println("attempting grants");
-            stmt = database_connection.prepareStatement("SHOW GRANTS FOR CURRENT_USER;");
-            rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                System.out.println(rs.getString(1));
-//                results.add(rs.getString());
-            }
-        } catch (SQLException se) {
-            error_SQL = se;
-            error_message = se.getMessage();
-        } finally {
-            try { if (rs != null) rs.close(); }
-            catch (SQLException se) {
-                error_SQL = se;
-                error_message = se.getMessage();
-            }
-            
-            try { if (stmt != null) stmt.close(); }
-            catch (SQLException se) {
-                error_SQL = se;
-                error_message = se.getMessage();
-            }
+    private String whereQuery(HashMap arguments) {
+        String query = " WHERE ";
+        
+        Iterator mapIterate = arguments.entrySet().iterator();
+        while (mapIterate.hasNext()) {
+            Map.Entry pair = (Map.Entry)mapIterate.next();
+            query += pair.getKey() + "=" + pair.getValue() + ", ";
         }
-        return results;
+        
+        if (query.endsWith(", ")) query = query.substring(0, query.length() - 2);
+        return query;
     }
+
+//    public boolean connection_is_valid() {
+//        return this.database_connection != null && 
+//                (this.error_message == null || this.error_SQL == null);
+//    }
+//    
+//    public List<List<String>> user_privileges() {
+//        List<List<String>> results = new ArrayList();
+//        PreparedStatement stmt = null;
+//        ResultSet rs = null;
+//        try {
+//            System.out.println("attempting grants");
+//            stmt = database_connection.prepareStatement("SHOW GRANTS FOR CURRENT_USER;");
+//            rs = stmt.executeQuery();
+//
+//            while (rs.next()) {
+//                System.out.println(rs.getString(1));
+////                results.add(rs.getString());
+//            }
+//        } catch (SQLException se) {
+//            error_SQL = se;
+//            error_message = se.getMessage();
+//        } finally {
+//            try { if (rs != null) rs.close(); }
+//            catch (SQLException se) {
+//                error_SQL = se;
+//                error_message = se.getMessage();
+//            }
+//            
+//            try { if (stmt != null) stmt.close(); }
+//            catch (SQLException se) {
+//                error_SQL = se;
+//                error_message = se.getMessage();
+//            }
+//        }
+//        return results;
+//    }
 }
