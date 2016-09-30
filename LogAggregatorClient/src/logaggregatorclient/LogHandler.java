@@ -9,7 +9,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,7 +22,7 @@ public class LogHandler {
     */
     
     
-    public static void read(String source_URI, String service, String last_line) {
+    public void read(String source_URI, String service, String last_line) {
         /*
         This method will be used by both the automatic update script aswell as 
         the add_new_log method. It will focus on reading, parsing and passing
@@ -34,75 +33,78 @@ public class LogHandler {
         The service will be the service id pointing towards which service this
         .log information will be stored to.
         */
-        //source_URI = "src/source/console.log"
         List<List<String>> combined2d = new ArrayList<>();        
-         try{
+        String regex = "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:{0,1}\\d{0,2}";
+        Pattern pat = Pattern.compile(regex);
+//        int lineNmbr = 0;
+        try{
             try (FileInputStream fstream = new FileInputStream(source_URI)) {
                 BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
                 String strLine;
                 /* read log line by line */
                 while ((strLine = br.readLine()) != null)   {
                     /* parse strLine to obtain what you want */
-                    String regex = "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:{0,1}\\d{0,2}";
                     
-                    Matcher m = Pattern.compile(regex).matcher(strLine);
+                    Matcher m = pat.matcher(strLine);
                     
                     if (m.find()) {
                         
                         String res = m.group(0);
-                        //String arr1[] = res.split("");
-                        //String ses = m1.group(0);
-                        //System.out.println(ses);
-                        
                         String utan_datum  = strLine.replaceAll(res, "");
-                        //String arr[] = utan_datum.split("");
-                        //System.out.println (m.group(0) + "     " + utan_datum);
-                        //String arr2[] = utan_datum.split("");
+                        
                         List<String> myList = new ArrayList<>();
                         myList.add(res);
                         myList.add(utan_datum);
-//                        List<String> myList = new ArrayList<>(Arrays.asList());
-//                        List<String> myList1 = new ArrayList<>(Arrays.asList(utan_datum.split(",")));
-                        //System.out.println(myList + " " + myList1);
 
                         combined2d.add(myList);
-//                        combined2d.add(myList1);
-
-                        //return combined2d;
-                    }
-                    
+                    }                    
                     else  {
-                        System.out.println("");
+                        // TODO: handeling lines without a date found
                     }
-                    
+//                    System.out.println("Line " + lineNmbr + " read.");
+//                    lineNmbr++;
                 }
             }
 
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
         }
-        System.out.println(combined2d);
 
         String[][] resultsArray = new String[combined2d.size()][];
         for (int i = 0; i < combined2d.size(); i++) {
             List<String> row = combined2d.get(i);
             resultsArray[i] = row.toArray(new String[row.size()]);
         }
-    }   
+        
+        packLog(resultsArray);
+    }
     
+    public void read(String source_URI, String service) {
+        read(source_URI, service, null);
+        /*
+        This is just a method overload, used to set a default value
+        if there is no last_line provided to the main read  method.
+
+        Thus this method should be left alone.
+        */
+    }
     
-    public static void packLog(String[][] stringArray) {
+    public void packLog(String[][] stringArray) {
+//        System.out.println("Starting to pack log.");
+        String logName = "Log";
+        String logFileType = ".txt";
+        String zipName = "PackedLog";
         try {
             String logg = "";
 
             for (String[] row : stringArray) {
                 for (String value : row) {
-                    logg += value + " ";
+                    logg += value;
                 }
                 logg += "\n";
             }
 
-            File file = new File("./filename.txt");
+            File file = new File("./" + logName + logFileType);
 
             // if file doesnt exists, then create it
             if (!file.exists()) {
@@ -121,11 +123,11 @@ public class LogHandler {
 
         try {
 
-            FileOutputStream fos = new FileOutputStream("./MyFile.zip");
+            FileOutputStream fos = new FileOutputStream("./" + zipName + ".zip");
             ZipOutputStream zos = new ZipOutputStream(fos);
-            ZipEntry ze = new ZipEntry("filename.txt");
+            ZipEntry ze = new ZipEntry(logName + logFileType);
             zos.putNextEntry(ze);
-            FileInputStream in = new FileInputStream("./filename.txt");
+            FileInputStream in = new FileInputStream("./" + logName + logFileType);
 
             int len;
             while ((len = in.read(buffer)) > 0) {
@@ -138,22 +140,10 @@ public class LogHandler {
             //remember close it
             zos.close();
 
-            System.out.println("Done");
+//            System.out.println("Done");
 
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-    }
-    
-    
-
-    public void read(String source_URI, String service) {
-        read(source_URI, service, null);
-        /*
-        This is just a method overload, used to set a default value
-        if there is no last_line provided to the main read  method.
-
-        Thus this method should be left alone.
-        */
     }
 }

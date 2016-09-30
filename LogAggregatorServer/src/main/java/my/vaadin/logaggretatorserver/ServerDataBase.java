@@ -24,6 +24,7 @@ public class ServerDataBase {
     private final String database_URI_prefix = "jdbc:mysql://";
     private final String database_driver = "com.mysql.jdbc.Driver";
     private Connection database_connection = null;
+    private String connection_exception = null;
     public SQLException error_SQL = null;
     public String error_message = null;
 
@@ -90,6 +91,7 @@ public class ServerDataBase {
             try { if (database_connection != null) database_connection.close(); }
             catch (SQLException e) {}
         } catch (SQLException se) {
+            connection_exception = se.getMessage();
             error_SQL = se;
             error_message = se.getMessage();
             
@@ -157,7 +159,6 @@ public class ServerDataBase {
                     row.add(rs.getString(column));
                 }
                 results.add(row);
-                row = null;
             }
         } catch (SQLException se) {
             error_SQL = se;
@@ -417,11 +418,14 @@ public class ServerDataBase {
         return query;
     }
 
-//    public boolean connection_is_valid() {
-//        return this.database_connection != null && 
-//                (this.error_message == null || this.error_SQL == null);
-//    }
-//    
+    public String is_valid() {
+        String message = connection_exception;
+        if (message == null) return "Connection is valid.";
+        else if (message.contains("Communications link failure")) return "Database server not found.";
+        else if (message.contains("Access denied")) return "Invalid login information.";
+        return message;
+    }
+    
 //    public List<List<String>> user_privileges() {
 //        List<List<String>> results = new ArrayList();
 //        PreparedStatement stmt = null;
