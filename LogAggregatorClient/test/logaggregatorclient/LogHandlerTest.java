@@ -37,44 +37,44 @@ public class LogHandlerTest {
     public void tearDown() {
     }
 
-    /**
-     * Test of read method, of class LogHandler.
-     */
-    @Test
-    public void testRead_3args() {
-        System.out.println("read");
-        String source_URI = "";
-        String service = "";
-        String last_line = "";
-        LogHandler.read(source_URI, service, last_line);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
+//    /**
+//     * Test of read method, of class LogHandler.
+//     */
+//    @Test
+//    public void testRead_3args() {
+//        System.out.println("read");
+//        String source_URI = "";
+//        String service = "";
+//        String last_line = "";
+//        LogHandler.read(source_URI, service, last_line);
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
 
-    /**
-     * Test of packLog method, of class LogHandler.
-     */
-    @Test
-    public void testPackLog() {
-        System.out.println("packLog");
-        String[][] stringArray = null;
-        LogHandler.packLog(stringArray);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
+//    /**
+//     * Test of packLog method, of class LogHandler.
+//     */
+//    @Test
+//    public void testPackLog() {
+//        System.out.println("packLog");
+//        String[][] stringArray = null;
+//        LogHandler.packLog(stringArray);
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
 
-    /**
-     * Test of read method, of class LogHandler.
-     */
-    @Test
-    public void testRead_String_String() {
-        System.out.println("read");
-        String source_URI = "";
-        String service = "";
-        LogHandler instance = new LogHandler();
-        instance.read(source_URI, service);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
+//    /**
+//     * Test of read method, of class LogHandler.
+//     */
+//    @Test
+//    public void testRead_String_String() {
+//        System.out.println("read");
+//        String source_URI = "";
+//        String service = "";
+//        LogHandler instance = new LogHandler();
+//        instance.read(source_URI, service);
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
     
 }

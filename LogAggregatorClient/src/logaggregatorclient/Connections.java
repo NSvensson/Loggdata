@@ -16,7 +16,7 @@ public class Connections {
     private final String USER_AGENT = "Mozilla/5.0";
     
     public void get() throws Exception {
-        String url = "http://localhost:8080/LogCollector/rhexample";
+        String url = "http://localhost:8080/LogAggregatorServer/rhexample";
 
         URL obj = new URL(url);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -46,9 +46,9 @@ public class Connections {
     }
     
     public void post() throws MalformedURLException, ProtocolException, IOException {
-        String url = "http://localhost:8080/LogCollector/rhexample";
+        String url = "http://localhost:8080/LogAggregatorServer/rhexample";
         URL obj = new URL(url);
-        HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
         //add reuqest header
         con.setRequestMethod("POST");
