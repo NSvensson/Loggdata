@@ -1,0 +1,5 @@
+/LogAggregatorClient/dist/
+*built-jar.properties
+*nbproject/private/private.properties
+*nbproject/private/private.xml
+

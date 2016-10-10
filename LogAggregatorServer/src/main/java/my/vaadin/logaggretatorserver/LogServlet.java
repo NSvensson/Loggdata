@@ -78,16 +78,26 @@ public class LogServlet extends HttpServlet {
         processRequest(request, response);
         
         System.out.println(Collections.list(request.getHeaderNames()));
-        System.out.println(request.getHeader("app-id"));
-        System.out.println(request.getHeader("api-key"));
         System.out.println("Post recieved.");
 
+        /*
+        First check if the headers app-id and api-key is provided 
+        (these headers are required for identification of the provided zip file)
+        */
         if (request.getHeader("app-id") != null && request.getHeader("api-key") != null) {
+            /*
+            Create a database object with preferably a user whom only has rights
+            to the config table, as no other table will be used in this servlet.
+            */
             ServerDataBase sdb = new ServerDataBase(
                     "localhost:3306/logtestdb",
                     "root",
                     "root");
 
+            /*
+            This HashMap object is required to provide a MySQL where clause to
+            find the current API key for the application.
+            */
             HashMap where = new HashMap();
             where.put("app_id", request.getHeader("app-id"));
 
@@ -98,10 +108,21 @@ public class LogServlet extends HttpServlet {
                     where);
             sdb.close();
 
+            /*
+            Check if the provided API key is valid and pick out the file from
+            the multipart request.
+            */
             Part givenFile;
-            if (api_key != null && api_key[0][0].equals(request.getHeader("api-key")) && (givenFile = request.getPart("file")) != null) {
-                System.out.println("API key correct.");
+            if (api_key != null && api_key[0][0].equals(request.getHeader("api-key")) &&
+                    (givenFile = request.getPart("file")) != null) {
 
+                System.out.println("API key is valid.");
+
+                /*
+                Check if the content-type of the provided file is zip or
+                anything related. (This however is a little bit unnecessary
+                due to the byte check done further down.)
+                */
                 String contentType = givenFile.getContentType();
                 if (contentType != null && (
                         contentType.contains("application/zip") || 
@@ -109,6 +130,9 @@ public class LogServlet extends HttpServlet {
                         contentType.contains("application/x-zip-compressed")
                         )) {
 
+                    /*
+                    Create a inputstream to read the provided file byte after byte.
+                    */
                     InputStream sis = givenFile.getInputStream();
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     byte[] buffer = new byte[sis.available()];
@@ -121,6 +145,8 @@ public class LogServlet extends HttpServlet {
                     byte[] read_file = baos.toByteArray();
 
                     /*
+                    Here we check if the provided file really is a zip file.
+                    
                     The first 4 bytes can be used to determine whether the read file
                     is a zip or not. The 4 magic numbers to determine if it is a zip
                     file is: 80 75 3 4.
@@ -131,6 +157,10 @@ public class LogServlet extends HttpServlet {
                             read_file[2] == 3 && 
                             read_file[3] == 4) {
 
+                        /*
+                        If the file indeed was a zip file, it will then be saved
+                        on the server locally, waiting for further processing.
+                        */
                         File file = new File("./ReceivedLog.zip");
                         try (FileOutputStream fop = new FileOutputStream(file)) {
                             if (!file.exists()) file.createNewFile();
