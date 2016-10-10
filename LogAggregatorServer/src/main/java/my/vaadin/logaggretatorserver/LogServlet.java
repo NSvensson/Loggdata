@@ -1,6 +1,5 @@
 package my.vaadin.logaggretatorserver;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -9,10 +8,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -86,8 +82,8 @@ public class LogServlet extends HttpServlet {
         */
         if (request.getHeader("app-id") != null && request.getHeader("api-key") != null) {
             /*
-            Create a database object with preferably a user whom only has rights
-            to the config table, as no other table will be used in this servlet.
+            Create a ServerDataBase object with preferably a user whom only has
+            rights to the config table, as no other table will be used in this servlet.
             */
             ServerDataBase sdb = new ServerDataBase(
                     "localhost:3306/logtestdb",
