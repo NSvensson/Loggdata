@@ -52,10 +52,10 @@ public class ServerDataBase {
         this.database_password = database_password;
 
         /*
-        When initiating a new ClientDataBase object, it should be written in
+        When initiating a new ServerDataBase object, it should be written in
         the following manner.
         
-        ClientDataBase cdb = new ClientDataBase(
+        ServerDataBase sdb = new ServerDataBase(
                 "localhost:3306/Database_name", 
                 "username", 
                 "password");
@@ -81,7 +81,7 @@ public class ServerDataBase {
             if (database_driver != null) Class.forName(database_driver);
             
             database_connection = DriverManager.getConnection(
-                    database_URI, 
+                    database_URI,
                     database_username,
                     database_password);
             
@@ -116,9 +116,8 @@ public class ServerDataBase {
         This method will be used to select and return the values from the
         columns provided by the columns array from the provided table.
         
-        The arguments designated_column and designated_value is not required for
-        this method, however it is useful in case the need for a WHERE clause
-        appears.
+        The argument designation is not required for this method, however it is
+        useful in case the need for a WHERE clause appears.
         
         The reason behind using the List library to return the values found
         by the provided query is simply because it is easier to work with when
@@ -380,9 +379,9 @@ public class ServerDataBase {
         This method will be called upon when it is desired to delete
         the designated row from the chosen table.
         
-        The arguments designated_column and designated_value is required for
-        this method, if a WHERE clause isn't provided when using a DELETE FROM 
-        query, it will cause everything in the chosen table to be deleted.
+        The argument designation is required for this method, if a WHERE
+        clause isn't provided when using a DELETE FROM query, it will cause
+        everything in the chosen table to be deleted.
         Such a removal is not required in this application, thus it will only be
         implemented if the need for it arises.
         */
@@ -411,10 +410,10 @@ public class ServerDataBase {
         Iterator mapIterate = arguments.entrySet().iterator();
         while (mapIterate.hasNext()) {
             Map.Entry pair = (Map.Entry)mapIterate.next();
-            query += pair.getKey() + "=" + pair.getValue() + ", ";
+            query += pair.getKey() + "=" + pair.getValue() + " AND ";
         }
         
-        if (query.endsWith(", ")) query = query.substring(0, query.length() - 2);
+        if (query.endsWith(" AND ")) query = query.substring(0, query.length() - 5);
         return query;
     }
 
