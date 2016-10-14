@@ -9,13 +9,20 @@ import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinResponse;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.server.VaadinSession;
+import com.vaadin.ui.AbsoluteLayout;
+import com.vaadin.ui.AbsoluteLayout.ComponentPosition;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Upload;
+import java.awt.Component;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
@@ -31,106 +38,33 @@ import java.util.Locale;
  */
 @Theme("mytheme")
 public class MyUI extends UI {
-
-    private final ServerDataBase vdb = new ServerDataBase(
-            "localhost:3306/VaadinApp", 
-            "root", 
-            "root");
     
+
+
     @Override
     protected void init(VaadinRequest vaadinRequest) {
-        final VerticalLayout vLayout = new VerticalLayout();
-        final VerticalLayout vSubLayout = new VerticalLayout();
-        final HorizontalLayout hLayout = new HorizontalLayout();
-        final Grid grid = new Grid();
+        final GridLayout main = new GridLayout();
+        final GridLayout layout = new GridLayout(2,6);
+        main.setWidth("100%");
+        main.setHeight("100%");
         
-        vLayout.setMargin(true);
-        hLayout.setMargin(true);
-        vSubLayout.setMargin(true);
-        setContent(vLayout);
+        main.addComponent(layout);
+        main.setComponentAlignment(layout, Alignment.MIDDLE_CENTER);
         
-        final TextField firstName = new TextField();
-        firstName.setCaption("First name:");
+        layout.addComponent(new Label("Username"),1,1);
+        layout.addComponent(new TextField(""),1,2);
         
-        final TextField lastName = new TextField();
-        lastName.setCaption("Last name:");
+        layout.addComponent(new Label("Password"),1,3);
+        layout.addComponent(new PasswordField(""),1,4);
         
-        final TextField brashibnik = new TextField();
-        brashibnik.setCaption("Brashibnik:");
+        layout.addComponent(new Button("Login"),1,5);
         
-        vdb.connect();
-        String[] test = {"first_name", "brashibnik", "last_name"};
-        String[][] results = vdb.select(test, "test_table");
-
-        grid.setColumns(test);
-        vdb.close();
-
-        for (String[] row: results) {
-            grid.addRow(row);
-        }
         
-        Button button = new Button("Click Me");
-        button.addClickListener(new Button.ClickListener() {
-            @Override
-            public void buttonClick(Button.ClickEvent event) {
-                Object[][] tmpTest = {{firstName.getValue(), lastName.getValue(), brashibnik.getValue()}};
-                vdb.connect();
-                vdb.insert(test, tmpTest, "test_table");
-                vdb.close();
-                firstName.clear();
-                lastName.clear();
-                brashibnik.clear();
-            }
-        });
-
-        vSubLayout.addComponents(firstName, lastName, brashibnik, button);
-        hLayout.addComponents(grid, vSubLayout);
-        vLayout.addComponent(hLayout);
-
-        Upload uploadBtn = new Upload();
-        vLayout.addComponent(uploadBtn);
-
-        // A request handler for generating some content
-        VaadinSession.getCurrent().addRequestHandler(
-                new RequestHandler() {
-            @Override
-            public boolean handleRequest(VaadinSession session,
-                                         VaadinRequest request,
-                                         VaadinResponse response)
-                    throws IOException {
-                if ("/rhexample".equals(request.getPathInfo())) {
-                    // Generate a plain text document
-                    response.setContentType("text/plain");
-                    response.getWriter().append(
-                       "Here's some dynamically generated content.\n");
-                    response.getWriter().format(Locale.ENGLISH,
-                       "Time: %Tc\n", new Date());
-
-                    // Use shared session data
-                    response.getWriter().format("Session data: %s\n",
-                        session.getAttribute("mydata"));
-
-                    return true; // We wrote a response
-                } else
-                    return false; // No response was written
-            }
-        });
+        
+        setContent(main);
+        
     }
-//
-//    void enter(String fragment) {
-//        System.out.println(fragment);
-//        final VerticalLayout vLayout = new VerticalLayout();
-//        vLayout.setMargin(true);
-//        setContent(vLayout);
-//        if (fragment.equals("login")) {
-//            Label lbl1 = new Label("login");
-//            vLayout.addComponent(lbl1);
-//        } else {
-//            Label lbl1 = new Label("index");
-//            vLayout.addComponent(lbl1);
-//        }
-//    }
-    
+
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
     @VaadinServletConfiguration(ui = MyUI.class, productionMode = false)
     public static class MyUIServlet extends VaadinServlet {

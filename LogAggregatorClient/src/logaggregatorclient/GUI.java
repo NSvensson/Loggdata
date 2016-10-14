@@ -72,9 +72,9 @@ public class GUI extends Application {
    private Scene app(Stage primaryStage){
        final FileChooser fileChooser = new FileChooser();
        final ComboBox interval = new ComboBox();
-            interval.getItems().addAll("Hour",
-                    "Minute",
-                    "Second");
+            interval.getItems().addAll("Hours",
+                    "Minutes",
+                    "Seconds");
             interval.getSelectionModel().selectFirst();
             
        primaryStage.setTitle("Register service");
@@ -84,10 +84,10 @@ public class GUI extends Application {
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
         
-        Label company = new Label("Company");
-        grid.add(company, 0, 0);
+        Label app_name = new Label("App name");
+        grid.add(app_name, 0, 0);
         Label inter = new Label("Interval");
-        grid.add(inter, 1, 0);      
+        grid.add(inter, 0, 4);      
         Label servname = new Label("Source");
         grid.add(servname, 0, 2);
         
@@ -95,9 +95,9 @@ public class GUI extends Application {
         grid.add(texcom,0,1);
         TextField texser = new TextField();
         TextField texint = new TextField();
-        grid.add(texint,1,1);
+        grid.add(texint,0,5);
         grid.add(texser,0,3);
-        grid.add(interval,1,2);
+        grid.add(interval,1,5);
         
         Button browse = new Button("Browse");
         grid.add(browse, 1, 3);
@@ -114,13 +114,13 @@ public class GUI extends Application {
         });
         
         Button exportbtn = new Button("Export");
-        grid.add(exportbtn, 0, 4);
+        grid.add(exportbtn, 0, 6);
         
-        Button logout = new Button("Logout");
-        grid.add(logout,1,4);
-        logout.setOnAction(e -> primaryStage.setScene(login(primaryStage)));
+        Button logout = new Button("Exit");
+        grid.add(logout,1,6);
+        logout.setOnAction(e -> System.exit(0));
        
-        Scene app = new Scene(grid,350,270);
+        Scene app = new Scene(grid);
         
        return app;
    }
