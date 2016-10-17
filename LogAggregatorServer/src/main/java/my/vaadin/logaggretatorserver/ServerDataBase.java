@@ -111,7 +111,7 @@ public class ServerDataBase {
         }
     }
     
-    public String[][] select(String[] columns, String table, HashMap designation){
+    public String[][] select(String[] columns, String table, HashMap<String, Object> designation){
         /*
         This method will be used to select and return the values from the
         columns provided by the columns array from the provided table.
@@ -140,7 +140,13 @@ public class ServerDataBase {
             query += columns[0] + " FROM " + table;
         }
         
-        if (designation != null) query += whereQuery(designation);
+        if (designation != null) {
+            query += " WHERE ";
+            for (String key : designation.keySet()) {
+                query += key + "=? AND ";
+            }
+            if (query.endsWith(" AND ")) query = query.substring(0, query.length() - 5);
+        }
         
         query += ";";
         
@@ -148,6 +154,14 @@ public class ServerDataBase {
         ResultSet rs = null;
         try {
             stmt = database_connection.prepareStatement(query);
+            
+            if (designation != null) {
+                int i = 1;
+                for (Object value : designation.values()) {
+                    stmt.setObject(i++, value);
+                }
+            }
+            
             rs = stmt.executeQuery();
 
             List<String> row;

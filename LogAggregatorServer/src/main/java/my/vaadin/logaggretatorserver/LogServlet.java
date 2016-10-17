@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.Collections;
 import java.util.HashMap;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -73,7 +72,6 @@ public class LogServlet extends HttpServlet {
             throws ServletException, IOException {
         processRequest(request, response);
         
-        System.out.println(Collections.list(request.getHeaderNames()));
         System.out.println("Post recieved.");
 
         /*
