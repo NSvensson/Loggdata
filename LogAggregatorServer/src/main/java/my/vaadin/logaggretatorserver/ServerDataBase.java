@@ -18,10 +18,10 @@ public class ServerDataBase {
     other parts of this application.
     */
     
-    private String database_URI;
-    private String database_username;
-    private String database_password;
-    private final String database_URI_prefix = "jdbc:mysql://";
+    private final String database_URI = "jdbc:mysql://localhost:3306/logdatacollector";
+    private final String database_username = "root";
+    private final String database_password = "root";
+//    private final String database_URI_prefix = "jdbc:mysql://";
     private final String database_driver = "com.mysql.jdbc.Driver";
     private Connection database_connection = null;
     private String connection_exception = null;
@@ -46,25 +46,25 @@ public class ServerDataBase {
     "jdbc:mysql://"
     */
 
-    public ServerDataBase(String database_URI, String database_username, String database_password) {
-        this.database_URI = this.database_URI_prefix + database_URI;
-        this.database_username = database_username;
-        this.database_password = database_password;
-
-        /*
-        When initiating a new ServerDataBase object, it should be written in
-        the following manner.
-        
-        ServerDataBase sdb = new ServerDataBase(
-                "localhost:3306/Database_name", 
-                "username", 
-                "password");
-        */
-    }
-
-    public void password(String database_password) { this.database_password = database_password; }
-    public void username(String database_username) { this.database_username = database_username; }
-    public void databaseURI(String database_URI) { this.database_URI = this.database_URI_prefix + database_URI; }
+//    public ServerDataBase(String database_URI, String database_username, String database_password) {
+//        this.database_URI = this.database_URI_prefix + database_URI;
+//        this.database_username = database_username;
+//        this.database_password = database_password;
+//
+//        /*
+//        When initiating a new ServerDataBase object, it should be written in
+//        the following manner.
+//        
+//        ServerDataBase sdb = new ServerDataBase(
+//                "localhost:3306/Database_name", 
+//                "username", 
+//                "password");
+//        */
+//    }
+//
+//    public void password(String database_password) { this.database_password = database_password; }
+//    public void username(String database_username) { this.database_username = database_username; }
+//    public void databaseURI(String database_URI) { this.database_URI = this.database_URI_prefix + database_URI; }
     
     public void connect() {
         /*

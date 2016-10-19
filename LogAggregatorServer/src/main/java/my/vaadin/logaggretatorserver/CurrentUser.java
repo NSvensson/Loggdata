@@ -12,10 +12,7 @@ public class CurrentUser {
     public String email = null;
     public String username = null;
     
-    private final ServerDataBase database_connection = new ServerDataBase(
-            "localhost:3306/logdatacollector",
-            "root",
-            "root");
+    private final ServerDataBase database_connection = new ServerDataBase();
     
     public CurrentUser(String username, String password) {
         HashMap whereQuery = new HashMap();

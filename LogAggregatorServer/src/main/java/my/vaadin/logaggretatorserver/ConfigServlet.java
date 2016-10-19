@@ -87,10 +87,7 @@ public class ConfigServlet extends HttpServlet {
                 
                 System.out.println("Authentication headers received.");
                 
-                ServerDataBase sdb = new ServerDataBase(
-                        "localhost:3306/loggdatacollector",
-                        "root",
-                        "root");
+                ServerDataBase sdb = new ServerDataBase();
                 
                 HashMap whereQuery = new HashMap();
                 whereQuery.put("username", request.getHeader("au_username"));

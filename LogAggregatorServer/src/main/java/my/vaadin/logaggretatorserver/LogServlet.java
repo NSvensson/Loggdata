@@ -83,10 +83,7 @@ public class LogServlet extends HttpServlet {
             Create a ServerDataBase object with preferably a user whom only has
             rights to the config table, as no other table will be used in this servlet.
             */
-            ServerDataBase sdb = new ServerDataBase(
-                    "localhost:3306/logtestdb",
-                    "root",
-                    "root");
+            ServerDataBase sdb = new ServerDataBase();
 
             /*
             This HashMap object is required to provide a MySQL where clause to
