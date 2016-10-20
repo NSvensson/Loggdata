@@ -43,6 +43,7 @@ import java.util.Locale;
 public class MyUI extends UI {
     private final String logsView = "Logs";
     
+    private CurrentUser user;
     private Navigator nav = new Navigator(this, this);
     
     @Override
@@ -81,7 +82,19 @@ public class MyUI extends UI {
             loginbtn.addClickListener(new Button.ClickListener() {
                 @Override
                 public void buttonClick(Button.ClickEvent event) {
-                    nav.navigateTo(logsView);
+                    user = new CurrentUser(
+                            usernametxf.getValue(),
+                            passwordpwf.getValue());
+                    
+                    System.out.println("Username provided: " + usernametxf.getValue());
+                    System.out.println("Password provided: " + passwordpwf.getValue());
+                    
+                    if (user.is_authenticated) {
+                        System.out.println("User authenticated.");
+                        nav.navigateTo(logsView);
+                    } else {
+                        System.out.println("Invalid credentials provided.");
+                    }
                 }
             });
             layout.addComponent(loginbtn,0,3);
@@ -89,7 +102,7 @@ public class MyUI extends UI {
         
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
-            System.out.println("Snoop doodelidoo");
+            System.out.println("LoginLayout entered.");
         }
     }
     //LoginLayout end
@@ -106,7 +119,7 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
-            System.out.println("BRASHIBNIK");
+            System.out.println("ViewLogsLayout entered.");
         }
     }
     //ViewLogsLayout end
