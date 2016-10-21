@@ -202,6 +202,130 @@ public class ServerDataBase {
     public String[][] select(String[] columns, String table){
         return this.select(columns, table, null);
     }
+
+    public String[][] select_advanced (String[] columns, String table, HashMap<String, Object> designation){
+        /*
+        This method will be used to select and return the values from the
+        columns provided by the columns array from the provided table.
+        
+        The argument designation is not required for this method, however it is
+        useful in case the need for a WHERE clause appears.
+        
+        The reason behind using the List library to return the values found
+        by the provided query is simply because it is easier to work with when
+        obtaining the values from the resultset, this however is free and might
+        change during the development of this method.
+        */
+
+        List<List<String>> results = new ArrayList<>();
+        String query = "SELECT ";
+        
+        if (columns.length >= 2) {
+            for (String column: columns) {
+                query += column + ", ";
+            }
+
+            if (query.endsWith(", ")){
+                query = query.substring(0, query.length() - 2) + " FROM " + table;
+            }
+        } else {
+            query += columns[0] + " FROM " + table;
+        }
+        
+        if (designation != null) {
+            query += " WHERE ";
+            
+            Iterator mapIterate = designation.entrySet().iterator();
+            while (mapIterate.hasNext()) {
+                Map.Entry pair = (Map.Entry)mapIterate.next();
+                Object keyValue = pair.getValue();
+                if (keyValue instanceof ArrayList) {
+                    query += pair.getKey() + " IN (";
+                
+                    ArrayList tmpKeyValues = (ArrayList) keyValue;
+                    for (Object values : tmpKeyValues) {
+                        query += "?, ";
+                    }
+                    if (query.endsWith(", ")) query = query.substring(0, query.length() - 2) + ")";
+                } else {
+                    query += pair.getKey() + "=?";
+                }
+                
+                query += " AND ";
+            }
+            
+            if (query.endsWith(" AND ")) query = query.substring(0, query.length() - 5);
+        }
+        
+        query += ";";
+        
+//        String testQuery = query;
+//        for (Object value : designation.values()) {
+//            if (value instanceof ArrayList) {
+//                ArrayList tmpKeyValues = (ArrayList) value;
+//                for (Object arrayValue : tmpKeyValues) {
+//                    testQuery = testQuery.replaceFirst("[?]", arrayValue.toString());
+//                }
+//            } else {
+//                testQuery = testQuery.replaceFirst("[?]", value.toString());
+//            }
+//        }
+
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = database_connection.prepareStatement(query);
+            
+            if (designation != null) {
+                int i = 1;
+                for (Object value : designation.values()) {
+                    if (value instanceof ArrayList) {
+                        ArrayList tmpKeyValues = (ArrayList) value;
+                        for (Object arrayValue : tmpKeyValues) {
+                            stmt.setObject(i++, arrayValue);
+                        }
+                    } else {
+                        stmt.setObject(i++, value);
+                    }
+                }
+            }
+            
+            rs = stmt.executeQuery();
+
+            List<String> row;
+            while (rs.next()) {
+                row = new ArrayList<>(columns.length);
+                
+                for (String column : columns) {
+                    row.add(rs.getString(column));
+                }
+                results.add(row);
+            }
+        } catch (SQLException se) {
+            error_SQL = se;
+            error_message = se.getMessage();
+        } finally {
+            try { if (rs != null) rs.close(); }
+            catch (SQLException se) {
+                error_SQL = se;
+                error_message = se.getMessage();
+            }
+            
+            try { if (stmt != null) stmt.close(); }
+            catch (SQLException se) {
+                error_SQL = se;
+                error_message = se.getMessage();
+            }
+        }
+        
+        String[][] resultsArray = new String[results.size()][];
+        for (int i = 0; i < results.size(); i++) {
+            List<String> row = results.get(i);
+            resultsArray[i] = row.toArray(new String[row.size()]);
+        }
+        
+        return resultsArray;
+    }
     
 //    public void create_table(String service) {
 //        /*
