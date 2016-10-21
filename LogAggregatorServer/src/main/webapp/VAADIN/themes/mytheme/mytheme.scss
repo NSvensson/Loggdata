@@ -35,4 +35,15 @@
   @include valo;
 
   // Insert your own theme rules here
+    .login-grid-layout {
+        border-style: solid;
+        border-color: #c5c5c5;
+        border-width: 1.5px;
+        padding: 10px;
+        border-radius: 6px;
+    }
+    
+    .paodding {
+        padding: 5px;
+    }
 }

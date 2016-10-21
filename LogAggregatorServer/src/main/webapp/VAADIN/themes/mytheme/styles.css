@@ -12967,3 +12967,15 @@ div.v-layout.v-horizontal.v-widget {
 	width: 19px;
 	overflow: hidden;
 }
+
+.mytheme .login-grid-layout {
+	border-style: solid;
+	border-color: #c5c5c5;
+	border-width: 1.5px;
+	padding: 10px;
+	border-radius: 6px;
+}
+
+.mytheme .paodding {
+	padding: 5px;
+}
