@@ -16,11 +16,14 @@ import com.vaadin.ui.AbsoluteLayout;
 import com.vaadin.ui.AbsoluteLayout.ComponentPosition;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Component.Focusable;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.PasswordField;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -28,6 +31,7 @@ import com.vaadin.ui.Upload;
 import java.awt.Component;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -41,16 +45,52 @@ import java.util.Locale;
  */
 @Theme("mytheme")
 public class MyUI extends UI {
+    private final String loginView = "";
     private final String logsView = "Logs";
     
     private CurrentUser user;
     private Navigator nav = new Navigator(this, this);
+
+    private String[][] tmpTestdata = {
+        {"Firefox", "2016-01-01", "SNOOP DOGG WAS HERE"},
+        {"Firefox", "2016-02-20", "SNOOasdasdP DOGG WAS HERE"},
+        {"Firefox", "2016-03-20", "SNOOP DOGG WAS HERE"},
+        {"Firefox", "2016-04-20", "SNOOP DasdasdOGG WAS HERE"},
+        {"Firefox", "2016-05-20", "SNOOP DOGG WAS HERE"},
+        {"Firefox", "2016-06-20", "SNOasdasdOP DOGGasdasd asdasdWAS HERE"},
+        {"Firefox", "2016-07-20", "SNOOP DOGG WAS asdasdHERE"},
+        {"Firefox", "2016-08-20", "SNOOP DOasdasdGG WAS HERE"},
+        {"Chrome", "2016-08-20", "SNOOP DOGG WAS HERE"},
+        {"Chrome", "2016-10-20", "SNOOP DasdasdOGG WAS HERE"},
+        {"Chrome", "2017-11-20", "SNOOP DOGG WASasdasd HERE"},
+        {"Chrome", "2016-12-20", "SNOOP DOGG WAS HERE"},
+        {"Chrome", "2016-10-19", "SNOOP DOGG WAS HERE"},
+        {"Chrome", "2016-10-20", "SNOOP DOasdasdGG WAS HERE"},
+        {"Chrome", "2016-10-21", "SNOOP DOGG WAS HERE"},
+        {"Chrome", "2016-10-20", "SNOOP DOasdasdGG WAS HERE"},
+        {"Chrome", "2016-10-20", "SNOOP DOGG WAS HERE"},
+        {"Chrome", "2016-10-25", "SNOOP DOGG WAS HERE"},
+        {"IE", "2016-10-20", "SNOOP DOGG WAS HERE"},
+        {"IE", "2016-10-21", "SNOOP DOGG WAS HERE"},
+        {"IE", "2016-11-20", "SNOOP DOGG WASasdasd HERE"},
+        {"IE", "2016-10-20", "SNOOP DOGG WAS HERE"},
+        {"IE", "2016-10-10", "BRASHIBNIK"},
+        {"IE", "2016-10-20", "SNOOP DOGG WAS HERE"},
+        {"IE", "2016-09-20", "SNOOP DOGG WAS HERE"}
+    };
+    
+    HashMap<String, String> tmpTestApps = new HashMap<String, String>();
     
     @Override
     protected void init(VaadinRequest vaadinRequest) {
+        
+        tmpTestApps.put("1", "Firefox");
+        tmpTestApps.put("2", "Chrome");
+        tmpTestApps.put("3", "IE");
+        
         getPage().setTitle("Snoop dogg");
         
-        nav.addView("", new LoginLayout());
+        nav.addView(loginView, new LoginLayout());
         nav.addView(logsView, new ViewLogsLayout());
     }
     
@@ -113,8 +153,60 @@ public class MyUI extends UI {
             setWidth("100%");
             setHeight("100%");
 
-            Label testLbl = new Label("BRASHIBNIKKKK!!!!!!!!");
-            addComponent(testLbl);
+            final GridLayout loglayout = new GridLayout(1,4);
+//            final VerticalLayout loglayout = new VerticalLayout();
+            loglayout.setWidth("90%");
+            loglayout.setHeight("90%");
+            addComponent(loglayout);
+            setComponentAlignment(loglayout, Alignment.MIDDLE_CENTER);
+            
+            final HorizontalLayout hTitleLayout = new HorizontalLayout();
+            Label testLbl = new Label("Your log.");
+            hTitleLayout.addComponent(testLbl);
+//            vTitleLayout.addComponent(testLbl);
+            
+            ComboBox app_name = new ComboBox("Applications");
+            app_name.addItem("All applications");
+            app_name.setValue("All applications");
+            app_name.addItems(tmpTestApps.values());
+            app_name.setNullSelectionAllowed(false);
+            app_name.setTextInputAllowed(false);
+            
+//            loglayout.addComponent(app_name, 0, 1);
+            hTitleLayout.addComponent(app_name);
+            hTitleLayout.setComponentAlignment(app_name, Alignment.TOP_RIGHT);
+            loglayout.addComponent(hTitleLayout,0,0);
+            
+
+            
+            Grid logtable = new Grid();
+            logtable.setSizeFull();
+            logtable.setColumns(new String[] {"Name", "Date", "Event"});
+            
+            for (String[] row : tmpTestdata) {
+                logtable.addRow(row);
+            }
+            
+//            loglayout.addComponent(logtable,0,2);
+            loglayout.addComponent(logtable);
+            
+            HorizontalLayout buttonLayout = new HorizontalLayout();
+            Button out = new Button("Logout");
+            out.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event){ 
+                    nav.navigateTo(loginView);
+                    user = null;
+                }
+            });
+            buttonLayout.addComponent(out);
+            buttonLayout.setComponentAlignment(out, Alignment.TOP_RIGHT);
+            
+//            loglayout.addComponent(buttonLayout, 0, 3);
+            loglayout.addComponent(buttonLayout);
+            loglayout.setComponentAlignment(buttonLayout, Alignment.TOP_RIGHT);
+            
+            loglayout.setRowExpandRatio(1,1);
         }
 
         @Override
