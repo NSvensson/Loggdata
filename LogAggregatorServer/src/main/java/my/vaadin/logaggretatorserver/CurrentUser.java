@@ -11,9 +11,8 @@ public class CurrentUser {
     public String last_name = null;
     public String email = null;
     public String username = null;
-    
     public ApplicationRow[] applications = null;
-//    public HashMap<String, String> available_applications = null;
+    public UserGroups user_group = null;
     
     private final ServerDataBase database_connection = new ServerDataBase();
     
@@ -24,7 +23,9 @@ public class CurrentUser {
                     "first_name",
                     "last_name",
                     "email",
-                    "username"};
+                    "username",
+                    "user_group_id"
+        };
 
         HashMap whereQuery = new HashMap();
         whereQuery.put("username", username);
@@ -43,9 +44,8 @@ public class CurrentUser {
             this.last_name = select[0][3];
             this.email = select[0][4];
             this.username = select[0][5];
-            
+            this.user_group = new UserGroups(select[0][6]);
             this.applications = available_applications(select[0][1]);
-//            this.available_applications = available_applications();
         }
     }
     
