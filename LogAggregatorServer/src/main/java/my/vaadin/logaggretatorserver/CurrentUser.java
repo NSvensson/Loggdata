@@ -1,6 +1,5 @@
 package my.vaadin.logaggretatorserver;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class CurrentUser {
@@ -12,7 +11,9 @@ public class CurrentUser {
     public String last_name = null;
     public String email = null;
     public String username = null;
-    public HashMap<String, String> available_applications = null;
+    
+    public ApplicationRow[] applications = null;
+//    public HashMap<String, String> available_applications = null;
     
     private final ServerDataBase database_connection = new ServerDataBase();
     
@@ -43,53 +44,42 @@ public class CurrentUser {
             this.email = select[0][4];
             this.username = select[0][5];
             
-            this.available_applications = available_applications();
+            this.applications = available_applications(select[0][1]);
+//            this.available_applications = available_applications();
         }
     }
     
-    private HashMap<String, String> available_applications() {
-        if (this.is_authenticated) {
-            HashMap<String, String> results = new HashMap<String, String>();
-            String[] columnQuery = {"id", "name"};
+    private ApplicationRow[] available_applications(String company_id) {
+        String[] columnQuery = {
+                "id",
+                "name",
+                "latest_update",
+                "update_interval",
+                "api_key",
+                "log_type"
+        };
 
-            HashMap whereQuery = new HashMap();
-            whereQuery.put("company_id", this.company_id);
+        HashMap whereQuery = new HashMap();
+        whereQuery.put("company_id", company_id);
 
-            this.database_connection.connect();
-            String[][] select = this.database_connection.select(columnQuery, "application", whereQuery);
-            this.database_connection.close();
+        this.database_connection.connect();
+        String[][] select = this.database_connection.select(columnQuery, "application", whereQuery);
+        this.database_connection.close();
 
-            if (select != null && select.length >= 1 && select[0].length == columnQuery.length) {
-                for (String[] row : select) {
-                    results.put(row[0], row[1]);
-                }
+        if (select != null && select.length >= 1 && select[0].length == columnQuery.length) {
+            ApplicationRow[] results = new ApplicationRow[select.length];
+            
+            for (int i = 0; i < select.length; i++) {
+                results[i] = new ApplicationRow(select[i][0], company_id, select[i][1], select[i][2], select[i][3], select[i][4], select[i][5]);
             }
             
             return results;
         }
+
         return null;
     }
     
-    public String[][] available_logs() {
-        if (this.is_authenticated) {
-            String[][] results;
-            String[] columnQuery = {"application_id", "date", "event"};
-
-            HashMap whereQuery = new HashMap();
-            whereQuery.put("application_id", new ArrayList(this.available_applications.keySet()));
-
-            this.database_connection.connect();
-            results = this.database_connection.select_advanced(columnQuery, "log", whereQuery);
-            this.database_connection.close();
-
-            if (results != null && results.length >= 1 && results[0].length == columnQuery.length) {
-                for (int i = 0; i < results.length; i++) {
-                    results[i][0] = this.available_applications.get(results[i][0]);
-                }
-            }
-            
-            return results;
-        }
-        return null;
+    private ApplicationRow[] available_applications() {
+        return available_applications(this.company_id);
     }
 }
