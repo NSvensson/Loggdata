@@ -259,18 +259,6 @@ public class ServerDataBase {
         
         query += ";";
         
-//        String testQuery = query;
-//        for (Object value : designation.values()) {
-//            if (value instanceof ArrayList) {
-//                ArrayList tmpKeyValues = (ArrayList) value;
-//                for (Object arrayValue : tmpKeyValues) {
-//                    testQuery = testQuery.replaceFirst("[?]", arrayValue.toString());
-//                }
-//            } else {
-//                testQuery = testQuery.replaceFirst("[?]", value.toString());
-//            }
-//        }
-
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -562,36 +550,4 @@ public class ServerDataBase {
         else if (message.contains("Access denied")) return "Invalid login information.";
         return message;
     }
-    
-//    public List<List<String>> user_privileges() {
-//        List<List<String>> results = new ArrayList();
-//        PreparedStatement stmt = null;
-//        ResultSet rs = null;
-//        try {
-//            System.out.println("attempting grants");
-//            stmt = database_connection.prepareStatement("SHOW GRANTS FOR CURRENT_USER;");
-//            rs = stmt.executeQuery();
-//
-//            while (rs.next()) {
-//                System.out.println(rs.getString(1));
-////                results.add(rs.getString());
-//            }
-//        } catch (SQLException se) {
-//            error_SQL = se;
-//            error_message = se.getMessage();
-//        } finally {
-//            try { if (rs != null) rs.close(); }
-//            catch (SQLException se) {
-//                error_SQL = se;
-//                error_message = se.getMessage();
-//            }
-//            
-//            try { if (stmt != null) stmt.close(); }
-//            catch (SQLException se) {
-//                error_SQL = se;
-//                error_message = se.getMessage();
-//            }
-//        }
-//        return results;
-//    }
 }
