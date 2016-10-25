@@ -6,7 +6,7 @@ public class CurrentUser {
     
     public boolean is_authenticated = false;
     public String id = null;
-    public String company_id = null;
+    public CompanyRow company = null;
     public String first_name = null;
     public String last_name = null;
     public String email = null;
@@ -39,7 +39,7 @@ public class CurrentUser {
             // Authenticated.
             this.is_authenticated = true;
             this.id = select[0][0];
-            this.company_id = select[0][1];
+            this.company = new CompanyRow(select[0][1]);
             this.first_name = select[0][2];
             this.last_name = select[0][3];
             this.email = select[0][4];
@@ -79,7 +79,7 @@ public class CurrentUser {
         return null;
     }
     
-    private ApplicationRow[] available_applications() {
-        return available_applications(this.company_id);
-    }
+//    private ApplicationRow[] available_applications() {
+//        return available_applications(this.company.id);
+//    }
 }
