@@ -15,7 +15,7 @@ public class DataManaging {
     private static final int BUFFER_SIZE = 4096;
 
  // public void unzip(String zipFilePath, String destDirectory) throws IOException {
-    public void unzip() throws IOException {
+    public static void unzip() throws IOException {
         String zipFilePath = "./MyFile.zip";
         String destDirectory = "./unpacked";
         File destDir = new File(destDirectory);
@@ -41,7 +41,7 @@ public class DataManaging {
         zipIn.close();
     }
 
-    private void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
+    private static void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
         byte[] bytesIn = new byte[BUFFER_SIZE];
         int read = 0;
@@ -51,7 +51,7 @@ public class DataManaging {
         bos.close();
     }
     
-    public String generateAPIKey(int identifier) {
+    public static String generateAPIKey(int identifier) {
         byte[] key = new byte[32];
         new Random().nextBytes(key);
         return identifier + "gg" + Base64.getEncoder().encodeToString(key);
