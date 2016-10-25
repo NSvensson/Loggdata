@@ -4,6 +4,7 @@ import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
+import com.vaadin.data.Property;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
@@ -12,6 +13,7 @@ import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinResponse;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.server.VaadinSession;
+import com.vaadin.shared.data.sort.SortDirection;
 import com.vaadin.ui.AbsoluteLayout;
 import com.vaadin.ui.AbsoluteLayout.ComponentPosition;
 import com.vaadin.ui.Alignment;
@@ -88,7 +90,7 @@ public class MyUI extends UI {
         tmpTestApps.put("2", "Chrome");
         tmpTestApps.put("3", "IE");
         
-        getPage().setTitle("Snoop dogg");
+        getPage().setTitle("Log server");
         
         nav.addView(loginView, new LoginLayout());
         nav.addView(logsView, new ViewLogsLayout());
@@ -160,32 +162,54 @@ public class MyUI extends UI {
             addComponent(loglayout);
             setComponentAlignment(loglayout, Alignment.MIDDLE_CENTER);
             
-            final HorizontalLayout hTitleLayout = new HorizontalLayout();
+            final GridLayout gTitleLayout = new GridLayout(2,1);
             Label testLbl = new Label("Your log.");
-            hTitleLayout.addComponent(testLbl);
+            testLbl.addStyleName("title_padding");
+            gTitleLayout.addComponent(testLbl,0,0);
 //            vTitleLayout.addComponent(testLbl);
-            
-            ComboBox app_name = new ComboBox("Applications");
-            app_name.addItem("All applications");
-            app_name.setValue("All applications");
-            app_name.addItems(tmpTestApps.values());
-            app_name.setNullSelectionAllowed(false);
-            app_name.setTextInputAllowed(false);
-            
-//            loglayout.addComponent(app_name, 0, 1);
-            hTitleLayout.addComponent(app_name);
-            hTitleLayout.setComponentAlignment(app_name, Alignment.TOP_RIGHT);
-            loglayout.addComponent(hTitleLayout,0,0);
-            
-
             
             Grid logtable = new Grid();
             logtable.setSizeFull();
             logtable.setColumns(new String[] {"Name", "Date", "Event"});
+            Grid.Column cName = logtable.getColumn("Name");
+            Grid.Column cDate = logtable.getColumn("Date");
+            cName.setWidth(200);
+            cDate.setWidth(200);
             
             for (String[] row : tmpTestdata) {
                 logtable.addRow(row);
             }
+
+            String nonSpecifiedOption = "All applications";
+            ComboBox app_name = new ComboBox("Applications");
+            app_name.addItem(nonSpecifiedOption);
+            app_name.setValue(nonSpecifiedOption);
+            app_name.addItems(tmpTestApps.values());
+            app_name.setNullSelectionAllowed(false);
+            app_name.setTextInputAllowed(false);
+            app_name.addValueChangeListener(new ComboBox.ValueChangeListener() {
+                @Override
+                public void valueChange(Property.ValueChangeEvent event) {
+                    String tmpValue = (String) app_name.getValue();
+                    
+                    if (tmpValue.equals(nonSpecifiedOption)) {
+                        for (String[] row : tmpTestdata) {
+                            logtable.addRow(row);
+                        }
+                    } else {
+                        for (String[] row : tmpTestdata) {
+                            if (row[0].equals(tmpValue)) logtable.addRow(row);
+                        }
+                    }
+                }
+            });
+            
+            
+//            loglayout.addComponent(app_name, 0, 1);
+            gTitleLayout.addComponent(app_name,1,0);
+            gTitleLayout.setComponentAlignment(app_name, Alignment.BOTTOM_RIGHT);
+            gTitleLayout.addStyleName("apps_padding");
+            loglayout.addComponent(gTitleLayout,0,0);
             
 //            loglayout.addComponent(logtable,0,2);
             loglayout.addComponent(logtable);
@@ -215,6 +239,7 @@ public class MyUI extends UI {
         }
     }
     //ViewLogsLayout end
+    
     
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
     @VaadinServletConfiguration(ui = MyUI.class, productionMode = false)
