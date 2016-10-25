@@ -12979,3 +12979,11 @@ div.v-layout.v-horizontal.v-widget {
 .mytheme .paodding {
 	padding: 5px;
 }
+
+.mytheme .title_padding {
+	padding-right: 10px;
+}
+
+.mytheme .apps_padding {
+	padding-bottom: 10px;
+}
