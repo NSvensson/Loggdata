@@ -4,7 +4,9 @@ import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
+import com.vaadin.data.Item;
 import com.vaadin.data.Property;
+import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
@@ -32,10 +34,14 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Upload;
 import java.awt.Component;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 
 /**
@@ -151,7 +157,25 @@ public class MyUI extends UI {
         
     //ViewLogsLayout start
     public class ViewLogsLayout extends GridLayout implements View {
+        
+        public final String HIDDEN_COLUMN_IDENTIFIER = "id";
+        public final String APPLICATION_NAME_COLUMN_IDENTIFIER = "Application";
+        public final String DATE_COLUMN_NAME_IDENTIFIER = "Date";
+        public final String EVENT_COLUMN_NAME_IDENTIFIER = "Event";
+        
+        public final HashMap<Object, String> comboIds = new HashMap<Object, String>();
+        public final IndexedContainer tableContainer = new IndexedContainer();
+        public final IndexedContainer comboBoxContainer = new IndexedContainer();
+        public final Grid logtable = new Grid(tableContainer);
+        public final ComboBox app_name = new ComboBox("Applications", comboBoxContainer);
+        
         public ViewLogsLayout() {
+            
+            this.tableContainer.addContainerProperty(this.HIDDEN_COLUMN_IDENTIFIER, String.class, null);
+            this.tableContainer.addContainerProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER, String.class, null);
+            this.tableContainer.addContainerProperty(this.DATE_COLUMN_NAME_IDENTIFIER, String.class, null);
+            this.tableContainer.addContainerProperty(this.EVENT_COLUMN_NAME_IDENTIFIER, String.class, null);
+            
             setWidth("100%");
             setHeight("100%");
 
@@ -161,59 +185,50 @@ public class MyUI extends UI {
             loglayout.setHeight("90%");
             addComponent(loglayout);
             setComponentAlignment(loglayout, Alignment.MIDDLE_CENTER);
-            
+
             final GridLayout gTitleLayout = new GridLayout(2,1);
             Label testLbl = new Label("Your log.");
             testLbl.addStyleName("title_padding");
             gTitleLayout.addComponent(testLbl,0,0);
 //            vTitleLayout.addComponent(testLbl);
-            
-            Grid logtable = new Grid();
-            logtable.setSizeFull();
-            logtable.setColumns(new String[] {"Name", "Date", "Event"});
-            Grid.Column cName = logtable.getColumn("Name");
-            Grid.Column cDate = logtable.getColumn("Date");
-            cName.setWidth(200);
-            cDate.setWidth(200);
-            
-            for (String[] row : tmpTestdata) {
-                logtable.addRow(row);
-            }
 
+            this.logtable.setSizeFull();
+
+            this.comboBoxContainer.addContainerProperty(this.HIDDEN_COLUMN_IDENTIFIER, String.class, null);
+            this.comboBoxContainer.addContainerProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER, String.class, null);
+            
             String nonSpecifiedOption = "All applications";
-            ComboBox app_name = new ComboBox("Applications");
-            app_name.addItem(nonSpecifiedOption);
-            app_name.setValue(nonSpecifiedOption);
-            app_name.addItems(tmpTestApps.values());
-            app_name.setNullSelectionAllowed(false);
-            app_name.setTextInputAllowed(false);
-            app_name.addValueChangeListener(new ComboBox.ValueChangeListener() {
+            Object newChoiceId = comboBoxContainer.addItem();
+            Item newChoice = comboBoxContainer.getItem(newChoiceId);
+            newChoice.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue("0");
+            newChoice.getItemProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER).setValue(nonSpecifiedOption);
+            
+            this.app_name.setValue(newChoiceId);
+            this.app_name.setItemCaptionPropertyId(APPLICATION_NAME_COLUMN_IDENTIFIER);
+            this.app_name.setNullSelectionAllowed(false);
+            this.app_name.setTextInputAllowed(false);
+            this.app_name.addValueChangeListener(new ComboBox.ValueChangeListener() {
                 @Override
                 public void valueChange(Property.ValueChangeEvent event) {
-                    String tmpValue = (String) app_name.getValue();
-                    
-                    if (tmpValue.equals(nonSpecifiedOption)) {
-                        for (String[] row : tmpTestdata) {
-                            logtable.addRow(row);
-                        }
-                    } else {
-                        for (String[] row : tmpTestdata) {
-                            if (row[0].equals(tmpValue)) logtable.addRow(row);
+                    if (user != null && user.is_authenticated && user.applications != null) {
+                        String tmpValue = app_name.getContainerProperty(app_name.getValue(), HIDDEN_COLUMN_IDENTIFIER).getValue().toString();
+                        if (tableContainer.hasContainerFilters()) tableContainer.removeAllContainerFilters();
+                        if (!tmpValue.equals("0")) {
+                            tableContainer.addContainerFilter(HIDDEN_COLUMN_IDENTIFIER, tmpValue, true, true);
                         }
                     }
                 }
             });
-            
-            
+
 //            loglayout.addComponent(app_name, 0, 1);
-            gTitleLayout.addComponent(app_name,1,0);
-            gTitleLayout.setComponentAlignment(app_name, Alignment.BOTTOM_RIGHT);
+            gTitleLayout.addComponent(this.app_name,1,0);
+            gTitleLayout.setComponentAlignment(this.app_name, Alignment.BOTTOM_RIGHT);
             gTitleLayout.addStyleName("apps_padding");
             loglayout.addComponent(gTitleLayout,0,0);
-            
+
 //            loglayout.addComponent(logtable,0,2);
-            loglayout.addComponent(logtable);
-            
+            loglayout.addComponent(this.logtable);
+
             HorizontalLayout buttonLayout = new HorizontalLayout();
             Button out = new Button("Logout");
             out.addClickListener(new Button.ClickListener() {
@@ -225,17 +240,41 @@ public class MyUI extends UI {
             });
             buttonLayout.addComponent(out);
             buttonLayout.setComponentAlignment(out, Alignment.TOP_RIGHT);
-            
+
 //            loglayout.addComponent(buttonLayout, 0, 3);
             loglayout.addComponent(buttonLayout);
             loglayout.setComponentAlignment(buttonLayout, Alignment.TOP_RIGHT);
-            
+
             loglayout.setRowExpandRatio(1,1);
         }
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
             System.out.println("ViewLogsLayout entered.");
+            System.out.println("User: " + user);
+            if (user != null && user.is_authenticated) {
+                if (user.applications != null) {
+                    
+                    for (ApplicationRow application : user.applications) {
+                        for (LogRow log : application.logs) {
+                            Item newLog = tableContainer.getItem(tableContainer.addItem());
+                            newLog.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(application.id);
+                            newLog.getItemProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER).setValue(application.name);
+                            newLog.getItemProperty(this.DATE_COLUMN_NAME_IDENTIFIER).setValue(log.date);
+                            newLog.getItemProperty(this.EVENT_COLUMN_NAME_IDENTIFIER).setValue(log.event);
+                        }
+                        Item newChoice = comboBoxContainer.getItem(comboBoxContainer.addItem());
+                        newChoice.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(application.id);
+                        newChoice.getItemProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER).setValue(application.name);
+                    }
+                    
+                    this.logtable.getColumn(this.HIDDEN_COLUMN_IDENTIFIER).setHidden(true);
+                    this.logtable.getColumn(this.APPLICATION_NAME_COLUMN_IDENTIFIER).setWidth(200);
+                    this.logtable.getColumn(this.DATE_COLUMN_NAME_IDENTIFIER).setWidth(200);
+                }
+            } else {
+                nav.navigateTo(loginView);
+            }
         }
     }
     //ViewLogsLayout end
