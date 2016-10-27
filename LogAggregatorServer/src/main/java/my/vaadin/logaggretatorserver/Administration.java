@@ -1,5 +1,6 @@
 package my.vaadin.logaggretatorserver;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Administration {
@@ -56,7 +57,7 @@ public class Administration {
                 boolean proceed = true;
                 database_connection.connect();
                 
-                if (first_name == null) {
+                if (first_name == null || first_name.length() < 1) {
                     this.settings.FIRST_NAME_ERROR_MESSAGE = "This field is required!";
                     if (proceed) proceed = false;
                 } else if (first_name.length() > this.settings.FIRST_NAME_MAX_LENGTH) {
@@ -64,7 +65,7 @@ public class Administration {
                     if (proceed) proceed = false;
                 }
 
-                if (last_name == null) {
+                if (last_name == null || last_name.length() < 1) {
                     this.settings.LAST_NAME_ERROR_MESSAGE = "This field is required!";
                     if (proceed) proceed = false;
                 } else if (last_name.length() > this.settings.LAST_NAME_MAX_LENGTH) {
@@ -72,7 +73,7 @@ public class Administration {
                     if (proceed) proceed = false;
                 }
 
-                if (email == null) {
+                if (email == null || email.length() < 1) {
                     this.settings.EMAIL_ERROR_MESSAGE = "This field is required!";
                     if (proceed) proceed = false;
                 } else if (email.length() > this.settings.EMAIL_MAX_LENGTH) {
@@ -80,7 +81,7 @@ public class Administration {
                     if (proceed) proceed = false;
                 }
 
-                if (username == null) {
+                if (username == null || username.length() < 1) {
                     this.settings.USERNAME_ERROR_MESSAGE = "This field is required!";
                     if (proceed) proceed = false;
                 } else if (username.length() > this.settings.USERNAME_MAX_LENGTH) {
@@ -100,7 +101,7 @@ public class Administration {
                     }
                 }
 
-                if (password == null) {
+                if (password == null || password.length() < 1) {
                     this.settings.PASSWORD_ERROR_MESSAGE = "This field is required!";
                     if (proceed) proceed = false;
                 } else if (password.length() > this.settings.PASSWORD_MAX_LENGTH) {
@@ -108,7 +109,7 @@ public class Administration {
                     if (proceed) proceed = false;
                 }
 
-                if (company_id == null) {
+                if (company_id == null || company_id.length() < 1) {
                     this.settings.COMPANY_ERROR_MESSAGE = "This field is required!";
                     if (proceed) proceed = false;
                 } else {
@@ -125,7 +126,7 @@ public class Administration {
                     }
                 }
 
-                if (user_group_id == null) {
+                if (user_group_id == null || user_group_id.length() < 1) {
                     this.settings.USER_GROUP_ERROR_MESSAGE = "This field is required!";
                     if (proceed) proceed = false;
                 } else {
@@ -178,6 +179,121 @@ public class Administration {
             return false;
         }
         //Create user method end.
+        
+        //Edit user method start.
+        public boolean edit(CurrentUser user_information, String first_name, String last_name, String email, String username, String password, String company_id, String user_group_id) {
+            if (this.user_groups.manage_users) {
+                ArrayList<String> columns = new ArrayList<String>();
+                ArrayList<Object> values = new ArrayList<Object>();
+                database_connection.connect();
+                
+                if (first_name == null || first_name.length() < 1) {
+                    this.settings.FIRST_NAME_ERROR_MESSAGE = "This field is required!";
+                } else if (first_name.length() > this.settings.FIRST_NAME_MAX_LENGTH) {
+                    this.settings.FIRST_NAME_ERROR_MESSAGE = "Your first name can't be longer than " + this.settings.FIRST_NAME_MAX_LENGTH + " characters!";
+                } else if (!first_name.equals(user_information.first_name)) {
+                    columns.add("first_name");
+                    values.add(first_name);
+                }
+
+                if (last_name == null || last_name.length() < 1) {
+                    this.settings.LAST_NAME_ERROR_MESSAGE = "This field is required!";
+                } else if (last_name.length() > this.settings.LAST_NAME_MAX_LENGTH) {
+                    this.settings.FIRST_NAME_ERROR_MESSAGE = "Your last name can't be longer than " + this.settings.LAST_NAME_MAX_LENGTH + " characters!";
+                } else if (!last_name.equals(user_information.last_name)) {
+                    columns.add("last_name");
+                    values.add(last_name);
+                }
+
+                if (email == null || email.length() < 1) {
+                    this.settings.EMAIL_ERROR_MESSAGE = "This field is required!";
+                } else if (email.length() > this.settings.EMAIL_MAX_LENGTH) {
+                    this.settings.EMAIL_ERROR_MESSAGE = "Your email can't be longer than " + this.settings.EMAIL_MAX_LENGTH + " characters!";
+                } else if (!email.equals(user_information.email)) {
+                    columns.add("email");
+                    values.add(email);
+                }
+
+                if (username == null || username.length() < 1) {
+                    this.settings.USERNAME_ERROR_MESSAGE = "This field is required!";
+                } else if (username.length() > this.settings.USERNAME_MAX_LENGTH) {
+                    this.settings.USERNAME_ERROR_MESSAGE = "Your username can't be longer than " + this.settings.USERNAME_MAX_LENGTH + " characters!";
+                } else {
+                    String[] columnQuery = { "id" };
+
+                    HashMap whereQuery = new HashMap();
+                    whereQuery.put("username", username);
+
+                    String[][] select = database_connection.select(columnQuery, "user", whereQuery);
+
+                    if (select != null && select.length >= 1 && select[0].length == columnQuery.length) {
+                        this.settings.USERNAME_ERROR_MESSAGE = "This username is taken.";
+                    } else {
+                        columns.add("username");
+                        values.add(username);
+                    }
+                }
+
+                if (password == null || password.length() < 1) {
+                    this.settings.PASSWORD_ERROR_MESSAGE = "This field is required!";
+                } else if (password.length() > this.settings.PASSWORD_MAX_LENGTH) {
+                    this.settings.PASSWORD_ERROR_MESSAGE = "Your password can't be longer than " + this.settings.PASSWORD_MAX_LENGTH + " characters!";
+                } else {
+                    columns.add("password");
+                    values.add(password);
+                }
+
+                if (company_id == null || company_id.length() < 1) {
+                    this.settings.COMPANY_ERROR_MESSAGE = "This field is required!";
+                } else {
+                    String[] columnQuery = { "id" };
+
+                    HashMap whereQuery = new HashMap();
+                    whereQuery.put("id", company_id);
+
+                    String[][] select = database_connection.select(columnQuery, "company", whereQuery);
+
+                    if (select == null || select.length == 0) {
+                        this.settings.COMPANY_ERROR_MESSAGE = "This company doesn't exist.";
+                    } else if (!company_id.equals(user_information.company.id)) {
+                        columns.add("company_id");
+                        values.add(company_id);
+                    }
+                }
+
+                if (user_group_id == null || user_group_id.length() < 1) {
+                    this.settings.USER_GROUP_ERROR_MESSAGE = "This field is required!";
+                } else {
+                    String[] columnQuery = { "id" };
+
+                    HashMap whereQuery = new HashMap();
+                    whereQuery.put("id", user_group_id);
+
+                    String[][] select = database_connection.select(columnQuery, "user_groups", whereQuery);
+
+                    if (select == null || select.length == 0) {
+                        this.settings.USER_GROUP_ERROR_MESSAGE = "This user group doesn't exist.";
+                    } else if (!user_group_id.equals(user_information.user_group.id)) {
+                        columns.add("user_group_id");
+                        values.add(user_group_id);
+                    }
+                }
+
+                if (!columns.isEmpty() && !values.isEmpty()) {
+
+                    database_connection.update((String[]) columns.toArray(), values.toArray(), "user");
+                    database_connection.close();
+                    
+                    //Return true if user was updated.
+                    return true;
+                }
+
+                database_connection.close();
+            }
+            //Return false if some error was thrown.
+            return false;
+        }
+        //Edit user method end.
     }
     //Administration.User object end.
     

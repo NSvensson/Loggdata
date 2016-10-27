@@ -49,6 +49,34 @@ public class CurrentUser {
         }
     }
     
+    public CurrentUser(String id) {
+        String[] columnQuery = {
+                    "company_id",
+                    "first_name",
+                    "last_name",
+                    "email",
+                    "username",
+                    "user_group_id"
+        };
+
+        HashMap whereQuery = new HashMap();
+        whereQuery.put("id", id);
+        
+        this.database_connection.connect();
+        String[][] select = this.database_connection.select(columnQuery, "user", whereQuery);
+        this.database_connection.close();
+
+        if (select != null && select.length == 1 && select[0].length == columnQuery.length) {
+            this.id = id;
+            this.company = new CompanyRow(select[0][0]);
+            this.first_name = select[0][1];
+            this.last_name = select[0][2];
+            this.email = select[0][3];
+            this.username = select[0][4];
+            this.user_group = new UserGroups(select[0][5]);
+        }
+    }
+    
     private ApplicationRow[] available_applications(String company_id) {
         String[] columnQuery = {
                 "id",
