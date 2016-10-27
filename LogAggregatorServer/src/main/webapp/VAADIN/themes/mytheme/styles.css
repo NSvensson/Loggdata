@@ -12987,3 +12987,7 @@ div.v-layout.v-horizontal.v-widget {
 .mytheme .apps_padding {
 	padding-bottom: 10px;
 }
+
+.mytheme .top_padding {
+	padding-top: 5px;
+}
