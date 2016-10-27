@@ -55,51 +55,19 @@ import java.util.Map;
 public class MyUI extends UI {
     private final String loginView = "";
     private final String logsView = "Logs";
+    private final String createUserView = "CreateUser";
     
     private CurrentUser user;
     private Navigator nav = new Navigator(this, this);
-
-    private String[][] tmpTestdata = {
-        {"Firefox", "2016-01-01", "SNOOP DOGG WAS HERE"},
-        {"Firefox", "2016-02-20", "SNOOasdasdP DOGG WAS HERE"},
-        {"Firefox", "2016-03-20", "SNOOP DOGG WAS HERE"},
-        {"Firefox", "2016-04-20", "SNOOP DasdasdOGG WAS HERE"},
-        {"Firefox", "2016-05-20", "SNOOP DOGG WAS HERE"},
-        {"Firefox", "2016-06-20", "SNOasdasdOP DOGGasdasd asdasdWAS HERE"},
-        {"Firefox", "2016-07-20", "SNOOP DOGG WAS asdasdHERE"},
-        {"Firefox", "2016-08-20", "SNOOP DOasdasdGG WAS HERE"},
-        {"Chrome", "2016-08-20", "SNOOP DOGG WAS HERE"},
-        {"Chrome", "2016-10-20", "SNOOP DasdasdOGG WAS HERE"},
-        {"Chrome", "2017-11-20", "SNOOP DOGG WASasdasd HERE"},
-        {"Chrome", "2016-12-20", "SNOOP DOGG WAS HERE"},
-        {"Chrome", "2016-10-19", "SNOOP DOGG WAS HERE"},
-        {"Chrome", "2016-10-20", "SNOOP DOasdasdGG WAS HERE"},
-        {"Chrome", "2016-10-21", "SNOOP DOGG WAS HERE"},
-        {"Chrome", "2016-10-20", "SNOOP DOasdasdGG WAS HERE"},
-        {"Chrome", "2016-10-20", "SNOOP DOGG WAS HERE"},
-        {"Chrome", "2016-10-25", "SNOOP DOGG WAS HERE"},
-        {"IE", "2016-10-20", "SNOOP DOGG WAS HERE"},
-        {"IE", "2016-10-21", "SNOOP DOGG WAS HERE"},
-        {"IE", "2016-11-20", "SNOOP DOGG WASasdasd HERE"},
-        {"IE", "2016-10-20", "SNOOP DOGG WAS HERE"},
-        {"IE", "2016-10-10", "BRASHIBNIK"},
-        {"IE", "2016-10-20", "SNOOP DOGG WAS HERE"},
-        {"IE", "2016-09-20", "SNOOP DOGG WAS HERE"}
-    };
-    
-    HashMap<String, String> tmpTestApps = new HashMap<String, String>();
     
     @Override
     protected void init(VaadinRequest vaadinRequest) {
-        
-        tmpTestApps.put("1", "Firefox");
-        tmpTestApps.put("2", "Chrome");
-        tmpTestApps.put("3", "IE");
         
         getPage().setTitle("Log server");
         
         nav.addView(loginView, new LoginLayout());
         nav.addView(logsView, new ViewLogsLayout());
+        nav.addView(createUserView, new CreateUserLayout());
     }
     
     //LoginLayout start
@@ -168,6 +136,7 @@ public class MyUI extends UI {
         public final IndexedContainer comboBoxContainer = new IndexedContainer();
         public final Grid logtable = new Grid(tableContainer);
         public final ComboBox app_name = new ComboBox("Applications", comboBoxContainer);
+        public final Button create = new Button("Create user");
         
         public ViewLogsLayout() {
             
@@ -176,11 +145,14 @@ public class MyUI extends UI {
             this.tableContainer.addContainerProperty(this.DATE_COLUMN_NAME_IDENTIFIER, String.class, null);
             this.tableContainer.addContainerProperty(this.EVENT_COLUMN_NAME_IDENTIFIER, String.class, null);
             
+            this.logtable.getColumn(this.HIDDEN_COLUMN_IDENTIFIER).setHidden(true);
+            this.logtable.getColumn(this.APPLICATION_NAME_COLUMN_IDENTIFIER).setWidth(200);
+            this.logtable.getColumn(this.DATE_COLUMN_NAME_IDENTIFIER).setWidth(200);
+            
             setWidth("100%");
             setHeight("100%");
 
             final GridLayout loglayout = new GridLayout(1,4);
-//            final VerticalLayout loglayout = new VerticalLayout();
             loglayout.setWidth("90%");
             loglayout.setHeight("90%");
             addComponent(loglayout);
@@ -188,9 +160,7 @@ public class MyUI extends UI {
 
             final GridLayout gTitleLayout = new GridLayout(2,1);
             Label testLbl = new Label("Your log.");
-            testLbl.addStyleName("title_padding");
             gTitleLayout.addComponent(testLbl,0,0);
-//            vTitleLayout.addComponent(testLbl);
 
             this.logtable.setSizeFull();
 
@@ -220,14 +190,12 @@ public class MyUI extends UI {
                 }
             });
 
-//            loglayout.addComponent(app_name, 0, 1);
             gTitleLayout.addComponent(this.app_name,1,0);
             gTitleLayout.setComponentAlignment(this.app_name, Alignment.BOTTOM_RIGHT);
             gTitleLayout.addStyleName("apps_padding");
             loglayout.addComponent(gTitleLayout,0,0);
 
-//            loglayout.addComponent(logtable,0,2);
-            loglayout.addComponent(this.logtable);
+            loglayout.addComponent(this.logtable,0,1);
 
             HorizontalLayout buttonLayout = new HorizontalLayout();
             Button out = new Button("Logout");
@@ -238,13 +206,25 @@ public class MyUI extends UI {
                     user = null;
                 }
             });
+            
             buttonLayout.addComponent(out);
             buttonLayout.setComponentAlignment(out, Alignment.TOP_RIGHT);
-
-//            loglayout.addComponent(buttonLayout, 0, 3);
-            loglayout.addComponent(buttonLayout);
+            
+            loglayout.addComponent(buttonLayout,0,2);
             loglayout.setComponentAlignment(buttonLayout, Alignment.TOP_RIGHT);
-
+            
+            HorizontalLayout administrationLayout = new HorizontalLayout();
+            create.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event){ 
+                    nav.navigateTo(createUserView);
+                }
+            });
+            create.setEnabled(false);
+            create.setVisible(false);
+            administrationLayout.addComponent(create);
+            loglayout.addComponent(administrationLayout,0,3);
+            
             loglayout.setRowExpandRatio(1,1);
         }
 
@@ -267,10 +247,11 @@ public class MyUI extends UI {
                         newChoice.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(application.id);
                         newChoice.getItemProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER).setValue(application.name);
                     }
-                    
-                    this.logtable.getColumn(this.HIDDEN_COLUMN_IDENTIFIER).setHidden(true);
-                    this.logtable.getColumn(this.APPLICATION_NAME_COLUMN_IDENTIFIER).setWidth(200);
-                    this.logtable.getColumn(this.DATE_COLUMN_NAME_IDENTIFIER).setWidth(200);
+                }
+                
+                if (user.user_group.manage_users) {
+                    if (!create.isVisible()) create.setVisible(true);
+                    if (!create.isEnabled()) create.setEnabled(true);
                 }
             } else {
                 nav.navigateTo(loginView);
@@ -279,7 +260,84 @@ public class MyUI extends UI {
     }
     //ViewLogsLayout end
     
-    
+    //CreateUserLayout start
+    public class CreateUserLayout extends GridLayout implements View {
+
+        public final ComboBox company_name = new ComboBox("Company");
+        public final ComboBox user_group_name = new ComboBox("User group");
+        
+        public CreateUserLayout() {
+            
+            setWidth("100%");
+            setHeight("100%");
+            
+            GridLayout createUserLayout = new GridLayout(1,10);
+            createUserLayout.setStyleName("login-grid-layout");
+            addComponent(createUserLayout);
+            setComponentAlignment(createUserLayout, Alignment.MIDDLE_CENTER);
+            
+            //Fields and components for the  layout.
+            Label createUserTitel = new Label("Create user");
+            TextField userFnameField = new TextField("First name");
+            TextField userLnameField = new TextField("Last name");
+            TextField userEmailField = new TextField("Email");
+            TextField userUnameField = new TextField("Username");
+            PasswordField userPwordField = new PasswordField("Password");
+            PasswordField userCPwordField = new PasswordField("Confirm password");
+            
+            Button back = new Button("Back");
+            back.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event){ 
+                    nav.navigateTo(logsView);
+                }
+            });
+            Button createUser = new Button("Create");
+            createUser.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event){
+                    //Create user snoop and doodle
+                }
+            });
+            createUser.setStyleName("titel_padding");
+            
+            GridLayout bLayout = new GridLayout(2,1);
+            bLayout.setStyleName("top_padding");
+            bLayout.addComponent(createUser,0,0);
+            bLayout.setComponentAlignment(createUser, Alignment.MIDDLE_LEFT);
+            bLayout.addComponent(back,1,0);
+            bLayout.setComponentAlignment(back, Alignment.MIDDLE_RIGHT);
+            bLayout.setWidth("100%");
+            bLayout.setHeight("100%");
+            
+            //Adding the fields to the layout.
+            createUserLayout.addComponent(createUserTitel, 0, 0);
+            createUserLayout.addComponent(userFnameField, 0, 1);
+            createUserLayout.addComponent(userLnameField, 0, 2);
+            createUserLayout.addComponent(userEmailField, 0, 3);
+            createUserLayout.addComponent(userUnameField, 0, 4);
+            createUserLayout.addComponent(userPwordField, 0, 5);
+            createUserLayout.addComponent(userCPwordField, 0, 6);
+            createUserLayout.addComponent(this.company_name, 0, 7);
+            createUserLayout.addComponent(this.user_group_name, 0, 8);
+            createUserLayout.addComponent(bLayout, 0, 9);
+        }
+        
+        @Override
+        public void enter(ViewChangeListener.ViewChangeEvent event) {
+            if (user != null && user.is_authenticated) {
+                if (user.user_group.manage_users) {
+                    //Snoop dogs here
+                } else {
+                    nav.navigateTo(logsView);
+                }
+            } else {
+                nav.navigateTo(loginView);
+            }
+        }
+    }
+    //CreateUserLayout end
+
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
     @VaadinServletConfiguration(ui = MyUI.class, productionMode = false)
     public static class MyUIServlet extends VaadinServlet {
