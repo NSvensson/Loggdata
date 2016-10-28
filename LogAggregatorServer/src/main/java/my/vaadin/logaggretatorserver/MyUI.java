@@ -159,6 +159,7 @@ public class MyUI extends UI {
             setComponentAlignment(loglayout, Alignment.MIDDLE_CENTER);
 
             final GridLayout gTitleLayout = new GridLayout(2,1);
+            gTitleLayout.setStyleName("titel_padding");
             Label testLbl = new Label("Your log.");
             gTitleLayout.addComponent(testLbl,0,0);
 
