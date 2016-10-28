@@ -56,4 +56,9 @@ public class DataManaging {
         new Random().nextBytes(key);
         return identifier + "gg" + Base64.getEncoder().encodeToString(key);
     }
+    
+    public static String hashString(String received_string) {
+        
+        return Integer.toString(received_string.hashCode());
+    }
 }
