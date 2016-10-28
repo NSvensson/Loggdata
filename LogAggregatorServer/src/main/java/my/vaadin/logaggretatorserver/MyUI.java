@@ -102,9 +102,6 @@ public class MyUI extends UI {
                             usernametxf.getValue(),
                             passwordpwf.getValue());
                     
-                    System.out.println("Username provided: " + usernametxf.getValue());
-                    System.out.println("Password provided: " + passwordpwf.getValue());
-                    
                     if (user.is_authenticated) {
                         System.out.println("User authenticated.");
                         nav.navigateTo(logsView);
@@ -118,7 +115,7 @@ public class MyUI extends UI {
         
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
-            System.out.println("LoginLayout entered.");
+            //LoginLayout entered.
         }
     }
     //LoginLayout end
@@ -167,13 +164,6 @@ public class MyUI extends UI {
             this.comboBoxContainer.addContainerProperty(this.HIDDEN_COLUMN_IDENTIFIER, String.class, null);
             this.comboBoxContainer.addContainerProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER, String.class, null);
             
-            String nonSpecifiedOption = "All applications";
-            Object newChoiceId = comboBoxContainer.addItem();
-            Item newChoice = comboBoxContainer.getItem(newChoiceId);
-            newChoice.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue("0");
-            newChoice.getItemProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER).setValue(nonSpecifiedOption);
-            
-            this.app_name.setValue(newChoiceId);
             this.app_name.setItemCaptionPropertyId(APPLICATION_NAME_COLUMN_IDENTIFIER);
             this.app_name.setNullSelectionAllowed(false);
             this.app_name.setTextInputAllowed(false);
@@ -202,8 +192,11 @@ public class MyUI extends UI {
             out.addClickListener(new Button.ClickListener() {
                 @Override
                 public void buttonClick(Button.ClickEvent event){ 
-                    nav.navigateTo(loginView);
+                    tableContainer.removeAllItems();
+                    comboBoxContainer.removeAllItems();
+                    create.setVisible(false);
                     user = null;
+                    nav.navigateTo(loginView);
                 }
             });
             
@@ -217,6 +210,8 @@ public class MyUI extends UI {
             create.addClickListener(new Button.ClickListener() {
                 @Override
                 public void buttonClick(Button.ClickEvent event){ 
+                    tableContainer.removeAllItems();
+                    comboBoxContainer.removeAllItems();
                     nav.navigateTo(createUserView);
                 }
             });
@@ -230,9 +225,15 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
-            System.out.println("ViewLogsLayout entered.");
-            System.out.println("User: " + user);
             if (user != null && user.is_authenticated) {
+                
+                String nonSpecifiedOption = "All applications";
+                Object standardChoiceId = comboBoxContainer.addItem();
+                Item standardChoice = comboBoxContainer.getItem(standardChoiceId);
+                standardChoice.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue("0");
+                standardChoice.getItemProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER).setValue(nonSpecifiedOption);
+                this.app_name.setValue(standardChoiceId);
+                
                 if (user.applications != null) {
                     
                     for (ApplicationRow application : user.applications) {
@@ -263,32 +264,76 @@ public class MyUI extends UI {
     //CreateUserLayout start
     public class CreateUserLayout extends GridLayout implements View {
 
-        public final ComboBox company_name = new ComboBox("Company");
-        public final ComboBox user_group_name = new ComboBox("User group");
+        public final String HIDDEN_COLUMN_IDENTIFIER = "id";
+        public final String NAME_COLUMN_IDENTIFIER = "Name";
+
+        public Administration administration = new Administration();
+        
+        public final IndexedContainer company_container = new IndexedContainer();
+        public final IndexedContainer user_group_container = new IndexedContainer();
+        
+        public final ComboBox company_name = new ComboBox("Company", company_container);
+        public final ComboBox user_group_name = new ComboBox("User group", user_group_container);
+
+        public TextField userFnameField = new TextField("First name");
+        public TextField userLnameField = new TextField("Last name");
+        public TextField userEmailField = new TextField("Email");
+        public TextField userUnameField = new TextField("Username");
+        public PasswordField userPwordField = new PasswordField("Password");
+        public PasswordField userCPwordField = new PasswordField("Confirm password");
+        
+        public Label first_name_label = new Label();
+        public Label last_name_label = new Label();
+        public Label email_label = new Label();
+        public Label username_label = new Label();
+        public Label password_label = new Label();
+        public Label confirm_password_label = new Label();
+        public Label company_label = new Label();
+        public Label user_group_label = new Label();
         
         public CreateUserLayout() {
+            
+            this.company_container.addContainerProperty(this.HIDDEN_COLUMN_IDENTIFIER, String.class, null);
+            this.company_container.addContainerProperty(this.NAME_COLUMN_IDENTIFIER, String.class, null);
+            
+            this.user_group_container.addContainerProperty(this.HIDDEN_COLUMN_IDENTIFIER, String.class, null);
+            this.user_group_container.addContainerProperty(this.NAME_COLUMN_IDENTIFIER, String.class, null);
+            
+            this.company_name.setNullSelectionAllowed(false);
+            this.company_name.setTextInputAllowed(false);
+            
+            this.user_group_name.setNullSelectionAllowed(false);
+            this.user_group_name.setTextInputAllowed(false);
+            
+            this.company_name.setItemCaptionPropertyId(this.NAME_COLUMN_IDENTIFIER);
+            this.user_group_name.setItemCaptionPropertyId(this.NAME_COLUMN_IDENTIFIER);
+            
+            this.first_name_label.setVisible(false);
+            this.last_name_label.setVisible(false);
+            this.email_label.setVisible(false);
+            this.username_label.setVisible(false);
+            this.password_label.setVisible(false);
+            this.confirm_password_label.setVisible(false);
+            this.company_label.setVisible(false);
+            this.user_group_label.setVisible(false);
             
             setWidth("100%");
             setHeight("100%");
             
-            GridLayout createUserLayout = new GridLayout(1,10);
+            GridLayout createUserLayout = new GridLayout(2,10);
             createUserLayout.setStyleName("login-grid-layout");
             addComponent(createUserLayout);
             setComponentAlignment(createUserLayout, Alignment.MIDDLE_CENTER);
             
             //Fields and components for the  layout.
-            Label createUserTitel = new Label("Create user");
-            TextField userFnameField = new TextField("First name");
-            TextField userLnameField = new TextField("Last name");
-            TextField userEmailField = new TextField("Email");
-            TextField userUnameField = new TextField("Username");
-            PasswordField userPwordField = new PasswordField("Password");
-            PasswordField userCPwordField = new PasswordField("Confirm password");
+            Label createUserTitle = new Label("Create user");
             
             Button back = new Button("Back");
             back.addClickListener(new Button.ClickListener() {
                 @Override
                 public void buttonClick(Button.ClickEvent event){ 
+                    company_container.removeAllItems();
+                    user_group_container.removeAllItems();
                     nav.navigateTo(logsView);
                 }
             });
@@ -296,7 +341,69 @@ public class MyUI extends UI {
             createUser.addClickListener(new Button.ClickListener() {
                 @Override
                 public void buttonClick(Button.ClickEvent event){
-                    //Create user snoop and doodle
+                    administration.user.settings.clear_error_messages();
+                    
+                    first_name_label.setVisible(false);
+                    last_name_label.setVisible(false);
+                    email_label.setVisible(false);
+                    username_label.setVisible(false);
+                    password_label.setVisible(false);
+                    confirm_password_label.setVisible(false);
+                    company_label.setVisible(false);
+                    user_group_label.setVisible(false);
+                    
+                    if (userPwordField.getValue().equals(userCPwordField.getValue())) {
+                        if (administration.user.create(
+                                userFnameField.getValue(),
+                                userLnameField.getValue(),
+                                userEmailField.getValue(),
+                                userUnameField.getValue(),
+                                userPwordField.getValue(),
+                                company_name.getContainerProperty(company_name.getValue(), HIDDEN_COLUMN_IDENTIFIER).getValue().toString(),
+                                user_group_name.getContainerProperty(user_group_name.getValue(), HIDDEN_COLUMN_IDENTIFIER).getValue().toString())) {
+                            System.out.println("User created.");
+                        } else {
+                            System.out.println("User not created.");
+                            
+                            if (administration.user.settings.FIRST_NAME_ERROR_MESSAGE != null) {
+                                first_name_label.setValue(administration.user.settings.FIRST_NAME_ERROR_MESSAGE);
+                                if (!first_name_label.isVisible()) first_name_label.setVisible(true);
+                            }
+                            
+                            if (administration.user.settings.LAST_NAME_ERROR_MESSAGE != null) {
+                                last_name_label.setValue(administration.user.settings.LAST_NAME_ERROR_MESSAGE);
+                                if (!last_name_label.isVisible()) last_name_label.setVisible(true);
+                            }
+                            
+                            if (administration.user.settings.EMAIL_ERROR_MESSAGE != null) {
+                                email_label.setValue(administration.user.settings.EMAIL_ERROR_MESSAGE);
+                                if (!email_label.isVisible()) email_label.setVisible(true);
+                            }
+                            
+                            if (administration.user.settings.USERNAME_ERROR_MESSAGE != null) {
+                                username_label.setValue(administration.user.settings.USERNAME_ERROR_MESSAGE);
+                                if (!username_label.isVisible()) username_label.setVisible(true);
+                            }
+                            
+                            if (administration.user.settings.PASSWORD_ERROR_MESSAGE != null) {
+                                password_label.setValue(administration.user.settings.PASSWORD_ERROR_MESSAGE);
+                                if (!password_label.isVisible()) password_label.setVisible(true);
+                            }
+                            
+                            if (administration.user.settings.COMPANY_ERROR_MESSAGE != null) {
+                                company_label.setValue(administration.user.settings.COMPANY_ERROR_MESSAGE);
+                                if (!company_label.isVisible()) company_label.setVisible(true);
+                            }
+                            
+                            if (administration.user.settings.USER_GROUP_ERROR_MESSAGE != null) {
+                                user_group_label.setValue(administration.user.settings.USER_GROUP_ERROR_MESSAGE);
+                                if (!user_group_label.isVisible()) user_group_label.setVisible(true);
+                            }
+                        }
+                    } else {
+                        confirm_password_label.setValue("The provided passwords do not match.");
+                        if (!confirm_password_label.isVisible()) confirm_password_label.setVisible(true);
+                    }
                 }
             });
             createUser.setStyleName("titel_padding");
@@ -311,15 +418,23 @@ public class MyUI extends UI {
             bLayout.setHeight("100%");
             
             //Adding the fields to the layout.
-            createUserLayout.addComponent(createUserTitel, 0, 0);
-            createUserLayout.addComponent(userFnameField, 0, 1);
-            createUserLayout.addComponent(userLnameField, 0, 2);
-            createUserLayout.addComponent(userEmailField, 0, 3);
-            createUserLayout.addComponent(userUnameField, 0, 4);
-            createUserLayout.addComponent(userPwordField, 0, 5);
-            createUserLayout.addComponent(userCPwordField, 0, 6);
+            createUserLayout.addComponent(createUserTitle, 0, 0);
+            createUserLayout.addComponent(this.userFnameField, 0, 1);
+            createUserLayout.addComponent(this.first_name_label, 1, 1);
+            createUserLayout.addComponent(this.userLnameField, 0, 2);
+            createUserLayout.addComponent(this.last_name_label, 1, 2);
+            createUserLayout.addComponent(this.userEmailField, 0, 3);
+            createUserLayout.addComponent(this.email_label, 1, 3);
+            createUserLayout.addComponent(this.userUnameField, 0, 4);
+            createUserLayout.addComponent(this.username_label, 1, 4);
+            createUserLayout.addComponent(this.userPwordField, 0, 5);
+            createUserLayout.addComponent(this.password_label, 1, 5);
+            createUserLayout.addComponent(this.userCPwordField, 0, 6);
+            createUserLayout.addComponent(this.confirm_password_label, 1, 6);
             createUserLayout.addComponent(this.company_name, 0, 7);
+            createUserLayout.addComponent(this.company_label, 1, 7);
             createUserLayout.addComponent(this.user_group_name, 0, 8);
+            createUserLayout.addComponent(this.user_group_label, 1, 8);
             createUserLayout.addComponent(bLayout, 0, 9);
         }
         
@@ -327,7 +442,25 @@ public class MyUI extends UI {
         public void enter(ViewChangeListener.ViewChangeEvent event) {
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_users) {
-                    //Snoop dogs here
+                    company_name.removeAllItems();
+                    user_group_name.removeAllItems();
+                    
+                    administration = new Administration(user.user_group);
+                    
+                    for (CompanyRow company : administration.object_collections.companies()) {
+                        Item newItem = company_container.getItem(company_container.addItem());
+                        newItem.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(company.id);
+                        newItem.getItemProperty(this.NAME_COLUMN_IDENTIFIER).setValue(company.name);
+                    }
+                    
+                    for (UserGroups group : administration.object_collections.user_groups()) {
+                        Item newItem = user_group_container.getItem(user_group_container.addItem());
+                        newItem.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(group.id);
+                        newItem.getItemProperty(this.NAME_COLUMN_IDENTIFIER).setValue(group.name);
+                    }
+                    
+                    company_name.setValue(company_name.getItemIds().toArray()[0]);
+                    user_group_name.setValue(user_group_name.getItemIds().toArray()[0]);
                 } else {
                     nav.navigateTo(logsView);
                 }

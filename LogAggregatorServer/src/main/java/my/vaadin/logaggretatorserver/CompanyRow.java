@@ -33,4 +33,12 @@ public class CompanyRow {
             this.details = select[0][2];
         }
     }
+    
+    public CompanyRow(String id, String name, String website, String details) {
+        
+        this.id = id;
+        this.name = name;
+        if (website != null) this.website = website;
+        if (details != null) this.details = details;
+    }
 }

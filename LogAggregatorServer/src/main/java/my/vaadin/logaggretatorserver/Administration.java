@@ -9,6 +9,7 @@ public class Administration {
     public Application application;
     public Company company;
     public UserGroup user_group;
+    public ObjectCollections object_collections;
 
     private final ServerDataBase database_connection = new ServerDataBase();
     
@@ -18,6 +19,11 @@ public class Administration {
         this.application = new Application(user_groups);
         this.company = new Company(user_groups);
         this.user_group = new UserGroup(user_groups);
+        this.object_collections = new ObjectCollections(user_groups);
+    }
+    
+    public Administration() {
+        this(new UserGroups());
     }
     
     //Administration.User object start.
@@ -48,6 +54,16 @@ public class Administration {
             public String EMAIL_ERROR_MESSAGE = null;
             public String USERNAME_ERROR_MESSAGE = null;
             public String PASSWORD_ERROR_MESSAGE = null;
+            
+            public void clear_error_messages() {
+                if (this.FIRST_NAME_ERROR_MESSAGE != null) this.FIRST_NAME_ERROR_MESSAGE = null;
+                if (this.LAST_NAME_ERROR_MESSAGE != null) this.LAST_NAME_ERROR_MESSAGE = null;
+                if (this.EMAIL_ERROR_MESSAGE != null) this.EMAIL_ERROR_MESSAGE = null;
+                if (this.USERNAME_ERROR_MESSAGE != null) this.USERNAME_ERROR_MESSAGE = null;
+                if (this.PASSWORD_ERROR_MESSAGE != null) this.PASSWORD_ERROR_MESSAGE = null;
+                if (this.COMPANY_ERROR_MESSAGE != null) this.COMPANY_ERROR_MESSAGE = null;
+                if (this.USER_GROUP_ERROR_MESSAGE != null) this.USER_GROUP_ERROR_MESSAGE = null;
+            }
         }
         //User settings end.
         
@@ -333,4 +349,93 @@ public class Administration {
         }
     }
     //Administration.UserGroup object end.
+    
+    //Administration.Collections object start.
+    public class ObjectCollections {
+        
+        private final UserGroups user_groups;
+        
+        public ObjectCollections(UserGroups user_groups) {
+            
+            this.user_groups = user_groups;
+        }
+        
+        //CurrentUser collection begin.
+        public CurrentUser[] users() {
+            if (this.user_groups.manage_users) {
+                
+            }
+            return null;
+        }
+        //CurrentUser collection end.
+        
+        //CompanyRow collection begin.
+        public CompanyRow[] companies() {
+            if (this.user_groups.manage_companies) {
+                
+                String[] columnQuery = {
+                        "id",
+                        "name",
+                        "website",
+                        "details"
+                };
+
+                database_connection.connect();
+                String[][] select = database_connection.select(columnQuery, "company");
+                database_connection.close();
+                
+                CompanyRow[] results = new CompanyRow[select.length];
+                
+                if (select != null && select.length >= 1 && select[0].length == columnQuery.length) {
+                    for (int i = 0; i < select.length; i++) {
+                        results[i] = new CompanyRow(select[i][0], select[i][1], select[i][2], select[i][3]);
+                    }
+                    return results;
+                }
+            }
+            return null;
+        }
+        //CompanyRow collection end.
+        
+        //UserGroups collection begin.
+        public UserGroups[] user_groups() {
+            if (this.user_groups.manage_groups) {
+                
+                String[] columnQuery = {
+                        "id",
+                        "name",
+                        "view_logs",
+                        "manage_applications",
+                        "manage_users",
+                        "manage_companies",
+                        "manage_groups"
+                };
+
+                database_connection.connect();
+                String[][] select = database_connection.select(columnQuery, "user_groups");
+                database_connection.close();
+
+                UserGroups[] results = new UserGroups[select.length];
+                
+                if (select != null && select.length >= 1 && select[0].length == columnQuery.length) {
+                    for (int i = 0; i < select.length; i++) {
+                        results[i] = new UserGroups(select[i][0], select[i][1], select[i][2], select[i][3], select[i][4], select[i][5], select[i][6]);
+                    }
+                    return results;
+                }
+            }
+            return null;
+        }
+        //UserGroups collection end.
+        
+        //ApplicationRow collection begin.
+        public ApplicationRow[] applications() {
+            if (this.user_groups.manage_applications) {
+                
+            }
+            return null;
+        }
+        //ApplicationRow collection end.
+    }
+    //Administration.Collections object end.
 }
