@@ -131,7 +131,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,2,'Niklas','Svenne','nieklas@snoop.com','niklas','niklas',1),(2,2,'Maeks','asenm','makes@snoop.com','maks','maks',1),(3,1,'Bjoern','Hov Annanas','bjorny@noob.com','fakoz','fakoz',2),(4,2,'Brashiblord','Brashiblord','brashibnika@gmail.com','brashibnik','brashibnik',1);
+INSERT INTO `user` VALUES (10,2,'Sven','McBen','Sven@gmail.com','maks','3343868',1);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 

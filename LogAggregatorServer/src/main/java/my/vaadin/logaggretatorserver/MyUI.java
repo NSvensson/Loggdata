@@ -10,38 +10,19 @@ import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.server.RequestHandler;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinResponse;
 import com.vaadin.server.VaadinServlet;
-import com.vaadin.server.VaadinSession;
-import com.vaadin.shared.data.sort.SortDirection;
-import com.vaadin.ui.AbsoluteLayout;
-import com.vaadin.ui.AbsoluteLayout.ComponentPosition;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component.Focusable;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.PasswordField;
-import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Upload;
-import java.awt.Component;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 
 /**
@@ -100,7 +81,7 @@ public class MyUI extends UI {
                 public void buttonClick(Button.ClickEvent event) {
                     user = new CurrentUser(
                             usernametxf.getValue(),
-                            passwordpwf.getValue());
+                            DataManaging.hashString(passwordpwf.getValue()));
                     
                     if (user.is_authenticated) {
                         System.out.println("User authenticated.");

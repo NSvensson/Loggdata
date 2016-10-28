@@ -51,7 +51,7 @@ public class DataManaging {
         bos.close();
     }
     
-    public static String generateAPIKey(int identifier) {
+    public static String generateAPIKey(String identifier) {
         byte[] key = new byte[32];
         new Random().nextBytes(key);
         return identifier + "gg" + Base64.getEncoder().encodeToString(key);

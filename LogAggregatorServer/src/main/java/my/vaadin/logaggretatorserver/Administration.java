@@ -176,7 +176,7 @@ public class Administration {
                                 last_name,
                                 email,
                                 username,
-                                password,
+                                DataManaging.hashString(password),
                                 company_id,
                                 user_group_id
                         }
