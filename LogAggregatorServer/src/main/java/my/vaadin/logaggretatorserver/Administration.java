@@ -429,9 +429,9 @@ public class Administration {
             return null;
         }
         //Create application end.
-        
-        //Insert logs method start.
-        public boolean insert_logs(String api_key, String[][] logs) {
+
+        //Authenticate API key start.
+        public String authenticate_API_key(String api_key) {
             if (user_groups.manage_applications) {
                 database_connection.connect();
                 
@@ -439,6 +439,26 @@ public class Administration {
 
                 HashMap whereQuery = new HashMap();
                 whereQuery.put("api_key", api_key);
+
+                String[][] select = database_connection.select(columnQuery, "application", whereQuery);
+
+                if (select != null && select.length == 1 && select[0].length == columnQuery.length) {
+                    return select[0][0];
+                }
+            }
+            return null;
+        }
+        //Authenticate API key end.
+        
+        //Insert logs method start.
+        public boolean insert_logs(String id, String[][] logs) {
+            if (user_groups.manage_applications) {
+                database_connection.connect();
+                
+                String[] columnQuery = { "id" };
+
+                HashMap whereQuery = new HashMap();
+                whereQuery.put("id", id);
 
                 String[][] select = database_connection.select(columnQuery, "application", whereQuery);
 
@@ -453,7 +473,7 @@ public class Administration {
                     Object[][] values = new Object[logs.length][3];
                     
                     for (int i = 0; i < logs.length; i++) {
-                        values[i] = new Object[] { select[0][0], logs[i][0], logs[i][1] };
+                        values[i] = new Object[] { id, logs[i][0], logs[i][1] };
                     }
                     
                     database_connection.insert(columnQuery, values, "log");
@@ -461,7 +481,7 @@ public class Administration {
                     columnQuery = new String[] { "latest_update" };
                     
                     whereQuery.clear();
-                    whereQuery.put("id", select[0][0]);
+                    whereQuery.put("id", id);
                     
                     Object[] latest_update = { new Timestamp(new Date().getTime()) };
                     
