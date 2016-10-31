@@ -27,7 +27,7 @@ CREATE TABLE `application` (
   `company_id` int(11) NOT NULL,
   `name` varchar(45) NOT NULL,
   `log_type` varchar(45) DEFAULT NULL,
-  `latest_update` datetime NOT NULL,
+  `latest_update` datetime DEFAULT NULL,
   `update_interval` int(11) NOT NULL,
   `api_key` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
