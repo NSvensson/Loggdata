@@ -2,14 +2,11 @@ package my.vaadin.logaggretatorserver;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -23,7 +20,6 @@ import javax.servlet.http.Part;
 
 @MultipartConfig
 public class ClientServlet extends HttpServlet {
-    private final Administration administration = new Administration(new UserGroups("1"));
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -38,7 +34,7 @@ public class ClientServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            String servlet_URI = "http://localhost:8080/LogAggregatorServer/LogServlet";
+            String servlet_URI = "http://localhost:8080/LogAggregatorServer/ClientServlet";
             
             out.println("<!DOCTYPE html>");
             out.println("<html>");
@@ -64,6 +60,128 @@ public class ClientServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        if (request.getHeader("client-action") != null) {
+            
+            //Authentication request begin.
+            if (request.getHeader("client-action").equals("authenticate") &&
+                request.getHeader("username") != null &&
+                request.getHeader("password") != null) {
+                
+                /*
+                When sending a authentication request to the server
+                the following requirements needs to be met:
+                
+                The header "client-action" with the value "authenticate".
+                
+                The header "username" containing the username for the user
+                getting authenticated.
+                
+                The header "password" containing the pre hashed/encrypted
+                password for the user getting authenticated.
+                Warning: The hashing/encryption method on the client side
+                must share the same hashing/encryption key as the server.
+                */
+                
+                /*
+                Create a CurrentUser object with the provided information.
+
+                Providing the boolean false as the third parameter will prevent
+                the object from reading and filling the memory with all the 
+                applications and logs related to the user.
+                */
+                CurrentUser user = new CurrentUser(
+                        request.getHeader("username"),
+                        request.getHeader("password"),
+                        false);
+                
+                if (user.applications == null) System.out.println("Applications not loaded.");
+                else System.out.println("Applications was loaded.");
+                
+                /*
+                Check if the user information provided is valid.
+                */
+                if (user.is_authenticated) {
+                    /*
+                    Check if the user has rights to use the client.
+                    */
+                    if (user.user_group.manage_applications) {
+                        System.out.println("Authentication: Authenticated.");
+                        response.addHeader("authenticated", "true");
+                    } else {
+                        System.out.println("Authentication: Permission denied.");
+                        response.addHeader("authenticated", "false");
+                        response.addHeader("authentication-problem", "Permission denied.");
+                    }
+                } else {
+                    System.out.println("Authentication: Invalid authentication information.");
+                    response.addHeader("authenticated", "false");
+                    response.addHeader("authentication-problem", "Invalid authentication information.");
+                }
+            }
+            //Authentication request end.
+
+            //New_application request begin.
+            if (request.getHeader("client-action").equals("new_application") &&
+                request.getHeader("application-name") != null &&
+                request.getHeader("update-interval") != null &&
+                request.getHeader("username") != null &&
+                request.getHeader("password") != null) {
+                
+                /*
+                When attempting to add a new application on the server
+                the following requirements needs to be met:
+                
+                The header "client-action" with the value "new_application".
+                
+                The header "application-name" containing the desired name
+                for the application being added.
+                
+                The header "update-interval" containing the amount of seconds
+                of each interval between each time the client is updating the
+                logs on the server.
+                
+                The header "username" containing the username for the user
+                getting authenticated.
+                
+                The header "password" containing the pre hashed/encrypted
+                password for the user getting authenticated.
+                Warning: The hashing/encryption method on the client side
+                must share the same hashing/encryption key as the server.
+                */
+                
+                CurrentUser user = new CurrentUser(
+                        request.getHeader("username"),
+                        request.getHeader("password"),
+                        false);
+                
+                Administration administration = new Administration(user.user_group);
+                
+                String api_key = administration.application.create(
+                        user.company.id,
+                        request.getHeader("application-name"),
+                        null,
+                        request.getHeader("update-interval"));
+
+                if (api_key != null) {
+                    System.out.println("New application created.");
+                    response.addHeader("application-created", "true");
+                    
+                    response.addHeader("api-key", api_key);
+                } else {
+                    System.out.println("New application not created.");
+                    response.addHeader("application-created", "false");
+                    
+                    if (administration.application.settings.NAME_ERROR_MESSAGE != null)
+                        response.addHeader("application-name-problem", administration.application.settings.NAME_ERROR_MESSAGE);
+
+                    if (administration.application.settings.UPDATE_INTERVAL_ERROR_MESSAGE != null)
+                        response.addHeader("update-interval-problem", administration.application.settings.UPDATE_INTERVAL_ERROR_MESSAGE);
+                }
+            }
+            //New_application request end.
+        }
+
         processRequest(request, response);
     }
 
@@ -91,7 +209,9 @@ public class ClientServlet extends HttpServlet {
             Check if the provided API key is valid and obtain the id related to 
             the key, then pick out the file from the multipart request.
             */
-            String application_id = this.administration.application.authenticate_API_key(request.getHeader("api-key"));
+            Administration administration = new Administration(new UserGroups("1"));
+            
+            String application_id = administration.application.authenticate_API_key(request.getHeader("api-key"));
             
             Part given_file;
             if (application_id != null && (given_file = request.getPart("file")) != null) {
@@ -200,7 +320,6 @@ public class ClientServlet extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "A servlet listening for logs being sent to the server.";
+        return "A servlet used for all interactions between the log server and the log clients.";
     }// </editor-fold>
-
 }

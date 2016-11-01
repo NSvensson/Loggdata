@@ -432,22 +432,12 @@ public class ServerDataBase {
         +------------+------------+------------+
         | columns[0] | columns[1] | columns[2] |
         +------------+------------+------------+
-        |values[0][0]|values[0][1]|values[0][2]|
-        +------------+------------+------------+
-        |values[1][0]|values[1][1]|values[1][2]|
-        +------------+------------+------------+
-        |values[2][0]|values[2][1]|values[2][2]|
-        +------------+------------+------------+
-        |values[3][0]|values[3][1]|values[3][2]|
+        | values[0]  | values[0]  | values[0]  |
         +------------+------------+------------+
         
         The table string will contain the name of the table you're inserting into.
         The columns string array will contain the names of the columns you're insering into.
         The values object array will contain the values of the columns you're inserting.
-        
-        The inner arrays of the values array should always contain the same amount
-        of values as the columns you're inserting into, aswell as ordered in the
-        same order as the columns you're inserting into.
         */
 
         String query = "INSERT INTO " + table + "(";
