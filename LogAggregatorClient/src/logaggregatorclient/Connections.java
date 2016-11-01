@@ -8,45 +8,52 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
-import javax.net.ssl.HttpsURLConnection;
-
 
 public class Connections {
     
     private final String USER_AGENT = "Mozilla/5.0";
+    private final String url = "http://localhost:8080/LogAggregatorServer/ClientServlet";
     
-    public void get() throws Exception {
-        String url = "http://localhost:8080/LogAggregatorServer/rhexample";
+    public String AUTHENTICATION_ERROR_MESSAGE = null;
+    
+    public boolean authenticate(String username, String password) {
+        try {
+            URL url_object = new URL(this.url);
+            HttpURLConnection connection = (HttpURLConnection) url_object.openConnection();
+            
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("User-Agent", this.USER_AGENT);
+            connection.setRequestProperty("client-action", "authenticate");
+            connection.setRequestProperty("username", username);
+            connection.setRequestProperty("password", password);
 
-        URL obj = new URL(url);
-        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-
-        // optional default is GET
-        con.setRequestMethod("GET");
-
-        //add request header
-        con.setRequestProperty("User-Agent", USER_AGENT);
-
-        int responseCode = con.getResponseCode();
-        System.out.println("\nSending 'GET' request to URL : " + url);
-        System.out.println("Response Code : " + responseCode);
-
-        BufferedReader in = new BufferedReader(
-                new InputStreamReader(con.getInputStream()));
-        String inputLine;
-        StringBuffer response = new StringBuffer();
-
-        while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
+            if (connection.getResponseCode() == 200) {
+                String authenticated_header = connection.getHeaderField("authenticated");
+                if (authenticated_header != null) {
+                    if (authenticated_header.equals("true")) {
+                        
+                        //User information approved.
+                        return true;
+                    } else if (authenticated_header.equals("false") &&
+                        connection.getHeaderField("authentication-problem") != null) {
+                        
+                        //User information denied.
+                        this.AUTHENTICATION_ERROR_MESSAGE = connection.getHeaderField("authentication-problem");
+                    }
+                } else {
+                    //Authenticated header not received.
+                }
+            } else {
+                //Connection not OK!
+            }
+        } catch (Exception e) {
+            System.out.println("Authenticate exception caught: " + e);
         }
-        in.close();
-
-        //print result
-        System.out.println(response.toString());
+        return false;
     }
     
     public void post() throws MalformedURLException, ProtocolException, IOException {
-        String url = "http://localhost:8080/LogAggregatorServer/rhexample";
+//        String url = "http://localhost:8080/LogAggregatorServer/rhexample";
         URL obj = new URL(url);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
