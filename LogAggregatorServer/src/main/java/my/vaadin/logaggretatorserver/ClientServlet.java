@@ -165,12 +165,12 @@ public class ClientServlet extends HttpServlet {
 
                 if (api_key != null) {
                     System.out.println("New application created.");
-                    response.addHeader("application-created", "true");
+                    response.addHeader("application-added", "true");
                     
                     response.addHeader("api-key", api_key);
                 } else {
                     System.out.println("New application not created.");
-                    response.addHeader("application-created", "false");
+                    response.addHeader("application-added", "false");
                     
                     if (administration.application.settings.NAME_ERROR_MESSAGE != null)
                         response.addHeader("application-name-problem", administration.application.settings.NAME_ERROR_MESSAGE);

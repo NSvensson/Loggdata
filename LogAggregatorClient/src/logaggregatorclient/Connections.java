@@ -16,6 +16,9 @@ public class Connections {
     
     public String AUTHENTICATION_ERROR_MESSAGE = null;
     
+    public String APPLICATION_NAME_ERROR_MESSAGE = null;
+    public String UPDATE_INTERVAL_ERROR_MESSAGE = null;
+    
     public boolean authenticate(String username, String password) {
         try {
             URL url_object = new URL(this.url);
@@ -50,6 +53,49 @@ public class Connections {
             System.out.println("Authenticate exception caught: " + e);
         }
         return false;
+    }
+    
+    public String new_application(String username, String password, String application_name, String update_interval) {
+
+        try {
+            URL url_object = new URL(this.url);
+            HttpURLConnection connection = (HttpURLConnection) url_object.openConnection();
+            
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("User-Agent", this.USER_AGENT);
+            connection.setRequestProperty("client-action", "new_application");
+            connection.setRequestProperty("application-name", application_name);
+            connection.setRequestProperty("update-interval", update_interval);
+            connection.setRequestProperty("username", username);
+            connection.setRequestProperty("password", password);
+
+            if (connection.getResponseCode() == 200) {
+                String application_created_header = connection.getHeaderField("application-added");
+                if (application_created_header != null) {
+                    if (application_created_header.equals("true") &&
+                        connection.getHeaderField("api-key") != null) {
+                        
+                        //Application added.
+                        return connection.getHeaderField("api-key");
+                    } else if (application_created_header.equals("false")) {
+                        
+                        //New application denied.
+                        if (connection.getHeaderField("application-name-problem") != null)
+                            this.APPLICATION_NAME_ERROR_MESSAGE = connection.getHeaderField("application-name-problem");
+                        
+                        if (connection.getHeaderField("update-interval-problem") != null)
+                            this.UPDATE_INTERVAL_ERROR_MESSAGE = connection.getHeaderField("update-interval-problem");
+                    }
+                } else {
+                    //Authenticated header not received.
+                }
+            } else {
+                //Connection not OK!
+            }
+        } catch (Exception e) {
+            System.out.println("Authenticate exception caught: " + e);
+        }
+        return null;
     }
     
     public void post() throws MalformedURLException, ProtocolException, IOException {
