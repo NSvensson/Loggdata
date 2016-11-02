@@ -1,6 +1,8 @@
 package my.vaadin.logaggretatorserver;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 public class Administration {
@@ -235,18 +237,20 @@ public class Administration {
                 } else if (username.length() > this.settings.USERNAME_MAX_LENGTH) {
                     this.settings.USERNAME_ERROR_MESSAGE = "Your username can't be longer than " + this.settings.USERNAME_MAX_LENGTH + " characters!";
                 } else {
-                    String[] columnQuery = { "id" };
+                    if (!username.equals(user_information.username)) {
+                        String[] columnQuery = { "id" };
 
-                    HashMap whereQuery = new HashMap();
-                    whereQuery.put("username", username);
+                        HashMap whereQuery = new HashMap();
+                        whereQuery.put("username", username);
 
-                    String[][] select = database_connection.select(columnQuery, "user", whereQuery);
+                        String[][] select = database_connection.select(columnQuery, "user", whereQuery);
 
-                    if (select != null && select.length >= 1 && select[0].length == columnQuery.length) {
-                        this.settings.USERNAME_ERROR_MESSAGE = "This username is taken.";
-                    } else {
-                        columns.add("username");
-                        values.add(username);
+                        if (select != null && select.length >= 1 && select[0].length == columnQuery.length) {
+                            this.settings.USERNAME_ERROR_MESSAGE = "This username is taken.";
+                        } else {
+                            columns.add("username");
+                            values.add(username);
+                        }
                     }
                 }
 
@@ -297,7 +301,10 @@ public class Administration {
 
                 if (!columns.isEmpty() && !values.isEmpty()) {
 
-                    database_connection.update((String[]) columns.toArray(), values.toArray(), "user");
+                    HashMap whereQuery = new HashMap();
+                    whereQuery.put("id", user_information.id);
+                    
+                    database_connection.update((String[]) columns.toArray(), values.toArray(), "user", whereQuery);
                     database_connection.close();
                     
                     //Return true if user was updated.
@@ -316,13 +323,178 @@ public class Administration {
     //Administration.Application object start.
     public class Application {
         
+        public Settings settings;
         private final UserGroups user_groups;
         
         public Application(UserGroups user_groups) {
             
+            this.settings = new Settings();
             this.user_groups = user_groups;
         }
         
+        //Application settings start.
+        public class Settings {
+            
+            public final int NAME_MAX_LENGTH = 45;
+            public final int LOG_TYPE_MAX_LENGTH = 45;
+            
+            public String COMPANY_ERROR_MESSAGE = null;
+            public String NAME_ERROR_MESSAGE = null;
+            public String LOG_TYPE_ERROR_MESSAGE = null;
+            public String UPDATE_INTERVAL_ERROR_MESSAGE = null;
+        }
+        //Application settings end.
+        
+        //Create application start.
+        public String create(String company_id, String name, String log_type, String update_interval) {
+            if (user_groups.manage_applications) {
+                boolean proceed = true;
+                database_connection.connect();
+                
+                if (company_id == null || company_id.length() < 1) {
+                    this.settings.COMPANY_ERROR_MESSAGE = "This field is required!";
+                    if (proceed) proceed = false;
+                } else {
+                    String[] columnQuery = { "id" };
+
+                    HashMap whereQuery = new HashMap();
+                    whereQuery.put("id", company_id);
+
+                    String[][] select = database_connection.select(columnQuery, "company", whereQuery);
+
+                    if (select == null || select.length == 0) {
+                        this.settings.COMPANY_ERROR_MESSAGE = "This company doesn't exist.";
+                        if (proceed) proceed = false;
+                    }
+                }
+                
+                if (name == null || name.length() < 1) {
+                    this.settings.NAME_ERROR_MESSAGE = "This field is required!";
+                    if (proceed) proceed = false;
+                } else if (name.length() > this.settings.NAME_MAX_LENGTH) {
+                    this.settings.NAME_ERROR_MESSAGE = "The application name can't be longer than " + this.settings.NAME_MAX_LENGTH + " characters!";
+                    if (proceed) proceed = false;
+                }
+                
+                if (log_type != null && log_type.length() > this.settings.LOG_TYPE_MAX_LENGTH) {
+                    this.settings.LOG_TYPE_ERROR_MESSAGE = "The log type field can't be longer than " + this.settings.LOG_TYPE_MAX_LENGTH + " characters!";
+                    if (proceed) proceed = false;
+                }
+                
+                if (update_interval == null || update_interval.length() < 1) {
+                    this.settings.UPDATE_INTERVAL_ERROR_MESSAGE = "This field is required!";
+                    if (proceed) proceed = false;
+                } else {
+                    try { Integer.parseInt(update_interval); }
+                    catch (NumberFormatException e) {
+                        this.settings.UPDATE_INTERVAL_ERROR_MESSAGE = "Incorrect value format!";
+                        if (proceed) proceed = false;
+                    }
+                }
+                
+                if (proceed) {
+                    String[] columnQuery = new String[] {
+                                "company_id",
+                                "name",
+                                "update_interval",
+                                "log_type"
+                    };
+
+                    Object[] values = {
+                                company_id,
+                                name,
+                                update_interval,
+                                log_type
+                    };
+
+                    String created_id = database_connection.create(columnQuery, values, "application");
+                    
+                    if (created_id != null) {
+                        String api_key = DataManaging.generateAPIKey(created_id);
+                        
+                        columnQuery = new String[] { "api_key" };
+                        values = new Object[] { api_key };
+
+                        HashMap whereQuery = new HashMap();
+                        whereQuery.put("id", created_id);
+                        
+                        database_connection.update(columnQuery, values, "application", whereQuery);
+                        database_connection.close();
+                        return api_key;
+                    }
+                    
+                    database_connection.close();
+                }
+            }
+            return null;
+        }
+        //Create application end.
+
+        //Authenticate API key start.
+        public String authenticate_API_key(String api_key) {
+            if (user_groups.manage_applications) {
+                database_connection.connect();
+                
+                String[] columnQuery = { "id" };
+
+                HashMap whereQuery = new HashMap();
+                whereQuery.put("api_key", api_key);
+
+                String[][] select = database_connection.select(columnQuery, "application", whereQuery);
+
+                if (select != null && select.length == 1 && select[0].length == columnQuery.length) {
+                    return select[0][0];
+                }
+            }
+            return null;
+        }
+        //Authenticate API key end.
+        
+        //Insert logs method start.
+        public boolean insert_logs(String id, String[][] logs) {
+            if (user_groups.manage_applications) {
+                database_connection.connect();
+                
+                String[] columnQuery = { "id" };
+
+                HashMap whereQuery = new HashMap();
+                whereQuery.put("id", id);
+
+                String[][] select = database_connection.select(columnQuery, "application", whereQuery);
+
+                if (select != null && select.length == 1 && select[0].length == columnQuery.length) {
+                    
+                    columnQuery = new String[] {
+                        "application_id",
+                        "date",
+                        "event"
+                    };
+                    
+                    Object[][] values = new Object[logs.length][3];
+                    
+                    for (int i = 0; i < logs.length; i++) {
+                        values[i] = new Object[] { id, logs[i][0], logs[i][1] };
+                    }
+                    
+                    database_connection.insert(columnQuery, values, "log");
+                    
+                    columnQuery = new String[] { "latest_update" };
+                    
+                    whereQuery.clear();
+                    whereQuery.put("id", id);
+                    
+                    Object[] latest_update = { new Timestamp(new Date().getTime()) };
+                    
+                    database_connection.update(columnQuery, latest_update, "application", whereQuery);
+                    database_connection.close();
+                    return true;
+                }
+                
+                database_connection.close();
+            }
+            return false;
+        }
+        //Insert logs method end.
     }
     //Administration.Application object end.
     
@@ -399,7 +571,7 @@ public class Administration {
         
         //UserGroups collection begin.
         public UserGroups[] user_groups() {
-            if (this.user_groups.manage_groups) {
+            if (this.user_groups.manage_groups || this.user_groups.manage_users) {
                 
                 String[] columnQuery = {
                         "id",

@@ -16,7 +16,7 @@ public class CurrentUser {
     
     private final ServerDataBase database_connection = new ServerDataBase();
     
-    public CurrentUser(String username, String password) {
+    public CurrentUser(String username, String password, boolean load_applications) {
         String[] columnQuery = {
                     "id",
                     "company_id",
@@ -45,8 +45,12 @@ public class CurrentUser {
             this.email = select[0][4];
             this.username = select[0][5];
             this.user_group = new UserGroups(select[0][6]);
-            this.applications = available_applications(select[0][1]);
+            if (load_applications) load_available_applications();
         }
+    }
+
+    public CurrentUser(String username, String password) {
+        this(username, password, true);
     }
     
     public CurrentUser(String id) {
@@ -77,7 +81,7 @@ public class CurrentUser {
         }
     }
     
-    private ApplicationRow[] available_applications(String company_id) {
+    public void load_available_applications() {
         String[] columnQuery = {
                 "id",
                 "name",
@@ -88,7 +92,7 @@ public class CurrentUser {
         };
 
         HashMap whereQuery = new HashMap();
-        whereQuery.put("company_id", company_id);
+        whereQuery.put("company_id", this.company.id);
 
         this.database_connection.connect();
         String[][] select = this.database_connection.select(columnQuery, "application", whereQuery);
@@ -98,13 +102,11 @@ public class CurrentUser {
             ApplicationRow[] results = new ApplicationRow[select.length];
             
             for (int i = 0; i < select.length; i++) {
-                results[i] = new ApplicationRow(select[i][0], company_id, select[i][1], select[i][2], select[i][3], select[i][4], select[i][5]);
+                results[i] = new ApplicationRow(select[i][0], this.company.id, select[i][1], select[i][2], select[i][3], select[i][4], select[i][5]);
             }
             
-            return results;
+            this.applications = results;
         }
-
-        return null;
     }
     
 //    private ApplicationRow[] available_applications() {

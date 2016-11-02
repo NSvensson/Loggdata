@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -420,6 +421,71 @@ public class ServerDataBase {
         }
     }
     
+    public String create(String[] columns, Object[] values, String table) {
+        /*
+        This method will be used to insert the given values into the columns of
+        the desired table.
+        
+        The arguments provided will work in the following manner:
+        +--------------------------------------+
+        |                table                 |
+        +------------+------------+------------+
+        | columns[0] | columns[1] | columns[2] |
+        +------------+------------+------------+
+        | values[0]  | values[0]  | values[0]  |
+        +------------+------------+------------+
+        
+        The table string will contain the name of the table you're inserting into.
+        The columns string array will contain the names of the columns you're insering into.
+        The values object array will contain the values of the columns you're inserting.
+        */
+
+        String query = "INSERT INTO " + table + "(";
+
+        if (columns.length == 1) {
+            query += columns[0] + ") VALUES ( ? );";
+        } else if (columns.length > 1) {
+            for (String column : columns) {
+                query += column + ", ";
+            }
+
+            if (query.endsWith(", ")){
+                query = query.substring(0, query.length() - 2) + ") VALUES (";
+            }
+
+            for (String column : columns) {
+                query += "?, ";
+            }
+
+            if (query.endsWith(", ")){
+                query = query.substring(0, query.length() - 2) + ");";
+            }
+        }
+        
+        PreparedStatement stmt = null;
+        try {
+            stmt = database_connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            for (int i = 0; i < values.length; i++) {
+                stmt.setObject(i + 1, values[i]);
+            }
+            stmt.executeUpdate();
+
+            ResultSet generated_keys = stmt.getGeneratedKeys();
+            generated_keys.next();
+            return Integer.toString(generated_keys.getInt(1));
+        } catch (SQLException se) {
+            error_SQL = se;
+            error_message = se.getMessage();
+        } finally {
+            try { if (stmt != null) stmt.close(); }
+            catch (SQLException se) {
+                error_SQL = se;
+                error_message = se.getMessage();
+            }
+        }
+        return null;
+    }
+
     public void update(String[] columns, Object[] values, String table, HashMap designation) {
         /*
         This method will be used to change values on the designated row in the
