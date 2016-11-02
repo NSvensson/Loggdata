@@ -19,6 +19,7 @@ import com.vaadin.ui.Grid;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
@@ -87,6 +88,8 @@ public class MyUI extends UI {
                         System.out.println("User authenticated.");
                         nav.navigateTo(logsView);
                     } else {
+                        Notification.show("Invalid credentials provided.",
+                        Notification.TYPE_ERROR_MESSAGE);
                         System.out.println("Invalid credentials provided.");
                     }
                 }
@@ -345,6 +348,8 @@ public class MyUI extends UI {
                                 company_name.getContainerProperty(company_name.getValue(), HIDDEN_COLUMN_IDENTIFIER).getValue().toString(),
                                 user_group_name.getContainerProperty(user_group_name.getValue(), HIDDEN_COLUMN_IDENTIFIER).getValue().toString())) {
                             System.out.println("User created.");
+                            Notification.show("  User created  ",
+                            Notification.TYPE_HUMANIZED_MESSAGE);
                         } else {
                             System.out.println("User not created.");
                             
