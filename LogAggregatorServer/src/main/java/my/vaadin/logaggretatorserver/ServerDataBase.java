@@ -20,7 +20,7 @@ public class ServerDataBase {
     
     private final String database_URI = "jdbc:mysql://localhost:3306/logdatacollector";
     private final String database_username = "root";
-    private final String database_password = "root";
+    private final String database_password = "hej";
 //    private final String database_URI_prefix = "jdbc:mysql://";
     private final String database_driver = "com.mysql.jdbc.Driver";
     private Connection database_connection = null;
