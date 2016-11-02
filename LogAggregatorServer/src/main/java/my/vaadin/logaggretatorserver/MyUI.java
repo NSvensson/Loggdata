@@ -19,6 +19,7 @@ import com.vaadin.ui.Grid;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
@@ -87,6 +88,8 @@ public class MyUI extends UI {
                         System.out.println("User authenticated.");
                         nav.navigateTo(logsView);
                     } else {
+                        Notification.show("Invalid credentials provided.",
+                        Notification.TYPE_ERROR_MESSAGE);
                         System.out.println("Invalid credentials provided.");
                     }
                 }
@@ -302,10 +305,11 @@ public class MyUI extends UI {
             setWidth("100%");
             setHeight("100%");
             
-            GridLayout createUserLayout = new GridLayout(2,10);
+            HorizontalLayout mainlayout = new HorizontalLayout();
+            GridLayout createUserLayout = new GridLayout(1,10);
             createUserLayout.setStyleName("login-grid-layout");
-            addComponent(createUserLayout);
-            setComponentAlignment(createUserLayout, Alignment.MIDDLE_CENTER);
+            addComponent(mainlayout);
+            setComponentAlignment(mainlayout, Alignment.MIDDLE_CENTER);
             
             //Fields and components for the  layout.
             Label createUserTitle = new Label("Create user");
@@ -344,6 +348,8 @@ public class MyUI extends UI {
                                 company_name.getContainerProperty(company_name.getValue(), HIDDEN_COLUMN_IDENTIFIER).getValue().toString(),
                                 user_group_name.getContainerProperty(user_group_name.getValue(), HIDDEN_COLUMN_IDENTIFIER).getValue().toString())) {
                             System.out.println("User created.");
+                            Notification.show("  User created  ",
+                            Notification.TYPE_HUMANIZED_MESSAGE);
                         } else {
                             System.out.println("User not created.");
                             
@@ -402,22 +408,43 @@ public class MyUI extends UI {
             //Adding the fields to the layout.
             createUserLayout.addComponent(createUserTitle, 0, 0);
             createUserLayout.addComponent(this.userFnameField, 0, 1);
-            createUserLayout.addComponent(this.first_name_label, 1, 1);
             createUserLayout.addComponent(this.userLnameField, 0, 2);
-            createUserLayout.addComponent(this.last_name_label, 1, 2);
             createUserLayout.addComponent(this.userEmailField, 0, 3);
-            createUserLayout.addComponent(this.email_label, 1, 3);
             createUserLayout.addComponent(this.userUnameField, 0, 4);
-            createUserLayout.addComponent(this.username_label, 1, 4);
             createUserLayout.addComponent(this.userPwordField, 0, 5);
-            createUserLayout.addComponent(this.password_label, 1, 5);
             createUserLayout.addComponent(this.userCPwordField, 0, 6);
-            createUserLayout.addComponent(this.confirm_password_label, 1, 6);
             createUserLayout.addComponent(this.company_name, 0, 7);
-            createUserLayout.addComponent(this.company_label, 1, 7);
             createUserLayout.addComponent(this.user_group_name, 0, 8);
-            createUserLayout.addComponent(this.user_group_label, 1, 8);
+            
             createUserLayout.addComponent(bLayout, 0, 9);
+            
+            
+            //Label layout for the side of the view to display error messeges
+            GridLayout labelLayout = new GridLayout(1,10);
+            labelLayout.addComponent(this.user_group_label, 0, 8);
+            labelLayout.setComponentAlignment(this.user_group_label, Alignment.MIDDLE_LEFT);
+            labelLayout.addComponent(this.company_label, 0, 7);
+            labelLayout.setComponentAlignment(this.company_label, Alignment.MIDDLE_LEFT);
+            labelLayout.addComponent(this.confirm_password_label, 0, 6);
+            labelLayout.setComponentAlignment(this.confirm_password_label, Alignment.MIDDLE_LEFT);
+            labelLayout.addComponent(this.password_label, 0, 5);
+            labelLayout.setComponentAlignment(this.password_label, Alignment.MIDDLE_LEFT);
+            labelLayout.addComponent(this.username_label, 0, 4);
+            labelLayout.setComponentAlignment(this.username_label, Alignment.MIDDLE_LEFT);
+            labelLayout.addComponent(this.email_label, 0, 3);
+            labelLayout.setComponentAlignment(this.email_label, Alignment.MIDDLE_LEFT);
+            labelLayout.addComponent(this.last_name_label, 0, 2);
+            labelLayout.setComponentAlignment(this.last_name_label, Alignment.MIDDLE_LEFT);
+            labelLayout.addComponent(this.first_name_label, 0, 1);
+            labelLayout.setComponentAlignment(this.first_name_label, Alignment.MIDDLE_LEFT);
+//            addComponent(labelLayout);
+
+            labelLayout.setHeight("100%");
+            labelLayout.setWidth("100%");
+            mainlayout.addComponent(createUserLayout);
+            mainlayout.setComponentAlignment(createUserLayout, Alignment.MIDDLE_RIGHT);
+            mainlayout.addComponent(labelLayout);
+            mainlayout.setComponentAlignment(labelLayout, Alignment.MIDDLE_LEFT);
         }
         
         @Override
