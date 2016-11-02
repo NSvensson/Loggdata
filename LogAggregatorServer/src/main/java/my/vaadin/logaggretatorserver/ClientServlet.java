@@ -32,20 +32,6 @@ public class ClientServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            String servlet_URI = "http://localhost:8080/LogAggregatorServer/ClientServlet";
-            
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<body style=\"display: none;\">");
-            out.println("<form action=\"" + servlet_URI + "\" method=\"post\" enctype=\"multipart/form-data\">");
-            out.println("<input type=\"file\" name=\"file\">");
-            out.println("<input type=\"submit\" name=\"Submit\" value=\"Upload\">");
-            out.println("</form>");
-            out.println("</body>");
-            out.println("</html>");
-        }
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

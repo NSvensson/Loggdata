@@ -94,6 +94,7 @@ public class LogHandler {
         String logName = "Log";
         String logFileType = ".txt";
         String zipName = "PackedLog";
+        String zipPath = "./" + zipName + ".zip";
         try {
             String logg = "";
 
@@ -119,11 +120,11 @@ public class LogHandler {
             e.printStackTrace();
         }
         
-        byte[] buffer = new byte[1024];
+        byte[] buffer = new byte[4096];
 
         try {
 
-            FileOutputStream fos = new FileOutputStream("./" + zipName + ".zip");
+            FileOutputStream fos = new FileOutputStream(zipPath);
             ZipOutputStream zos = new ZipOutputStream(fos);
             ZipEntry ze = new ZipEntry(logName + logFileType);
             zos.putNextEntry(ze);

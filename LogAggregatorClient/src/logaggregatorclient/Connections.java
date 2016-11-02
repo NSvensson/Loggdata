@@ -1,12 +1,11 @@
 package logaggregatorclient;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 
 public class Connections {
@@ -30,7 +29,7 @@ public class Connections {
             connection.setRequestProperty("username", username);
             connection.setRequestProperty("password", password);
 
-            if (connection.getResponseCode() == 200) {
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 String authenticated_header = connection.getHeaderField("authenticated");
                 if (authenticated_header != null) {
                     if (authenticated_header.equals("true")) {
@@ -46,6 +45,7 @@ public class Connections {
                 } else {
                     //Authenticated header not received.
                 }
+                connection.disconnect();
             } else {
                 //Connection not OK!
             }
@@ -56,7 +56,6 @@ public class Connections {
     }
     
     public String new_application(String username, String password, String application_name, String update_interval) {
-
         try {
             URL url_object = new URL(this.url);
             HttpURLConnection connection = (HttpURLConnection) url_object.openConnection();
@@ -69,14 +68,16 @@ public class Connections {
             connection.setRequestProperty("username", username);
             connection.setRequestProperty("password", password);
 
-            if (connection.getResponseCode() == 200) {
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 String application_created_header = connection.getHeaderField("application-added");
                 if (application_created_header != null) {
                     if (application_created_header.equals("true") &&
                         connection.getHeaderField("api-key") != null) {
                         
                         //Application added.
-                        return connection.getHeaderField("api-key");
+                        String api_key = connection.getHeaderField("api-key");
+                        connection.disconnect();
+                        return api_key;
                     } else if (application_created_header.equals("false")) {
                         
                         //New application denied.
@@ -87,52 +88,72 @@ public class Connections {
                             this.UPDATE_INTERVAL_ERROR_MESSAGE = connection.getHeaderField("update-interval-problem");
                     }
                 } else {
-                    //Authenticated header not received.
+                    //Application-added header not received.
                 }
+                connection.disconnect();
             } else {
                 //Connection not OK!
             }
         } catch (Exception e) {
-            System.out.println("Authenticate exception caught: " + e);
+            System.out.println("New application exception caught: " + e);
         }
         return null;
     }
     
-    public void post() throws MalformedURLException, ProtocolException, IOException {
-//        String url = "http://localhost:8080/LogAggregatorServer/rhexample";
-        URL obj = new URL(url);
-        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-
-        //add reuqest header
-        con.setRequestMethod("POST");
-        con.setRequestProperty("User-Agent", USER_AGENT);
-        con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
-
-        String urlParameters = "sn=C02G8416DRJM&cn=&locale=&caller=&num=12345";
-
-        // Send post request
-        con.setDoOutput(true);
-        DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-        wr.writeBytes(urlParameters);
-        wr.flush();
-        wr.close();
-
-        int responseCode = con.getResponseCode();
-        System.out.println("\nSending 'POST' request to URL : " + url);
-        System.out.println("Post parameters : " + urlParameters);
-        System.out.println("Response Code : " + responseCode);
-
-        BufferedReader in = new BufferedReader(
-                new InputStreamReader(con.getInputStream()));
-        String inputLine;
-        StringBuffer response = new StringBuffer();
-
-        while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
+    public void send_logs(String api_key, String packed_log_source) {
+        try {
+            String boundary = "gg" + System.currentTimeMillis() + "gg";
+            String LINE_FEED = "\r\n";
+            
+            URL url_object = new URL(this.url);
+            HttpURLConnection connection = (HttpURLConnection) url_object.openConnection();
+            
+            connection.setUseCaches(false);
+            connection.setDoOutput(true);
+            connection.setDoInput(true);
+            connection.setRequestProperty("api-key", api_key);
+            connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+            
+            OutputStream output_stream = connection.getOutputStream();
+            PrintWriter writer = new PrintWriter(new OutputStreamWriter(output_stream), true);
+            
+            //File part begin
+            File upload_file = new File(packed_log_source);
+            
+            //File part headers begin
+            writer.append("--" + boundary).append(LINE_FEED);
+            writer.append("Content-Disposition: form-data; name=\"file\"; filename=\"" + upload_file.getName() + "\"").append(LINE_FEED);
+            writer.append("Content-Type: application/octet-stream").append(LINE_FEED);
+            writer.append(LINE_FEED);
+            writer.flush();
+            //File part headers end
+            
+            //File part body begin
+            FileInputStream input_stream = new FileInputStream(upload_file);
+            byte[] buffer = new byte[4096];
+            int bytes_read = -1;
+            while ((bytes_read = input_stream.read(buffer)) != -1) {
+                output_stream.write(buffer, 0, bytes_read);
+            }
+            output_stream.flush();
+            input_stream.close();
+            writer.append(LINE_FEED);
+            writer.flush();
+            //File part body end
+            //File part end
+            
+            writer.append(LINE_FEED).flush();
+            writer.append("--" + boundary + "--").append(LINE_FEED);
+            writer.close();
+            
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                System.out.println("Server returned OK status.");
+                connection.disconnect();
+            } else {
+                System.out.println("Server returned non-OK status.");
+            }
+        } catch (Exception e) {
+            System.out.println("Send logs exception caught: " + e);
         }
-        in.close();
-
-        //print result
-        System.out.println(response.toString());
     }
 }
