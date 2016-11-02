@@ -10,7 +10,6 @@ import java.net.URL;
 
 public class Connections {
     
-    private final String USER_AGENT = "Mozilla/5.0";
     private final String url = "http://localhost:8080/LogAggregatorServer/ClientServlet";
     
     public String AUTHENTICATION_ERROR_MESSAGE = null;
@@ -24,7 +23,6 @@ public class Connections {
             HttpURLConnection connection = (HttpURLConnection) url_object.openConnection();
             
             connection.setRequestMethod("GET");
-            connection.setRequestProperty("User-Agent", this.USER_AGENT);
             connection.setRequestProperty("client-action", "authenticate");
             connection.setRequestProperty("username", username);
             connection.setRequestProperty("password", password);
@@ -61,7 +59,6 @@ public class Connections {
             HttpURLConnection connection = (HttpURLConnection) url_object.openConnection();
             
             connection.setRequestMethod("GET");
-            connection.setRequestProperty("User-Agent", this.USER_AGENT);
             connection.setRequestProperty("client-action", "new_application");
             connection.setRequestProperty("application-name", application_name);
             connection.setRequestProperty("update-interval", update_interval);
