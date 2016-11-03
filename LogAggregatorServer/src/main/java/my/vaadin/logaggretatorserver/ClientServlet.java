@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -250,7 +249,6 @@ public class ClientServlet extends HttpServlet {
                         
                         if (entry.getName().equals("Log.txt")) {
                             System.out.println("Log.txt found.");
-                            System.out.println("Current time millidillidilli:\n" + System.currentTimeMillis());
                             
                             /*
                             Here we pick out the date and the event provided in the log file
@@ -295,7 +293,7 @@ public class ClientServlet extends HttpServlet {
                                 is built, we send it to the administration object to process and insert
                                 the logs found.
                                 */
-                                if (administration.application.insert_logs(application_id, results)) System.out.println("Logs successfully inserted.\n" + System.currentTimeMillis());
+                                if (administration.application.insert_logs(application_id, results)) System.out.println("Logs successfully inserted.");
                                 else System.out.println("Logs unsuccessfully inserted.");
                             }
                         }

@@ -47,26 +47,6 @@ public class ServerDataBase {
     "jdbc:mysql://"
     */
 
-//    public ServerDataBase(String database_URI, String database_username, String database_password) {
-//        this.database_URI = this.database_URI_prefix + database_URI;
-//        this.database_username = database_username;
-//        this.database_password = database_password;
-//
-//        /*
-//        When initiating a new ServerDataBase object, it should be written in
-//        the following manner.
-//        
-//        ServerDataBase sdb = new ServerDataBase(
-//                "localhost:3306/Database_name", 
-//                "username", 
-//                "password");
-//        */
-//    }
-//
-//    public void password(String database_password) { this.database_password = database_password; }
-//    public void username(String database_username) { this.database_username = database_username; }
-//    public void databaseURI(String database_URI) { this.database_URI = this.database_URI_prefix + database_URI; }
-    
     public void connect() {
         /*
         This method uses the connection information that has been provided to
@@ -203,151 +183,7 @@ public class ServerDataBase {
     public String[][] select(String[] columns, String table){
         return this.select(columns, table, null);
     }
-
-    public String[][] select_advanced (String[] columns, String table, HashMap<String, Object> designation){
-        /*
-        This method will be used to select and return the values from the
-        columns provided by the columns array from the provided table.
-        
-        The argument designation is not required for this method, however it is
-        useful in case the need for a WHERE clause appears.
-        
-        The reason behind using the List library to return the values found
-        by the provided query is simply because it is easier to work with when
-        obtaining the values from the resultset, this however is free and might
-        change during the development of this method.
-        */
-
-        List<List<String>> results = new ArrayList<>();
-        String query = "SELECT ";
-        
-        if (columns.length >= 2) {
-            for (String column: columns) {
-                query += column + ", ";
-            }
-
-            if (query.endsWith(", ")){
-                query = query.substring(0, query.length() - 2) + " FROM " + table;
-            }
-        } else {
-            query += columns[0] + " FROM " + table;
-        }
-        
-        if (designation != null) {
-            query += " WHERE ";
-            
-            Iterator mapIterate = designation.entrySet().iterator();
-            while (mapIterate.hasNext()) {
-                Map.Entry pair = (Map.Entry)mapIterate.next();
-                Object keyValue = pair.getValue();
-                if (keyValue instanceof ArrayList) {
-                    query += pair.getKey() + " IN (";
-                
-                    ArrayList tmpKeyValues = (ArrayList) keyValue;
-                    for (Object values : tmpKeyValues) {
-                        query += "?, ";
-                    }
-                    if (query.endsWith(", ")) query = query.substring(0, query.length() - 2) + ")";
-                } else {
-                    query += pair.getKey() + "=?";
-                }
-                
-                query += " AND ";
-            }
-            
-            if (query.endsWith(" AND ")) query = query.substring(0, query.length() - 5);
-        }
-        
-        query += ";";
-        
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = database_connection.prepareStatement(query);
-            
-            if (designation != null) {
-                int i = 1;
-                for (Object value : designation.values()) {
-                    if (value instanceof ArrayList) {
-                        ArrayList tmpKeyValues = (ArrayList) value;
-                        for (Object arrayValue : tmpKeyValues) {
-                            stmt.setObject(i++, arrayValue);
-                        }
-                    } else {
-                        stmt.setObject(i++, value);
-                    }
-                }
-            }
-            
-            rs = stmt.executeQuery();
-
-            List<String> row;
-            while (rs.next()) {
-                row = new ArrayList<>(columns.length);
-                
-                for (String column : columns) {
-                    row.add(rs.getString(column));
-                }
-                results.add(row);
-            }
-        } catch (SQLException se) {
-            error_SQL = se;
-            error_message = se.getMessage();
-        } finally {
-            try { if (rs != null) rs.close(); }
-            catch (SQLException se) {
-                error_SQL = se;
-                error_message = se.getMessage();
-            }
-            
-            try { if (stmt != null) stmt.close(); }
-            catch (SQLException se) {
-                error_SQL = se;
-                error_message = se.getMessage();
-            }
-        }
-        
-        String[][] resultsArray = new String[results.size()][];
-        for (int i = 0; i < results.size(); i++) {
-            List<String> row = results.get(i);
-            resultsArray[i] = row.toArray(new String[row.size()]);
-        }
-        
-        return resultsArray;
-    }
     
-//    public void create_table(String service) {
-//        /*
-//        If a new service is being added, this method will be called upon to
-//        create a table to store the logs from the new service.
-//
-//        This method is currently only useful for the creation of new tables
-//        to store the logs in.
-//        */
-//        String query = "CREATE TABLE " + 
-//                service + " (" +
-//                "id INTEGER NOT NULL AUTO_INCREMENT, " +
-//                "date DATETIME NOT NULL, " +
-//                "action VARCHAR(255) NOT NULL, " +
-//                "PRIMARY KEY (id));";
-//        
-//        PreparedStatement stmt = null;
-//        try {
-//            stmt = database_connection.prepareStatement(query);
-//            stmt.executeUpdate();
-//
-//        } catch (SQLException se) {
-//            error_SQL = se;
-//            error_message = se.getMessage();
-//        } finally {
-//            try { if (stmt != null) stmt.close(); }
-//            catch (SQLException se) {
-//                error_SQL = se;
-//                error_message = se.getMessage();
-//            }
-//        }
-//    }
-
     public void insert(String[] columns, Object[][] values, String table) {
         /*
         This method will be used to insert the given values into the columns of
@@ -408,7 +244,6 @@ public class ServerDataBase {
                 }
                 stmt.executeUpdate();
             }
-
         } catch (SQLException  se) {
             error_SQL = se;
             error_message = se.getMessage();
@@ -539,32 +374,6 @@ public class ServerDataBase {
     public void update(String[] columns, Object[] values, String table) {
         this.update(columns, values, table, null);
     }
-
-//    public void drop_table(String table) {
-//        /*
-//        This method will be used when removing a table from the database
-//        is desired. Removing a table is irreversible, use with caution.
-//        
-//        The string table will contain the name of the desired table to drop.
-//        */
-//        String query = "DROP TABLE " + table + ";";
-//        
-//        PreparedStatement stmt = null;
-//        try {
-//            stmt = database_connection.prepareStatement(query);
-//            stmt.executeUpdate();
-//
-//        } catch (SQLException se) {
-//            error_SQL = se;
-//            error_message = se.getMessage();
-//        } finally {
-//            try { if (stmt != null) stmt.close(); }
-//            catch (SQLException se) {
-//                error_SQL = se;
-//                error_message = se.getMessage();
-//            }
-//        }
-//    }
     
     public void delete_row(String table, HashMap designation) {
         /*

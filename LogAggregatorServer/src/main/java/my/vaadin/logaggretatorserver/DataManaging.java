@@ -1,14 +1,7 @@
 package my.vaadin.logaggretatorserver;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Base64;
 import java.util.Random;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 public class DataManaging {
 
