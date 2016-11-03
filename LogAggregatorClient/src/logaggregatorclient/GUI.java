@@ -2,7 +2,6 @@ package logaggregatorclient;
 
 import java.io.File;
 import javafx.application.Application;
-import static javafx.application.Application.launch;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -20,6 +19,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import static javafx.application.Application.launch;
 
 public class GUI extends Application {
     
@@ -32,12 +32,12 @@ public class GUI extends Application {
         Maybe a login window or something similar could be created here.
         */
         
-        primaryStage.setScene(snoop(primaryStage));
-        primaryStage.setTitle("Login");
+        primaryStage.setScene(betaMenu(primaryStage));
+//        primaryStage.setTitle("Login");
         primaryStage.show();
     }
     
-    private Scene snoop(Stage primaryStage){
+    private Scene betaMenu(Stage primaryStage){
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
         grid.setHgap(10);
@@ -55,9 +55,7 @@ public class GUI extends Application {
         Button update = new Button("Update log");
         grid.add(update, 0, 1);
         
-        Scene snoop = new Scene(grid);
-        
-        return snoop;
+        return new Scene(grid);
     }
     
     private Scene login(Stage primaryStage){
@@ -86,22 +84,23 @@ public class GUI extends Application {
         login_button_hbox.getChildren().add(login_button);
         grid.add(login_button_hbox, 1, 4);
         
-        login_button.setOnAction(e-> primaryStage.setScene(app(primaryStage)));
+        login_button.setOnAction(e -> primaryStage.setScene(app(primaryStage)));
         
         Scene login = new Scene(grid, 350, 270);
         
         return login;
-}
-   private Scene app(Stage primaryStage){
-       final FileChooser fileChooser = new FileChooser();
-       final ComboBox interval = new ComboBox();
-            interval.getItems().addAll("Hours",
-                    "Minutes",
-                    "Seconds");
-            interval.getSelectionModel().selectFirst();
-            
-       primaryStage.setTitle("Register service");
-       GridPane grid = new GridPane();
+    }
+    
+    private Scene app(Stage primaryStage) {
+        final FileChooser fileChooser = new FileChooser();
+        final ComboBox interval = new ComboBox();
+        interval.getItems().addAll("Hours",
+                                   "Minutes",
+                                   "Seconds");
+        interval.getSelectionModel().selectFirst();
+        
+        primaryStage.setTitle("Register service");
+        GridPane grid = new GridPane();
         grid.setAlignment(Pos.TOP_CENTER);
         grid.setHgap(10);
         grid.setVgap(10);
@@ -145,7 +144,7 @@ public class GUI extends Application {
        
         Scene app = new Scene(grid);
         
-       return app;
+        return app;
    }
     
     public static void main(String[] args) {

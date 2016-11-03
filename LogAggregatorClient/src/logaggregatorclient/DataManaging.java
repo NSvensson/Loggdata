@@ -71,16 +71,16 @@ public class DataManaging {
             results.put(this.LINE_TWO, prop.getProperty(this.LINE_TWO));
             results.put(this.LINE_THREE, prop.getProperty(this.LINE_THREE));
             
-        }catch(IOException e){
+        }catch(IOException e) {
             System.out.println("Error : "+e);
-        } finally{
-            if(input != null){
-                try{
-                input.close();
-                    }catch(IOException ex){
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch(IOException ex) {
                     System.out.println("Error : "+ex);
-                        }
                 }
+            }
         }
         
         return results;
