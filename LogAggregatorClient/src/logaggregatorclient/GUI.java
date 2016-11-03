@@ -132,8 +132,8 @@ public class GUI extends Application {
         grid.add(textfield_application_name,0,1);
         TextField textfield_application_source = new TextField();
         TextField textfield_update_interval = new TextField();
-        grid.add(textfield_update_interval,0,5);
         grid.add(textfield_application_source,0,3);
+        grid.add(textfield_update_interval,0,5);
         grid.add(interval,1,5);
         
         Button browse = new Button("Browse");
@@ -182,7 +182,7 @@ public class GUI extends Application {
             } else {
                 alert.setTitle("Login fail");
                 alert.setContentText(this.connections.AUTHENTICATION_ERROR_MESSAGE);
-                alert.showAndWait();
+                alert.show();
             }
         }
     }
@@ -193,6 +193,10 @@ public class GUI extends Application {
                                 String interval_option) {
         
         String update_interval_calculated = update_interval;
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Sending log");
+        alert.setContentText("Sending log please wait.\nThis may take a few minutes.");
+        alert.showAndWait();
         
         if (interval_option.equals(this.COMBOBOX_HOURS)) {
             update_interval_calculated = Integer.toString(Integer.parseInt(update_interval) * 60 * 60);
@@ -217,6 +221,7 @@ public class GUI extends Application {
                 this.logs.last_read_line_three);
         
         this.connections.send_logs(api_key, this.logs.zip_path);
+        
     }
     
     public static void main(String[] args) {
