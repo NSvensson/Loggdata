@@ -32,20 +32,6 @@ public class ClientServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            String servlet_URI = "http://localhost:8080/LogAggregatorServer/ClientServlet";
-            
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<body style=\"display: none;\">");
-            out.println("<form action=\"" + servlet_URI + "\" method=\"post\" enctype=\"multipart/form-data\">");
-            out.println("<input type=\"file\" name=\"file\">");
-            out.println("<input type=\"submit\" name=\"Submit\" value=\"Upload\">");
-            out.println("</form>");
-            out.println("</body>");
-            out.println("</html>");
-        }
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -264,6 +250,7 @@ public class ClientServlet extends HttpServlet {
                         
                         if (entry.getName().equals("Log.txt")) {
                             System.out.println("Log.txt found.");
+                            System.out.println("Current time millidillidilli:\n" + System.currentTimeMillis());
                             
                             /*
                             Here we pick out the date and the event provided in the log file
@@ -286,6 +273,14 @@ public class ClientServlet extends HttpServlet {
                                     String tmp_event = read_line.replaceAll(tmp_date, "");
                                     
                                     results_array_list.add(new String[] { tmp_date, tmp_event });
+                                } else  {
+                                    if (!results_array_list.isEmpty() && read_line != null && read_line.length() >= 1) {
+                                        String[] tmp_string_array = new String[2];
+                                        tmp_string_array[0] = results_array_list.get(results_array_list.size() - 1)[0];
+                                        tmp_string_array[1] = results_array_list.get(results_array_list.size() - 1)[1] + "\n" + read_line;
+                                        
+                                        results_array_list.set(results_array_list.size() - 1, tmp_string_array);
+                                    }
                                 }
                             }
                             
@@ -300,7 +295,7 @@ public class ClientServlet extends HttpServlet {
                                 is built, we send it to the administration object to process and insert
                                 the logs found.
                                 */
-                                if (administration.application.insert_logs(application_id, results)) System.out.println("Logs successfully inserted.");
+                                if (administration.application.insert_logs(application_id, results)) System.out.println("Logs successfully inserted.\n" + System.currentTimeMillis());
                                 else System.out.println("Logs unsuccessfully inserted.");
                             }
                         }
