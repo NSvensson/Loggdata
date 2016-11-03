@@ -19,15 +19,20 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import static javafx.application.Application.launch;
 import javafx.scene.control.Alert;
 
 public class GUI extends Application {
     
     private String username = null;
     private String password = null;
+
+    private final String COMBOBOX_HOURS = "Hours";
+    private final String COMBOBOX_MINUTES = "Minutes";
+    private final String COMBOBOX_SECONDS = "Seconds";
     
     private final Connections connections = new Connections();
+    private final LogHandler logs = new LogHandler();
+    private final DataManaging data_managing = new DataManaging();
     
     @Override
     public void start(Stage primaryStage) {
@@ -104,9 +109,9 @@ public class GUI extends Application {
     private Scene app(Stage primaryStage) {
         final FileChooser fileChooser = new FileChooser();
         final ComboBox interval = new ComboBox();
-        interval.getItems().addAll("Hours",
-                                   "Minutes",
-                                   "Seconds");
+        interval.getItems().addAll(this.COMBOBOX_HOURS,
+                                   this.COMBOBOX_MINUTES,
+                                   this.COMBOBOX_SECONDS);
         interval.getSelectionModel().selectFirst();
         
         primaryStage.setTitle("Register service");
@@ -123,12 +128,12 @@ public class GUI extends Application {
         Label servname = new Label("Source");
         grid.add(servname, 0, 2);
         
-        TextField texcom = new TextField();
-        grid.add(texcom,0,1);
-        TextField texser = new TextField();
-        TextField texint = new TextField();
-        grid.add(texint,0,5);
-        grid.add(texser,0,3);
+        TextField textfield_application_name = new TextField();
+        grid.add(textfield_application_name,0,1);
+        TextField textfield_application_source = new TextField();
+        TextField textfield_update_interval = new TextField();
+        grid.add(textfield_update_interval,0,5);
+        grid.add(textfield_application_source,0,3);
         grid.add(interval,1,5);
         
         Button browse = new Button("Browse");
@@ -139,7 +144,7 @@ public class GUI extends Application {
                 File logfile = fileChooser.showOpenDialog(primaryStage);
                 if (logfile != null){
 //                  texser = logfile.getAbsolutePath();
-                  texser.setText(logfile.getAbsolutePath());
+                  textfield_application_source.setText(logfile.getAbsolutePath());
                 }
                 
             }
@@ -147,6 +152,12 @@ public class GUI extends Application {
         
         Button exportbtn = new Button("Export");
         grid.add(exportbtn, 0, 6);
+        exportbtn.setOnAction(e ->
+                this.newApplication(textfield_application_name.getText(),
+                                    textfield_application_source.getText(),
+                                    textfield_update_interval.getText(),
+                                    interval.getValue().toString())
+        );
         
         Button logout = new Button("Exit");
         grid.add(logout,1,6);
@@ -174,6 +185,38 @@ public class GUI extends Application {
                 alert.showAndWait();
             }
         }
+    }
+    
+    private void newApplication(String application_name,
+                                String application_source_uri,
+                                String update_interval,
+                                String interval_option) {
+        
+        String update_interval_calculated = update_interval;
+        
+        if (interval_option.equals(this.COMBOBOX_HOURS)) {
+            update_interval_calculated = Integer.toString(Integer.parseInt(update_interval) * 60 * 60);
+        } else if (interval_option.equals(this.COMBOBOX_MINUTES)) {
+            update_interval_calculated = Integer.toString(Integer.parseInt(update_interval) * 60);
+        }
+        
+        String api_key = this.connections.new_application(
+                this.username,
+                this.password,
+                application_name,
+                update_interval_calculated);
+        
+        this.logs.read(application_source_uri, null, null, null);
+        
+        this.data_managing.generatePropertiesFile(
+                application_source_uri,
+                api_key,
+                update_interval_calculated,
+                this.logs.last_read_line_one,
+                this.logs.last_read_line_two,
+                this.logs.last_read_line_three);
+        
+        this.connections.send_logs(api_key, this.logs.zip_path);
     }
     
     public static void main(String[] args) {
