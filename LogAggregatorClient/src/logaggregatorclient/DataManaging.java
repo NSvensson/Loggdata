@@ -85,4 +85,9 @@ public class DataManaging {
         
         return results;
     }
+    
+    public static String hashString(String received_string) {
+        
+        return Integer.toString(received_string.hashCode());
+    }
 }

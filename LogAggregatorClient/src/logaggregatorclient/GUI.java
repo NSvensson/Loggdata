@@ -23,6 +23,11 @@ import static javafx.application.Application.launch;
 
 public class GUI extends Application {
     
+    private String username = null;
+    private String password = null;
+    
+    private final Connections connections = new Connections();
+    
     @Override
     public void start(Stage primaryStage) {
         /*
@@ -84,7 +89,11 @@ public class GUI extends Application {
         login_button_hbox.getChildren().add(login_button);
         grid.add(login_button_hbox, 1, 4);
         
-        login_button.setOnAction(e -> primaryStage.setScene(app(primaryStage)));
+        login_button.setOnAction(e ->
+                this.loginCheck(username_textfield.getText(),
+                                password_passwordfield.getText(),
+                                primaryStage)
+        );
         
         Scene login = new Scene(grid, 350, 270);
         
@@ -145,7 +154,23 @@ public class GUI extends Application {
         Scene app = new Scene(grid);
         
         return app;
-   }
+    }
+    
+    private void loginCheck(String username, String password, Stage primaryStage) {
+        
+        this.username = username;
+        this.password = DataManaging.hashString(password);
+        
+        if (this.username != null && this.username.length() >= 1 &&
+            this.password != null && this.password.length() >= 1) {
+            
+            if (this.connections.authenticate(this.username, this.password)) {
+                primaryStage.setScene(app(primaryStage));
+            } else {
+                System.out.println(this.connections.AUTHENTICATION_ERROR_MESSAGE);
+            }
+        }
+    }
     
     public static void main(String[] args) {
         launch(args);
