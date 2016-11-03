@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.Properties;
 
 public class DataManaging {
@@ -16,10 +17,10 @@ public class DataManaging {
     private final String LINE_ONE = "line_one";
     private final String LINE_TWO = "line_two";
     private final String LINE_THREE = "line_three";
+    private final String LOG_URI = "log_uri";
     
     
-    
-    public void generatePropertiesFile(String api_key, String update_interval, String line_one, String line_two, String line_three){
+    public void generatePropertiesFile(String log_uri, String api_key, String update_interval, String line_one, String line_two, String line_three){
         
         Properties prop = new Properties();
         OutputStream output = null;
@@ -27,6 +28,7 @@ public class DataManaging {
         try{
             output = new FileOutputStream(this.FILE_PATH);
             
+            prop.setProperty(this.LOG_URI, log_uri);
             prop.setProperty(this.API_KEY, api_key);
             prop.setProperty(this.UPDATE_INTERVAL, update_interval);
             prop.setProperty(this.LINE_ONE, line_one);
@@ -47,9 +49,9 @@ public class DataManaging {
         }
     } 
         
-    public String[] readPropertiesFile() {
+    public HashMap<String, String> readPropertiesFile() {
         
-        String[] results = null;
+        HashMap<String, String> results = null;
         
         Properties prop = new Properties();
         InputStream input = null;
@@ -58,23 +60,16 @@ public class DataManaging {
             input = new FileInputStream(this.FILE_PATH);
             prop.load(input);
             
-            results = new String[5];
+            results = new HashMap<String, String>();
             
-            // print out the collected data
-            System.out.println(prop.getProperty(API_KEY));
-            results[0] = prop.getProperty(this.API_KEY);
+            // puts the collected data in to the Hashmap object
             
-            System.out.println(prop.getProperty(UPDATE_INTERVAL));
-            results[1] = prop.getProperty(this.UPDATE_INTERVAL);
-            
-            System.out.println(prop.getProperty(LINE_ONE));
-            results[2] = prop.getProperty(this.LINE_ONE);
-            
-            System.out.println(prop.getProperty(LINE_TWO));
-            results[3] = prop.getProperty(this.LINE_TWO);
-            
-            System.out.println(prop.getProperty(LINE_THREE));
-            results[4] = prop.getProperty(this.LINE_THREE);
+            results.put(LOG_URI,prop.getProperty(LOG_URI));
+            results.put(this.API_KEY, prop.getProperty(this.API_KEY));
+            results.put(this.UPDATE_INTERVAL, prop.getProperty(this.UPDATE_INTERVAL));
+            results.put(this.LINE_ONE, prop.getProperty(this.LINE_ONE));
+            results.put(this.LINE_TWO, prop.getProperty(this.LINE_TWO));
+            results.put(this.LINE_THREE, prop.getProperty(this.LINE_THREE));
             
         }catch(IOException e){
             System.out.println("Error : "+e);

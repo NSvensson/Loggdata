@@ -32,9 +32,32 @@ public class GUI extends Application {
         Maybe a login window or something similar could be created here.
         */
         
-        primaryStage.setScene(login(primaryStage));
+        primaryStage.setScene(snoop(primaryStage));
         primaryStage.setTitle("Login");
         primaryStage.show();
+    }
+    
+    private Scene snoop(Stage primaryStage){
+        GridPane grid = new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(25, 25, 25, 25));
+        
+        Text titel = new Text("what do you want to do");
+        grid.add(titel, 0, 0);
+        
+        Button next = new Button("To login");
+        grid.add(next, 1, 1);
+        next.setOnAction(e-> primaryStage.setScene(login(primaryStage)));
+        
+        
+        Button update = new Button("Update log");
+        grid.add(update, 0, 1);
+        
+        Scene snoop = new Scene(grid);
+        
+        return snoop;
     }
     
     private Scene login(Stage primaryStage){
