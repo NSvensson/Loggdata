@@ -65,6 +65,7 @@ public class GUI extends Application {
         
         Button update = new Button("Update log");
         grid.add(update, 0, 1);
+        update.setOnAction(e -> betaAutomaticUpdates(primaryStage));
         
         return new Scene(grid);
     }
@@ -195,7 +196,7 @@ public class GUI extends Application {
         String update_interval_calculated = update_interval;
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Sending log");
-        alert.setContentText("Sending log please wait.\nThis may take a few minutes.");
+        alert.setContentText("Sending log may take a few minutes.\nPress OK to proceed.");
         alert.showAndWait();
         
         if (interval_option.equals(this.COMBOBOX_HOURS)) {
@@ -221,7 +222,13 @@ public class GUI extends Application {
                 this.logs.last_read_line_three);
         
         this.connections.send_logs(api_key, this.logs.zip_path);
+    }
+    
+    private void betaAutomaticUpdates(Stage primaryStage) {
+        primaryStage.close();
         
+        AutomaticUpdate automatic_update = new AutomaticUpdate();
+        automatic_update.start();
     }
     
     public static void main(String[] args) {

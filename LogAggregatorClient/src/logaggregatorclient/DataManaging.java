@@ -12,13 +12,12 @@ public class DataManaging {
 
     private final String FILE_PATH = "config.properties";
     
-    private final String API_KEY = "api_key";
-    private final String UPDATE_INTERVAL = "update_interval";
-    private final String LINE_ONE = "line_one";
-    private final String LINE_TWO = "line_two";
-    private final String LINE_THREE = "line_three";
-    private final String LOG_URI = "log_uri";
-    
+    public final String API_KEY = "api_key";
+    public final String UPDATE_INTERVAL = "update_interval";
+    public final String LINE_ONE = "line_one";
+    public final String LINE_TWO = "line_two";
+    public final String LINE_THREE = "line_three";
+    public final String LOG_URI = "log_uri";
     
     public void generatePropertiesFile(String log_uri, String api_key, String update_interval, String line_one, String line_two, String line_three){
         
@@ -31,9 +30,15 @@ public class DataManaging {
             prop.setProperty(this.LOG_URI, log_uri);
             prop.setProperty(this.API_KEY, api_key);
             prop.setProperty(this.UPDATE_INTERVAL, update_interval);
-            prop.setProperty(this.LINE_ONE, line_one);
-            prop.setProperty(this.LINE_TWO, line_two);
-            prop.setProperty(this.LINE_THREE, line_three);
+            
+            if (line_one != null) prop.setProperty(this.LINE_ONE, line_one);
+            else prop.setProperty(this.LINE_ONE, "");
+            
+            if (line_two != null) prop.setProperty(this.LINE_TWO, line_two);
+            else prop.setProperty(this.LINE_TWO, "");
+            
+            if (line_three != null) prop.setProperty(this.LINE_THREE, line_three);
+            else prop.setProperty(this.LINE_THREE, "");
             
             prop.store(output, null);
         } catch(IOException e){

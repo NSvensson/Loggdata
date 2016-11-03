@@ -104,10 +104,22 @@ public class LogHandler {
             }
         }
         
-        if (resultsArray.length >= 3) {
-            this.last_read_line_one = resultsArray[0][0] + resultsArray[0][1];
-            this.last_read_line_two = resultsArray[1][0] + resultsArray[1][1];
-            this.last_read_line_three = resultsArray[2][0] + resultsArray[2][1];
+        if (resultsArray.length >= 3 &&
+            resultsArray[0] != null) {
+            
+            if (resultsArray[1] == null && resultsArray[2] == null) {
+                this.last_read_line_three = this.last_read_line_two;
+                this.last_read_line_two = this.last_read_line_one;
+                this.last_read_line_one = resultsArray[0][0] + resultsArray[0][1];
+            } else if (resultsArray[1] != null && resultsArray[2] == null) {
+                this.last_read_line_three = this.last_read_line_two;
+                this.last_read_line_two = resultsArray[1][0] + resultsArray[1][1];
+                this.last_read_line_one = resultsArray[0][0] + resultsArray[0][1];
+            } else if (resultsArray[1] != null && resultsArray[2] != null) {
+                this.last_read_line_one = resultsArray[0][0] + resultsArray[0][1];
+                this.last_read_line_two = resultsArray[1][0] + resultsArray[1][1];
+                this.last_read_line_three = resultsArray[2][0] + resultsArray[2][1];
+            }
         }
         packLog(resultsArray);
     }

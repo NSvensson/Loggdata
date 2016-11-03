@@ -1,28 +1,70 @@
 package logaggregatorclient;
 
+import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class AutomaticUpdate {
-    /*
-    This class will focus on updating the logs on the database server 
-    automatically every given intervall.
-    */
     
-    private final String source_URI;
-    private final int update_frequency;
-    private final String service;
+    private final DataManaging data_managing = new DataManaging();
+    private HashMap<String, String> configuration = null;
+    private final Timer timer = new Timer();
     
-    public AutomaticUpdate(String source_URI, int update_frequency, String service) {
-        this.source_URI = source_URI;
-        this.update_frequency = update_frequency;
-        this.service = service;
-        
+    public AutomaticUpdate() {
+        configuration = data_managing.readPropertiesFile();
+    }
+    
+    public void start() {
+        timer.schedule(new UpdateTask(), 0, (Integer.parseInt(configuration.get(data_managing.UPDATE_INTERVAL)) * 1000));
+    }
+    
+    public void stop() {
+        timer.cancel();
+    }
+    
+    private class UpdateTask extends TimerTask {
         /*
-        The source_URI will point to the .log file stored on the clients device.
-
-        The service will be the service id pointing towards which service this
-        .log information will be stored to.
-
-        The update_frequency will be the amount of seconds inbetween everytime
-        the .log will be sent to the database server.
+        This class will focus on updating the logs on the database server 
+        automatically every given interval.
         */
+        
+        private final Connections connections = new Connections();
+        private LogHandler log_handler = null;
+        
+        @Override
+        public void run() {
+            System.out.println("\nAutomaticUpdate run method start.\nTime now: " + System.currentTimeMillis());
+
+            log_handler = new LogHandler();
+            configuration = data_managing.readPropertiesFile();
+            
+            log_handler.read(
+                    configuration.get(data_managing.LOG_URI),
+                    configuration.get(data_managing.LINE_ONE),
+                    configuration.get(data_managing.LINE_TWO),
+                    configuration.get(data_managing.LINE_THREE)
+            );
+            
+            connections.send_logs(
+                    configuration.get(data_managing.API_KEY),
+                    log_handler.zip_path
+            );
+            
+            if (log_handler.last_read_line_one != null &&
+                log_handler.last_read_line_two != null &&
+                log_handler.last_read_line_three != null) {
+                
+                data_managing.generatePropertiesFile(
+                        configuration.get(data_managing.LOG_URI),
+                        configuration.get(data_managing.API_KEY),
+                        configuration.get(data_managing.UPDATE_INTERVAL),
+                        log_handler.last_read_line_one,
+                        log_handler.last_read_line_two,
+                        log_handler.last_read_line_three
+                );
+            }
+            
+            System.out.println("\nAutomaticUpdate run method end.\nTime now: " + System.currentTimeMillis());
+        }
     }
 }
