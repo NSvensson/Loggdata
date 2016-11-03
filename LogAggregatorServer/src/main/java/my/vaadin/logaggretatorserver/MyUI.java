@@ -222,16 +222,19 @@ public class MyUI extends UI {
                 if (user.applications != null) {
                     
                     for (ApplicationRow application : user.applications) {
-                        for (LogRow log : application.logs) {
-                            Item newLog = tableContainer.getItem(tableContainer.addItem());
-                            newLog.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(application.id);
-                            newLog.getItemProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER).setValue(application.name);
-                            newLog.getItemProperty(this.DATE_COLUMN_NAME_IDENTIFIER).setValue(log.date);
-                            newLog.getItemProperty(this.EVENT_COLUMN_NAME_IDENTIFIER).setValue(log.event);
+                        
+                        if (application.logs != null) {
+                            for (LogRow log : application.logs) {
+                                Item newLog = tableContainer.getItem(tableContainer.addItem());
+                                newLog.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(application.id);
+                                newLog.getItemProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER).setValue(application.name);
+                                newLog.getItemProperty(this.DATE_COLUMN_NAME_IDENTIFIER).setValue(log.date);
+                                newLog.getItemProperty(this.EVENT_COLUMN_NAME_IDENTIFIER).setValue(log.event);
+                            }
+                            Item newChoice = comboBoxContainer.getItem(comboBoxContainer.addItem());
+                            newChoice.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(application.id);
+                            newChoice.getItemProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER).setValue(application.name);
                         }
-                        Item newChoice = comboBoxContainer.getItem(comboBoxContainer.addItem());
-                        newChoice.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(application.id);
-                        newChoice.getItemProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER).setValue(application.name);
                     }
                 }
                 

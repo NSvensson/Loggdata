@@ -21,6 +21,12 @@ public class LogHandler {
     the log files given.
     */
     
+    public String zip_path = null;
+
+    public String last_read_line_one = null;
+    public String last_read_line_two = null;
+    public String last_read_line_three = null;
+    
     public void read(String source_URI, String line_one, String line_two, String line_three) {
         /*
         This method will be used by both the automatic update script aswell as 
@@ -35,7 +41,6 @@ public class LogHandler {
         List<List<String>> combined2d = new ArrayList<>();        
         String regex = "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:{0,1}\\d{0,2}";
         Pattern pat = Pattern.compile(regex);
-        int strike = 0;
         
         try {
             try (FileInputStream fstream = new FileInputStream(source_URI)) {
@@ -65,19 +70,6 @@ public class LogHandler {
                             combined2d.set(combined2d.size() - 1, myList);
                         }
                     }
-                    
-//                    if (line_one != null && line_two != null && line_three != null) {
-//                        String line_check = myList.get(0) + myList.get(1);
-//                        if (line_check.equals(line_one)) {
-//                            strike++;
-//                        } else if (line_check.equals(line_two)) {
-//                            strike++;
-//                        } else if (line_check.equals(line_three) && strike >= 2) {
-//                            combined2d.remove(combined2d.size() - 1);
-//                            combined2d.remove(combined2d.size() - 2);
-//                            break;
-//                        }
-//                    }
                 }
             }
         } catch (Exception e) {
@@ -112,6 +104,11 @@ public class LogHandler {
             }
         }
         
+        if (resultsArray.length >= 3) {
+            this.last_read_line_one = resultsArray[0][0] + resultsArray[0][1];
+            this.last_read_line_two = resultsArray[1][0] + resultsArray[1][1];
+            this.last_read_line_three = resultsArray[2][0] + resultsArray[2][1];
+        }
         packLog(resultsArray);
     }
     
@@ -119,7 +116,7 @@ public class LogHandler {
         String logName = "Log";
         String logFileType = ".txt";
         String zipName = "PackedLog";
-        String zipPath = "./" + zipName + ".zip";
+        this.zip_path = "./" + zipName + ".zip";
         try {
             String logg = "";
 
@@ -150,7 +147,7 @@ public class LogHandler {
 
         try {
 
-            FileOutputStream fos = new FileOutputStream(zipPath);
+            FileOutputStream fos = new FileOutputStream(this.zip_path);
             ZipOutputStream zos = new ZipOutputStream(fos);
             ZipEntry ze = new ZipEntry(logName + logFileType);
             zos.putNextEntry(ze);
