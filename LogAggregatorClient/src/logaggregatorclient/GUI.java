@@ -20,6 +20,7 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import static javafx.application.Application.launch;
+import javafx.scene.control.Alert;
 
 public class GUI extends Application {
     
@@ -160,6 +161,7 @@ public class GUI extends Application {
         
         this.username = username;
         this.password = DataManaging.hashString(password);
+        Alert alert =new Alert(Alert.AlertType.WARNING);
         
         if (this.username != null && this.username.length() >= 1 &&
             this.password != null && this.password.length() >= 1) {
@@ -167,7 +169,9 @@ public class GUI extends Application {
             if (this.connections.authenticate(this.username, this.password)) {
                 primaryStage.setScene(app(primaryStage));
             } else {
-                System.out.println(this.connections.AUTHENTICATION_ERROR_MESSAGE);
+                alert.setTitle("Login fail");
+                alert.setContentText(this.connections.AUTHENTICATION_ERROR_MESSAGE);
+                alert.showAndWait();
             }
         }
     }
