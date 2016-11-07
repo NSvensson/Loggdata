@@ -482,7 +482,7 @@ public class MyUI extends UI {
         }
     }
     //CreateUserLayout end
-
+    
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
     @VaadinServletConfiguration(ui = MyUI.class, productionMode = false)
     public static class MyUIServlet extends VaadinServlet {
