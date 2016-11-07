@@ -81,6 +81,16 @@ public class CurrentUser {
         }
     }
     
+    public CurrentUser(String id, String company_id, String first_name, String last_name, String email, String username, String user_group_id) {
+        this.id = id;
+        this.company = new CompanyRow(company_id);
+        this.first_name = first_name;
+        this.last_name = last_name;
+        this.email = email;
+        this.username = username;
+        this.user_group = new UserGroups(user_group_id);
+    }
+    
     public void load_available_applications() {
         String[] columnQuery = {
                 "id",

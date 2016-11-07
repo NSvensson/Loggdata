@@ -107,7 +107,7 @@ public class Administration {
                     if (proceed) proceed = false;
                 } else {
                     String[] columnQuery = { "id" };
-
+                    
                     HashMap whereQuery = new HashMap();
                     whereQuery.put("username", username);
 
@@ -536,6 +536,36 @@ public class Administration {
         public CurrentUser[] users() {
             if (this.user_groups.manage_users) {
                 
+                String[] columnQuery = {
+                        "id",
+                        "company_id",
+                        "first_name",
+                        "last_name",
+                        "email",
+                        "username",
+                        "user_group_id"
+                };
+
+                database_connection.connect();
+                String[][] select = database_connection.select(columnQuery, "company");
+                database_connection.close();
+                
+                CurrentUser[] results = new CurrentUser[select.length];
+                
+                if (select != null && select.length >= 1 && select[0].length == columnQuery.length) {
+                    for (int i = 0; i < select.length; i++) {
+                        results[i] = new CurrentUser(
+                                select[i][0],
+                                select[i][1],
+                                select[i][2],
+                                select[i][3],
+                                select[i][4],
+                                select[i][5],
+                                select[i][6]
+                        );
+                    }
+                    return results;
+                }
             }
             return null;
         }
@@ -560,7 +590,12 @@ public class Administration {
                 
                 if (select != null && select.length >= 1 && select[0].length == columnQuery.length) {
                     for (int i = 0; i < select.length; i++) {
-                        results[i] = new CompanyRow(select[i][0], select[i][1], select[i][2], select[i][3]);
+                        results[i] = new CompanyRow(
+                                select[i][0],
+                                select[i][1],
+                                select[i][2],
+                                select[i][3]
+                        );
                     }
                     return results;
                 }
@@ -591,7 +626,15 @@ public class Administration {
                 
                 if (select != null && select.length >= 1 && select[0].length == columnQuery.length) {
                     for (int i = 0; i < select.length; i++) {
-                        results[i] = new UserGroups(select[i][0], select[i][1], select[i][2], select[i][3], select[i][4], select[i][5], select[i][6]);
+                        results[i] = new UserGroups(
+                                select[i][0],
+                                select[i][1],
+                                select[i][2],
+                                select[i][3],
+                                select[i][4],
+                                select[i][5],
+                                select[i][6]
+                        );
                     }
                     return results;
                 }
