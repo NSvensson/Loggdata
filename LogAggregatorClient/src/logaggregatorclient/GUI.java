@@ -43,6 +43,8 @@ public class GUI extends Application {
         Maybe a login window or something similar could be created here.
         */
         
+        Configurations.readPropertiesFile();
+        
         primaryStage.setScene(betaMenu(primaryStage));
 //        primaryStage.setTitle("Login");
         primaryStage.show();
