@@ -33,8 +33,6 @@ public class AutomaticUpdate {
         
         @Override
         public void run() {
-            System.out.println("\nAutomaticUpdate run method start.\nTime now: " + System.currentTimeMillis());
-
             log_handler = new LogHandler();
             configuration = data_managing.readPropertiesFile();
             
@@ -63,8 +61,6 @@ public class AutomaticUpdate {
                         log_handler.last_read_line_three
                 );
             }
-            
-            System.out.println("\nAutomaticUpdate run method end.\nTime now: " + System.currentTimeMillis());
         }
     }
 }
