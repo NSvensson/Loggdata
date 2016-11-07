@@ -44,6 +44,7 @@ public class MyUI extends UI {
     
     @Override
     protected void init(VaadinRequest vaadinRequest) {
+        Configurations.readPropertiesFile();
         
         getPage().setTitle("Log server");
         
