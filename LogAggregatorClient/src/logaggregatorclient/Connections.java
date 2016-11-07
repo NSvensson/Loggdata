@@ -10,12 +10,18 @@ import java.net.URL;
 
 public class Connections {
     
-    private final String url = "http://localhost:8080/LogAggregatorServer/ClientServlet";
+    private final String url;
+    private final String SERVLET_URL = "ClientServlet";
     
     public String AUTHENTICATION_ERROR_MESSAGE = null;
     
     public String APPLICATION_NAME_ERROR_MESSAGE = null;
     public String UPDATE_INTERVAL_ERROR_MESSAGE = null;
+    
+    public Connections() {
+        Configurations.readPropertiesFile();
+        this.url = Configurations.server_URL + this.SERVLET_URL;
+    }
     
     public boolean authenticate(String username, String password) {
         try {
