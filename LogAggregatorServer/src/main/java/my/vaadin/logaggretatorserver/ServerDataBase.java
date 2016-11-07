@@ -19,11 +19,13 @@ public class ServerDataBase {
     other parts of this application.
     */
     
-    private final String database_URI = "jdbc:mysql://localhost:3306/logdatacollector";
-    private final String database_username = "root";
-    private final String database_password = "hej";
-//    private final String database_URI_prefix = "jdbc:mysql://";
-    private final String database_driver = "com.mysql.jdbc.Driver";
+    private String database_URI;
+    private String database_username;
+    private String database_password;
+    
+    private final String DATABASE_URI_PREFIX = "jdbc:mysql://";
+    private final String DATABASE_DRIVER = "com.mysql.jdbc.Driver";
+    
     private Connection database_connection = null;
     private String connection_exception = null;
     public SQLException error_SQL = null;
@@ -47,6 +49,12 @@ public class ServerDataBase {
     "jdbc:mysql://"
     */
 
+    public ServerDataBase() {
+        this.database_URI = this.DATABASE_URI_PREFIX + Configurations.database_URI;
+        this.database_username = Configurations.database_username;
+        this.database_password = Configurations.database_password;
+    }
+    
     public void connect() {
         /*
         This method uses the connection information that has been provided to
@@ -59,7 +67,7 @@ public class ServerDataBase {
         if (database_connection != null) close();
         
         try {
-            if (database_driver != null) Class.forName(database_driver);
+            if (DATABASE_DRIVER != null) Class.forName(DATABASE_DRIVER);
             
             database_connection = DriverManager.getConnection(
                     database_URI,
