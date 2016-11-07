@@ -154,7 +154,8 @@ public class GUI extends Application {
         Button exportbtn = new Button("Export");
         grid.add(exportbtn, 0, 6);
         exportbtn.setOnAction(e ->
-                this.newApplication(textfield_application_name.getText(),
+                this.newApplication(primaryStage,
+                                    textfield_application_name.getText(),
                                     textfield_application_source.getText(),
                                     textfield_update_interval.getText(),
                                     interval.getValue().toString())
@@ -188,7 +189,8 @@ public class GUI extends Application {
         }
     }
     
-    private void newApplication(String application_name,
+    private void newApplication(Stage primaryStage,
+                                String application_name,
                                 String application_source_uri,
                                 String update_interval,
                                 String interval_option) {
@@ -222,6 +224,8 @@ public class GUI extends Application {
                 this.logs.last_read_line_three);
         
         this.connections.send_logs(api_key, this.logs.zip_path);
+        
+        betaAutomaticUpdates(primaryStage);
     }
     
     private void betaAutomaticUpdates(Stage primaryStage) {

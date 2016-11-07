@@ -108,11 +108,11 @@ public class LogHandler {
             resultsArray[0] != null) {
             
             if (resultsArray[1] == null && resultsArray[2] == null) {
-                this.last_read_line_three = this.last_read_line_two;
-                this.last_read_line_two = this.last_read_line_one;
+                this.last_read_line_three = line_two;
+                this.last_read_line_two = line_one;
                 this.last_read_line_one = resultsArray[0][0] + resultsArray[0][1];
             } else if (resultsArray[1] != null && resultsArray[2] == null) {
-                this.last_read_line_three = this.last_read_line_two;
+                this.last_read_line_three = line_one;
                 this.last_read_line_two = resultsArray[1][0] + resultsArray[1][1];
                 this.last_read_line_one = resultsArray[0][0] + resultsArray[0][1];
             } else if (resultsArray[1] != null && resultsArray[2] != null) {
