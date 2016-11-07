@@ -38,6 +38,8 @@ public class MyUI extends UI {
     private final String loginView = "";
     private final String logsView = "Logs";
     private final String createUserView = "CreateUser";
+    private final String createCompanyView = "CreateCompany";
+    private final String manageUsersView = "ManageUsers";
     
     private CurrentUser user;
     private Navigator nav = new Navigator(this, this);
@@ -51,6 +53,8 @@ public class MyUI extends UI {
         nav.addView(loginView, new LoginLayout());
         nav.addView(logsView, new ViewLogsLayout());
         nav.addView(createUserView, new CreateUserLayout());
+        nav.addView(createCompanyView,new CreateCompanyLayout());
+        nav.addView(manageUsersView,new ManageUsersLayout());
     }
     
     //LoginLayout start
@@ -118,7 +122,8 @@ public class MyUI extends UI {
         public final IndexedContainer comboBoxContainer = new IndexedContainer();
         public final Grid logtable = new Grid(tableContainer);
         public final ComboBox app_name = new ComboBox("Applications", comboBoxContainer);
-        public final Button create = new Button("Create user");
+        public final Button create_user = new Button("Manage users");
+        public final Button create_company = new Button("Create company");
         
         public ViewLogsLayout() {
             
@@ -180,7 +185,8 @@ public class MyUI extends UI {
                 public void buttonClick(Button.ClickEvent event){ 
                     tableContainer.removeAllItems();
                     comboBoxContainer.removeAllItems();
-                    create.setVisible(false);
+                    create_user.setVisible(false);
+                    create_company.setVisible(false);
                     user = null;
                     nav.navigateTo(loginView);
                 }
@@ -193,7 +199,7 @@ public class MyUI extends UI {
             loglayout.setComponentAlignment(buttonLayout, Alignment.TOP_RIGHT);
             
             HorizontalLayout administrationLayout = new HorizontalLayout();
-            create.addClickListener(new Button.ClickListener() {
+            create_user.addClickListener(new Button.ClickListener() {
                 @Override
                 public void buttonClick(Button.ClickEvent event){ 
                     tableContainer.removeAllItems();
@@ -201,9 +207,21 @@ public class MyUI extends UI {
                     nav.navigateTo(createUserView);
                 }
             });
-            create.setEnabled(false);
-            create.setVisible(false);
-            administrationLayout.addComponent(create);
+            create_company.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event){
+                    tableContainer.removeAllItems();
+                    comboBoxContainer.removeAllItems();
+                    nav.navigateTo(createCompanyView);
+                }
+            });
+            
+            create_user.setEnabled(false);
+            create_user.setVisible(false);
+            create_company.setEnabled(false);
+            create_company.setVisible(false);
+            administrationLayout.addComponent(create_user);
+            administrationLayout.addComponent(create_company);
             loglayout.addComponent(administrationLayout,0,3);
             
             loglayout.setRowExpandRatio(1,1);
@@ -240,8 +258,12 @@ public class MyUI extends UI {
                 }
                 
                 if (user.user_group.manage_users) {
-                    if (!create.isVisible()) create.setVisible(true);
-                    if (!create.isEnabled()) create.setEnabled(true);
+                    if (!create_user.isVisible()) create_user.setVisible(true);
+                    if (!create_user.isEnabled()) create_user.setEnabled(true);
+                }
+                if (user.user_group.manage_companies) {
+                    if (!create_company.isVisible()) create_company.setVisible(true);
+                    if (!create_company.isEnabled()) create_company.setEnabled(true);
                 }
             } else {
                 nav.navigateTo(loginView);
@@ -483,7 +505,103 @@ public class MyUI extends UI {
         }
     }
     //CreateUserLayout end
+    
+    //CreateCompanyLayout start
+    public class CreateCompanyLayout extends GridLayout implements View {
+        
+        public TextField companyNameField = new TextField("Company name");
+        public TextField companyWebsiteField = new TextField("Website");
+        public TextField companyDetailsField = new TextField("Details");
+        
+        public CreateCompanyLayout(){
+            
+            setWidth("100%");
+            setHeight("100%");
+            
+            HorizontalLayout mainlayout = new HorizontalLayout();
+            GridLayout createCompanyLayout = new GridLayout(1,5);
+            createCompanyLayout.setStyleName("login-grid-layout");
+            addComponent(mainlayout);
+            setComponentAlignment(mainlayout, Alignment.MIDDLE_CENTER);
+            
+            // components for the layout
+            Label createCompanyTitel = new Label("Create a new company");
+            
+            Button backButton = new Button("Back");
+            backButton.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event){ 
+                    nav.navigateTo(logsView);
+                }
+            });
+            
+            Button createCompanyButton = new Button("Create");
+            createCompanyButton.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    if(companyNameField.getValue() != null){
+                        
+                    }
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+            });
+            
+            //creating a layout for the buttons
+            HorizontalLayout bLayout = new HorizontalLayout();
+            bLayout.setStyleName("top_padding");
+            bLayout.setWidth("100%");
+            bLayout.setHeight("100%");
+            
+            //adding the buttons to the buttonlayout
+            bLayout.addComponent(createCompanyButton);
+            bLayout.addComponent(backButton);
+            bLayout.setComponentAlignment(createCompanyButton, Alignment.MIDDLE_LEFT);
+            bLayout.setComponentAlignment(backButton, Alignment.MIDDLE_RIGHT);
+            
+            //adding the componets to the grid
+            createCompanyLayout.addComponent(createCompanyTitel,0,0);
+            createCompanyLayout.addComponent(companyNameField,0,1);
+            createCompanyLayout.addComponent(companyWebsiteField,0,2);
+            createCompanyLayout.addComponent(companyDetailsField,0,3);
+            createCompanyLayout.addComponent(bLayout,0,4);
+            
+            //adding the createCompanyLayout to the mainLayout
+            mainlayout.addComponent(createCompanyLayout);
+        }
 
+        @Override
+        public void enter(ViewChangeListener.ViewChangeEvent event) {
+            throw new UnsupportedOperationException(); //To change body of generated methods, choose Tools | Templates.
+        }
+    }
+    //CreateCompanyLayout ends
+    
+    //ManageUserLayout start
+    public class ManageUsersLayout extends GridLayout implements View {
+        
+        public ManageUsersLayout(){
+            setWidth("100%");
+            setHeight("100%");
+
+            final GridLayout userlayout = new GridLayout(1,4);
+            userlayout.setWidth("90%");
+            userlayout.setHeight("90%");
+            addComponent(userlayout);
+            setComponentAlignment(userlayout, Alignment.MIDDLE_CENTER);
+
+            final GridLayout gTitleLayout = new GridLayout(2,1);
+            gTitleLayout.setStyleName("titel_padding");
+            Label testLbl = new Label("Your log.");
+            gTitleLayout.addComponent(testLbl,0,0);
+            
+        }
+
+        @Override
+        public void enter(ViewChangeListener.ViewChangeEvent event) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+    }
+            
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
     @VaadinServletConfiguration(ui = MyUI.class, productionMode = false)
     public static class MyUIServlet extends VaadinServlet {
