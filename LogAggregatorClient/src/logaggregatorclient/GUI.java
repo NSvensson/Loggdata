@@ -42,15 +42,21 @@ public class GUI extends Application {
         
         Maybe a login window or something similar could be created here.
         */
-        
         Configurations.readPropertiesFile();
         
-        primaryStage.setScene(betaMenu(primaryStage));
+        if (Configurations.server_URL == null) {
+            primaryStage.setScene(noConfigScene(primaryStage));
+        } else {
+            primaryStage.setScene(betaMenu(primaryStage));
+        }
+        
 //        primaryStage.setTitle("Login");
         primaryStage.show();
     }
     
-    private Scene betaMenu(Stage primaryStage){
+    private Scene betaMenu(Stage primaryStage) {
+        connections.checkConfigurations();
+        
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
         grid.setHgap(10);
@@ -172,11 +178,67 @@ public class GUI extends Application {
         return app;
     }
     
+    private Scene noConfigScene(Stage primaryStage) {
+        GridPane grid = new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(25, 25, 25, 25));
+
+        Text prompt_title = new Text("Warning!");
+        prompt_title.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        grid.add(prompt_title, 0, 0, 2, 1);
+
+        Label prompt_description = new Label("A configuration file for this client could not be found.");
+        grid.add(prompt_description, 0, 1, 2, 1);
+
+        Label prompt_question = new Label("Would you like to proceed with generating a new configuration file?");
+        grid.add(prompt_question, 0, 2, 2, 1);
+
+        Button accept_button = new Button("Proceed");
+        accept_button.setOnAction(e -> primaryStage.setScene(configInputPrompt(primaryStage)));
+        grid.add(accept_button, 0, 3);
+
+        Button decline_button = new Button("Quit");
+        decline_button.setOnAction(e -> System.exit(0));
+        grid.add(decline_button, 1, 3);
+
+        return new Scene(grid);
+    }
+
+    private Scene configInputPrompt(Stage primaryStage) {
+        GridPane grid = new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(25, 25, 25, 25));
+
+        Label prompt_description = new Label("Please provide the url for the\nLogCollector server:");
+        grid.add(prompt_description, 0, 0, 2, 1);
+
+        TextField url_input = new TextField();
+        grid.add(url_input, 0, 1, 2, 1);
+
+        Button accept_button = new Button("Done");
+        accept_button.setOnAction((ActionEvent e) -> {
+            Configurations.generatePropertiesFile(url_input.getText());
+            Configurations.readPropertiesFile();
+            primaryStage.setScene(betaMenu(primaryStage));
+        });
+        grid.add(accept_button, 0, 2);
+
+        Button decline_button = new Button("Quit");
+        decline_button.setOnAction(e -> System.exit(0));
+        grid.add(decline_button, 1, 2);
+
+        return new Scene(grid);
+    }
+
     private void loginCheck(String username, String password, Stage primaryStage) {
         
         this.username = username;
         this.password = DataManaging.hashString(password);
-        Alert alert =new Alert(Alert.AlertType.WARNING);
+        Alert alert = new Alert(Alert.AlertType.WARNING);
         
         if (this.username != null && this.username.length() >= 1 &&
             this.password != null && this.password.length() >= 1) {
@@ -184,9 +246,15 @@ public class GUI extends Application {
             if (this.connections.authenticate(this.username, this.password)) {
                 primaryStage.setScene(app(primaryStage));
             } else {
-                alert.setTitle("Login fail");
-                alert.setContentText(this.connections.AUTHENTICATION_ERROR_MESSAGE);
-                alert.show();
+                if (this.connections.AUTHENTICATION_ERROR_MESSAGE != null) {
+                    alert.setTitle("Invalid login");
+                    alert.setContentText(this.connections.AUTHENTICATION_ERROR_MESSAGE);
+                    alert.show();
+                } else {
+                    alert.setContentText("Couldn't connect to the URL provided\nin the configuration file.");
+                    alert.show();
+                    primaryStage.setScene(configInputPrompt(primaryStage));
+                }
             }
         }
     }
