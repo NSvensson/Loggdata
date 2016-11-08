@@ -117,7 +117,6 @@ public class MyUI extends UI {
         public final String DATE_COLUMN_NAME_IDENTIFIER = "Date";
         public final String EVENT_COLUMN_NAME_IDENTIFIER = "Event";
         
-        public final HashMap<Object, String> comboIds = new HashMap<Object, String>();
         public final IndexedContainer tableContainer = new IndexedContainer();
         public final IndexedContainer comboBoxContainer = new IndexedContainer();
         public final Grid logtable = new Grid(tableContainer);
@@ -204,7 +203,7 @@ public class MyUI extends UI {
                 public void buttonClick(Button.ClickEvent event){ 
                     tableContainer.removeAllItems();
                     comboBoxContainer.removeAllItems();
-                    nav.navigateTo(createUserView);
+                    nav.navigateTo(manageUsersView);
                 }
             });
             create_company.addClickListener(new Button.ClickListener() {
@@ -508,7 +507,7 @@ public class MyUI extends UI {
     
     //CreateCompanyLayout start
     public class CreateCompanyLayout extends GridLayout implements View {
-        
+    
         public TextField companyNameField = new TextField("Company name");
         public TextField companyWebsiteField = new TextField("Website");
         public TextField companyDetailsField = new TextField("Details");
@@ -579,7 +578,37 @@ public class MyUI extends UI {
     //ManageUserLayout start
     public class ManageUsersLayout extends GridLayout implements View {
         
+        public Administration administration = null;
+        
+        public final String HIDDEN_COLUMN_IDENTIFIER = "id";
+        public final String FIRST_NAME_COLUMN_IDENTIFIER = "Name";
+        public final String LAST_NAME_NAME_COLUMN_IDENTIFIER = "Lastname";
+        public final String EMAIL_COLUMN_IDENTIFIER = "Email";
+        public final String USERNAME_COLUMN_IDENTIFIER = "Username";
+        public final String USER_GROUP_COLUMN_IDENTIFIER = "User group";
+        public final String USER_COMPANY_COLUMN_IDENTIFIER = "User company";
+        
+        public final IndexedContainer tableContainer = new IndexedContainer();
+        public final Grid usertable = new Grid(tableContainer);
+        
         public ManageUsersLayout(){
+            
+            this.tableContainer.addContainerProperty(this.HIDDEN_COLUMN_IDENTIFIER, String.class, null);
+            this.tableContainer.addContainerProperty(this.FIRST_NAME_COLUMN_IDENTIFIER, String.class, null);
+            this.tableContainer.addContainerProperty(this.LAST_NAME_NAME_COLUMN_IDENTIFIER, String.class, null);
+            this.tableContainer.addContainerProperty(this.EMAIL_COLUMN_IDENTIFIER, String.class, null);
+            this.tableContainer.addContainerProperty(this.USERNAME_COLUMN_IDENTIFIER, String.class, null);
+            this.tableContainer.addContainerProperty(this.USER_GROUP_COLUMN_IDENTIFIER, String.class, null);
+            this.tableContainer.addContainerProperty(this.USER_COMPANY_COLUMN_IDENTIFIER, String.class, null);
+            
+            this.usertable.getColumn(this.HIDDEN_COLUMN_IDENTIFIER).setHidden(true);
+            this.usertable.getColumn(this.FIRST_NAME_COLUMN_IDENTIFIER);
+            this.usertable.getColumn(this.LAST_NAME_NAME_COLUMN_IDENTIFIER);
+            this.usertable.getColumn(this.EMAIL_COLUMN_IDENTIFIER);
+            this.usertable.getColumn(this.USERNAME_COLUMN_IDENTIFIER);
+            this.usertable.getColumn(this.USER_GROUP_COLUMN_IDENTIFIER);
+            this.usertable.getColumn(this.USER_COMPANY_COLUMN_IDENTIFIER);
+            
             setWidth("100%");
             setHeight("100%");
 
@@ -591,14 +620,38 @@ public class MyUI extends UI {
 
             final GridLayout gTitleLayout = new GridLayout(2,1);
             gTitleLayout.setStyleName("titel_padding");
-            Label testLbl = new Label("Your log.");
+            Label testLbl = new Label("Users.");
             gTitleLayout.addComponent(testLbl,0,0);
+            gTitleLayout.addComponent(usertable, 1, 0);
             
+            userlayout.addComponent(gTitleLayout);
         }
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            if (user != null && user.is_authenticated) {
+                if (user.user_group.manage_users) {
+                    //hack begin
+
+                    administration = new Administration(user.user_group);
+
+                    for (CurrentUser userRow : administration.object_collections.users()) {
+                        Item userItem = tableContainer.getItem(tableContainer.addItem());
+                        userItem.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(userRow.id);
+                        userItem.getItemProperty(this.FIRST_NAME_COLUMN_IDENTIFIER).setValue(userRow.first_name);
+                        userItem.getItemProperty(this.LAST_NAME_NAME_COLUMN_IDENTIFIER).setValue(userRow.last_name);
+                        userItem.getItemProperty(this.EMAIL_COLUMN_IDENTIFIER).setValue(userRow.email);
+                        userItem.getItemProperty(this.USERNAME_COLUMN_IDENTIFIER).setValue(userRow.username);
+                        userItem.getItemProperty(this.USER_COMPANY_COLUMN_IDENTIFIER).setValue(userRow.company.name);
+                        userItem.getItemProperty(this.USER_GROUP_COLUMN_IDENTIFIER).setValue(userRow.user_group.name);
+                    }
+                    //hack end
+                } else {
+                    nav.navigateTo(logsView);
+                }
+            } else {
+                nav.navigateTo(loginView);
+            }
         }
     }
             
