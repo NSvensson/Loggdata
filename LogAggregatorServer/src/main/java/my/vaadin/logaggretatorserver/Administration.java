@@ -547,7 +547,7 @@ public class Administration {
                 };
 
                 database_connection.connect();
-                String[][] select = database_connection.select(columnQuery, "company");
+                String[][] select = database_connection.select(columnQuery, "user");
                 database_connection.close();
                 
                 CurrentUser[] results = new CurrentUser[select.length];

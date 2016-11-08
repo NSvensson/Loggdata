@@ -23,6 +23,7 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
+import java.awt.Checkbox;
 import java.util.HashMap;
 
 
@@ -121,7 +122,7 @@ public class MyUI extends UI {
         public final IndexedContainer comboBoxContainer = new IndexedContainer();
         public final Grid logtable = new Grid(tableContainer);
         public final ComboBox app_name = new ComboBox("Applications", comboBoxContainer);
-        public final Button create_user = new Button("Manage users");
+        public final Button manage_users = new Button("Manage users");
         public final Button create_company = new Button("Create company");
         
         public ViewLogsLayout() {
@@ -184,7 +185,7 @@ public class MyUI extends UI {
                 public void buttonClick(Button.ClickEvent event){ 
                     tableContainer.removeAllItems();
                     comboBoxContainer.removeAllItems();
-                    create_user.setVisible(false);
+                    manage_users.setVisible(false);
                     create_company.setVisible(false);
                     user = null;
                     nav.navigateTo(loginView);
@@ -198,7 +199,7 @@ public class MyUI extends UI {
             loglayout.setComponentAlignment(buttonLayout, Alignment.TOP_RIGHT);
             
             HorizontalLayout administrationLayout = new HorizontalLayout();
-            create_user.addClickListener(new Button.ClickListener() {
+            manage_users.addClickListener(new Button.ClickListener() {
                 @Override
                 public void buttonClick(Button.ClickEvent event){ 
                     tableContainer.removeAllItems();
@@ -215,11 +216,11 @@ public class MyUI extends UI {
                 }
             });
             
-            create_user.setEnabled(false);
-            create_user.setVisible(false);
+            manage_users.setEnabled(false);
+            manage_users.setVisible(false);
             create_company.setEnabled(false);
             create_company.setVisible(false);
-            administrationLayout.addComponent(create_user);
+            administrationLayout.addComponent(manage_users);
             administrationLayout.addComponent(create_company);
             loglayout.addComponent(administrationLayout,0,3);
             
@@ -257,8 +258,8 @@ public class MyUI extends UI {
                 }
                 
                 if (user.user_group.manage_users) {
-                    if (!create_user.isVisible()) create_user.setVisible(true);
-                    if (!create_user.isEnabled()) create_user.setEnabled(true);
+                    if (!manage_users.isVisible()) manage_users.setVisible(true);
+                    if (!manage_users.isEnabled()) manage_users.setEnabled(true);
                 }
                 if (user.user_group.manage_companies) {
                     if (!create_company.isVisible()) create_company.setVisible(true);
@@ -345,7 +346,7 @@ public class MyUI extends UI {
                 public void buttonClick(Button.ClickEvent event){ 
                     company_container.removeAllItems();
                     user_group_container.removeAllItems();
-                    nav.navigateTo(logsView);
+                    nav.navigateTo(manageUsersView);
                 }
             });
             Button createUser = new Button("Create");
@@ -578,7 +579,7 @@ public class MyUI extends UI {
     //ManageUserLayout start
     public class ManageUsersLayout extends GridLayout implements View {
         
-        public Administration administration = null;
+        public Administration administration = new Administration();
         
         public final String HIDDEN_COLUMN_IDENTIFIER = "id";
         public final String FIRST_NAME_COLUMN_IDENTIFIER = "Name";
@@ -602,12 +603,6 @@ public class MyUI extends UI {
             this.tableContainer.addContainerProperty(this.USER_COMPANY_COLUMN_IDENTIFIER, String.class, null);
             
             this.usertable.getColumn(this.HIDDEN_COLUMN_IDENTIFIER).setHidden(true);
-            this.usertable.getColumn(this.FIRST_NAME_COLUMN_IDENTIFIER);
-            this.usertable.getColumn(this.LAST_NAME_NAME_COLUMN_IDENTIFIER);
-            this.usertable.getColumn(this.EMAIL_COLUMN_IDENTIFIER);
-            this.usertable.getColumn(this.USERNAME_COLUMN_IDENTIFIER);
-            this.usertable.getColumn(this.USER_GROUP_COLUMN_IDENTIFIER);
-            this.usertable.getColumn(this.USER_COMPANY_COLUMN_IDENTIFIER);
             
             setWidth("100%");
             setHeight("100%");
@@ -618,13 +613,36 @@ public class MyUI extends UI {
             addComponent(userlayout);
             setComponentAlignment(userlayout, Alignment.MIDDLE_CENTER);
 
-            final GridLayout gTitleLayout = new GridLayout(2,1);
-            gTitleLayout.setStyleName("titel_padding");
             Label testLbl = new Label("Users.");
-            gTitleLayout.addComponent(testLbl,0,0);
-            gTitleLayout.addComponent(usertable, 1, 0);
+            userlayout.addComponent(testLbl,0,0);
+            userlayout.addComponent(usertable, 0, 1);
+            userlayout.setColumnExpandRatio(0, 1);
+            userlayout.setRowExpandRatio(1,1);
+            usertable.setSizeFull();
             
-            userlayout.addComponent(gTitleLayout);
+            //Layout for the buttons
+            HorizontalLayout buttonLayout = new HorizontalLayout();
+            
+            Button back = new Button("Back");
+            back.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    tableContainer.removeAllItems();
+                    nav.navigateTo(logsView);
+                }
+            });
+            
+            Button createUser = new Button("Create User");
+            createUser.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    tableContainer.removeAllItems();
+                    nav.navigateTo(createUserView);
+                }
+            });
+            buttonLayout.addComponent(createUser);
+            buttonLayout.addComponent(back);
+            userlayout.addComponent(buttonLayout, 0, 2);
         }
 
         @Override
@@ -634,7 +652,7 @@ public class MyUI extends UI {
                     //hack begin
 
                     administration = new Administration(user.user_group);
-
+                    
                     for (CurrentUser userRow : administration.object_collections.users()) {
                         Item userItem = tableContainer.getItem(tableContainer.addItem());
                         userItem.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(userRow.id);
