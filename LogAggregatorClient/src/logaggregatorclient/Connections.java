@@ -8,9 +8,10 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class Connections {
+public final class Connections {
     
-    private final String url;
+    private String url = null;
+    
     private final String SERVLET_URL = "ClientServlet";
     
     public String AUTHENTICATION_ERROR_MESSAGE = null;
@@ -19,8 +20,20 @@ public class Connections {
     public String UPDATE_INTERVAL_ERROR_MESSAGE = null;
     
     public Connections() {
+        this.checkConfigurations();
+    }
+    
+    public void checkConfigurations() {
         Configurations.readPropertiesFile();
-        this.url = Configurations.server_URL + this.SERVLET_URL;
+        
+        if (Configurations.server_URL != null) {
+            if (Configurations.server_URL.endsWith("/" + this.SERVLET_URL))
+                this.url = Configurations.server_URL;
+            else if (!Configurations.server_URL.endsWith("/"))
+                this.url = Configurations.server_URL + "/" + this.SERVLET_URL;
+            else
+                this.url = Configurations.server_URL + this.SERVLET_URL;
+        }
     }
     
     public boolean authenticate(String username, String password) {
