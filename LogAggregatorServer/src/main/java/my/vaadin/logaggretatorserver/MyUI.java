@@ -16,6 +16,8 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.SelectionMode;
+import com.vaadin.ui.Grid.SingleSelectionModel;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -39,10 +41,12 @@ public class MyUI extends UI {
     private final String loginView = "";
     private final String logsView = "Logs";
     private final String createUserView = "CreateUser";
+    private final String editUserView = "EditUser";
     private final String createCompanyView = "CreateCompany";
     private final String manageUsersView = "ManageUsers";
     
     private CurrentUser user;
+    private CurrentUser selectedUser = null;
     private Navigator nav = new Navigator(this, this);
     
     @Override
@@ -54,8 +58,9 @@ public class MyUI extends UI {
         nav.addView(loginView, new LoginLayout());
         nav.addView(logsView, new ViewLogsLayout());
         nav.addView(createUserView, new CreateUserLayout());
-        nav.addView(createCompanyView,new CreateCompanyLayout());
-        nav.addView(manageUsersView,new ManageUsersLayout());
+        nav.addView(createCompanyView, new CreateCompanyLayout());
+        nav.addView(manageUsersView, new ManageUsersLayout());
+        nav.addView(editUserView, new EditUserLayout());
     }
     
     //LoginLayout start
@@ -603,6 +608,7 @@ public class MyUI extends UI {
             this.tableContainer.addContainerProperty(this.USER_COMPANY_COLUMN_IDENTIFIER, String.class, null);
             
             this.usertable.getColumn(this.HIDDEN_COLUMN_IDENTIFIER).setHidden(true);
+            this.usertable.setSelectionMode(SelectionMode.SINGLE);
             
             setWidth("100%");
             setHeight("100%");
@@ -632,7 +638,7 @@ public class MyUI extends UI {
                 }
             });
             
-            Button createUser = new Button("Create User");
+            Button createUser = new Button("Create user");
             createUser.addClickListener(new Button.ClickListener() {
                 @Override
                 public void buttonClick(Button.ClickEvent event) {
@@ -642,6 +648,25 @@ public class MyUI extends UI {
             });
             buttonLayout.addComponent(createUser);
             buttonLayout.addComponent(back);
+
+            Button editUserButton = new Button("Edit user");
+            editUserButton.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    Object selected = ((SingleSelectionModel) usertable.getSelectionModel()).getSelectedRow();
+
+                    if (selected != null) {
+                        selectedUser = new CurrentUser(usertable.getContainerDataSource().getItem(selected).getItemProperty(HIDDEN_COLUMN_IDENTIFIER).getValue().toString());
+                        System.out.println("Selected user id: " + selectedUser.id);
+                        tableContainer.removeAllItems();
+                        nav.navigateTo(editUserView);
+                    } else {
+                        System.out.println("Nothing selected.");
+                    }
+                }
+            });
+
+            buttonLayout.addComponent(editUserButton);
             userlayout.addComponent(buttonLayout, 0, 2);
         }
 
@@ -649,7 +674,6 @@ public class MyUI extends UI {
         public void enter(ViewChangeListener.ViewChangeEvent event) {
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_users) {
-                    //hack begin
 
                     administration = new Administration(user.user_group);
                     
@@ -663,7 +687,6 @@ public class MyUI extends UI {
                         userItem.getItemProperty(this.USER_COMPANY_COLUMN_IDENTIFIER).setValue(userRow.company.name);
                         userItem.getItemProperty(this.USER_GROUP_COLUMN_IDENTIFIER).setValue(userRow.user_group.name);
                     }
-                    //hack end
                 } else {
                     nav.navigateTo(logsView);
                 }
@@ -672,7 +695,236 @@ public class MyUI extends UI {
             }
         }
     }
+    //ManageUserLayout end
+    
+    //EditUserLayout start
+    public class EditUserLayout extends GridLayout implements View {
+
+        public final String NAME_COLUMN_IDENTIFIER = "Name";
+
+        public Administration administration = new Administration();
+        
+        public final IndexedContainer company_container = new IndexedContainer();
+        public final IndexedContainer user_group_container = new IndexedContainer();
+        
+        public final ComboBox company_name = new ComboBox("Company", company_container);
+        public final ComboBox user_group_name = new ComboBox("User group", user_group_container);
+
+        public TextField userFnameField = new TextField("First name");
+        public TextField userLnameField = new TextField("Last name");
+        public TextField userEmailField = new TextField("Email");
+        public TextField userUnameField = new TextField("Username");
+        public PasswordField userPwordField = new PasswordField("Password");
+        public PasswordField userCPwordField = new PasswordField("Confirm password");
+        
+        public Label first_name_label = new Label();
+        public Label last_name_label = new Label();
+        public Label email_label = new Label();
+        public Label username_label = new Label();
+        public Label password_label = new Label();
+        public Label confirm_password_label = new Label();
+        public Label company_label = new Label();
+        public Label user_group_label = new Label();
+        
+        public EditUserLayout() {
             
+            this.company_container.addContainerProperty(this.NAME_COLUMN_IDENTIFIER, String.class, null);
+            
+            this.user_group_container.addContainerProperty(this.NAME_COLUMN_IDENTIFIER, String.class, null);
+            
+            this.company_name.setNullSelectionAllowed(false);
+            this.company_name.setTextInputAllowed(false);
+            
+            this.user_group_name.setNullSelectionAllowed(false);
+            this.user_group_name.setTextInputAllowed(false);
+            
+            this.company_name.setItemCaptionPropertyId(this.NAME_COLUMN_IDENTIFIER);
+            this.user_group_name.setItemCaptionPropertyId(this.NAME_COLUMN_IDENTIFIER);
+            
+            this.first_name_label.setVisible(false);
+            this.last_name_label.setVisible(false);
+            this.email_label.setVisible(false);
+            this.username_label.setVisible(false);
+            this.password_label.setVisible(false);
+            this.confirm_password_label.setVisible(false);
+            this.company_label.setVisible(false);
+            this.user_group_label.setVisible(false);
+            
+            setWidth("100%");
+            setHeight("100%");
+            
+            HorizontalLayout mainlayout = new HorizontalLayout();
+            GridLayout createUserLayout = new GridLayout(2,10);
+            createUserLayout.setStyleName("login-grid-layout");
+            addComponent(mainlayout);
+            setComponentAlignment(mainlayout, Alignment.MIDDLE_CENTER);
+            
+            //Fields and components for the  layout.
+            Label createUserTitle = new Label("Edit user");
+            
+            Button back = new Button("Back");
+            back.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event){ 
+                    company_container.removeAllItems();
+                    user_group_container.removeAllItems();
+                    nav.navigateTo(manageUsersView);
+                }
+            });
+            
+            Button editUser = new Button("Done");
+            editUser.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event){
+                    administration.user.settings.clear_error_messages();
+                    
+                    first_name_label.setVisible(false);
+                    last_name_label.setVisible(false);
+                    email_label.setVisible(false);
+                    username_label.setVisible(false);
+                    password_label.setVisible(false);
+                    confirm_password_label.setVisible(false);
+                    company_label.setVisible(false);
+                    user_group_label.setVisible(false);
+                    
+                    if (userPwordField.getValue().equals(userCPwordField.getValue())) {
+                        if (administration.user.edit(
+                                selectedUser,
+                                userFnameField.getValue(),
+                                userLnameField.getValue(),
+                                userEmailField.getValue(),
+                                userUnameField.getValue(),
+                                userPwordField.getValue(),
+                                company_name.getValue().toString(),
+                                user_group_name.getValue().toString())) {
+                            System.out.println("User updated.");
+                            Notification.show("\tUser updated\t",
+                            Notification.TYPE_HUMANIZED_MESSAGE);
+                        } else {
+                            System.out.println("User not updated.");
+                            
+                            if (administration.user.settings.FIRST_NAME_ERROR_MESSAGE != null) {
+                                first_name_label.setValue(administration.user.settings.FIRST_NAME_ERROR_MESSAGE);
+                                if (!first_name_label.isVisible()) first_name_label.setVisible(true);
+                            }
+                            
+                            if (administration.user.settings.LAST_NAME_ERROR_MESSAGE != null) {
+                                last_name_label.setValue(administration.user.settings.LAST_NAME_ERROR_MESSAGE);
+                                if (!last_name_label.isVisible()) last_name_label.setVisible(true);
+                            }
+                            
+                            if (administration.user.settings.EMAIL_ERROR_MESSAGE != null) {
+                                email_label.setValue(administration.user.settings.EMAIL_ERROR_MESSAGE);
+                                if (!email_label.isVisible()) email_label.setVisible(true);
+                            }
+                            
+                            if (administration.user.settings.USERNAME_ERROR_MESSAGE != null) {
+                                username_label.setValue(administration.user.settings.USERNAME_ERROR_MESSAGE);
+                                if (!username_label.isVisible()) username_label.setVisible(true);
+                            }
+                            
+                            if (administration.user.settings.PASSWORD_ERROR_MESSAGE != null) {
+                                password_label.setValue(administration.user.settings.PASSWORD_ERROR_MESSAGE);
+                                if (!password_label.isVisible()) password_label.setVisible(true);
+                            }
+                            
+                            if (administration.user.settings.COMPANY_ERROR_MESSAGE != null) {
+                                company_label.setValue(administration.user.settings.COMPANY_ERROR_MESSAGE);
+                                if (!company_label.isVisible()) company_label.setVisible(true);
+                            }
+                            
+                            if (administration.user.settings.USER_GROUP_ERROR_MESSAGE != null) {
+                                user_group_label.setValue(administration.user.settings.USER_GROUP_ERROR_MESSAGE);
+                                if (!user_group_label.isVisible()) user_group_label.setVisible(true);
+                            }
+                        }
+                    } else {
+                        confirm_password_label.setValue("The provided passwords do not match.");
+                        if (!confirm_password_label.isVisible()) confirm_password_label.setVisible(true);
+                    }
+                }
+            });
+            editUser.setStyleName("titel_padding");
+            
+            GridLayout bLayout = new GridLayout(2,1);
+            bLayout.setStyleName("top_padding");
+            bLayout.addComponent(editUser,0,0);
+            bLayout.setComponentAlignment(editUser, Alignment.MIDDLE_LEFT);
+            bLayout.addComponent(back,1,0);
+            bLayout.setComponentAlignment(back, Alignment.MIDDLE_RIGHT);
+            bLayout.setWidth("100%");
+            bLayout.setHeight("100%");
+            
+            //Adding the fields to the layout.
+            createUserLayout.addComponent(createUserTitle, 0, 0);
+            createUserLayout.addComponent(this.userFnameField, 0, 1);
+            createUserLayout.addComponent(this.userLnameField, 0, 2);
+            createUserLayout.addComponent(this.userEmailField, 0, 3);
+            createUserLayout.addComponent(this.userUnameField, 0, 4);
+            createUserLayout.addComponent(this.userPwordField, 0, 5);
+            createUserLayout.addComponent(this.userCPwordField, 0, 6);
+            createUserLayout.addComponent(this.company_name, 0, 7);
+            createUserLayout.addComponent(this.user_group_name, 0, 8);
+            
+            createUserLayout.addComponent(bLayout, 0, 9);
+            
+            createUserLayout.addComponent(this.user_group_label, 1, 8);
+            createUserLayout.setComponentAlignment(this.user_group_label, Alignment.MIDDLE_LEFT);
+            createUserLayout.addComponent(this.company_label, 1, 7);
+            createUserLayout.setComponentAlignment(this.company_label, Alignment.MIDDLE_LEFT);
+            createUserLayout.addComponent(this.confirm_password_label, 1, 6);
+            createUserLayout.setComponentAlignment(this.confirm_password_label, Alignment.MIDDLE_LEFT);
+            createUserLayout.addComponent(this.password_label, 1, 5);
+            createUserLayout.setComponentAlignment(this.password_label, Alignment.MIDDLE_LEFT);
+            createUserLayout.addComponent(this.username_label, 1, 4);
+            createUserLayout.setComponentAlignment(this.username_label, Alignment.MIDDLE_LEFT);
+            createUserLayout.addComponent(this.email_label, 1, 3);
+            createUserLayout.setComponentAlignment(this.email_label, Alignment.MIDDLE_LEFT);
+            createUserLayout.addComponent(this.last_name_label, 1, 2);
+            createUserLayout.setComponentAlignment(this.last_name_label, Alignment.MIDDLE_LEFT);
+            createUserLayout.addComponent(this.first_name_label, 1, 1);
+            createUserLayout.setComponentAlignment(this.first_name_label, Alignment.MIDDLE_LEFT);
+
+            mainlayout.addComponent(createUserLayout);
+            mainlayout.setComponentAlignment(createUserLayout, Alignment.MIDDLE_CENTER);
+        }
+        
+        @Override
+        public void enter(ViewChangeListener.ViewChangeEvent event) {
+            if (user != null && user.is_authenticated) {
+                if (user.user_group.manage_users && selectedUser != null) {
+                    company_name.removeAllItems();
+                    user_group_name.removeAllItems();
+                    
+                    administration = new Administration(user.user_group);
+                    
+                    for (CompanyRow company : administration.object_collections.companies()) {
+                        Item newItem = company_container.addItem(company.id);
+                        newItem.getItemProperty(this.NAME_COLUMN_IDENTIFIER).setValue(company.name);
+                    }
+                    
+                    for (UserGroups group : administration.object_collections.user_groups()) {
+                        Item newItem = user_group_container.addItem(group.id);
+                        newItem.getItemProperty(this.NAME_COLUMN_IDENTIFIER).setValue(group.name);
+                    }
+                    
+                    company_name.setValue(selectedUser.company.id);
+                    user_group_name.setValue(selectedUser.user_group.id);
+                    
+                    userFnameField.setValue(selectedUser.first_name);
+                    userLnameField.setValue(selectedUser.last_name);
+                    userEmailField.setValue(selectedUser.email);
+                    userUnameField.setValue(selectedUser.username);
+                } else {
+                    nav.navigateTo(manageUsersView);
+                }
+            } else {
+                nav.navigateTo(loginView);
+            }
+        }
+    }
+    //EditUserLayout end
+    
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
     @VaadinServletConfiguration(ui = MyUI.class, productionMode = false)
     public static class MyUIServlet extends VaadinServlet {

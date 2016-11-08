@@ -304,7 +304,7 @@ public class Administration {
                     HashMap whereQuery = new HashMap();
                     whereQuery.put("id", user_information.id);
                     
-                    database_connection.update((String[]) columns.toArray(), values.toArray(), "user", whereQuery);
+                    database_connection.update(columns.toArray(new String[columns.size()]), values.toArray(), "user", whereQuery);
                     database_connection.close();
                     
                     //Return true if user was updated.
