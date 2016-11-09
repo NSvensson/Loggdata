@@ -54,4 +54,8 @@ public class UserGroups {
         this.manage_companies = manage_companies.equals("1");
         this.manage_groups = manage_groups.equals("1");
     }
+    
+    public UserGroups(boolean manage_applications) {
+        this.manage_applications = manage_applications;
+    }
 }

@@ -603,6 +603,66 @@ public class Administration {
             return false;
         }
         //Create company method end.
+
+        //Edit company method start.
+        public boolean edit(CompanyRow company_information, String name, String website, String details) {
+            if (this.user_groups.manage_users) {
+                ArrayList<String> columns = new ArrayList<String>();
+                ArrayList<Object> values = new ArrayList<Object>();
+                
+                if (name == null || name.length() < 1) {
+                    this.settings.NAME_ERROR_MESSAGE = "This field is required!";
+                } else if (name.length() > this.settings.NAME_MAX_LENGTH) {
+                    this.settings.NAME_ERROR_MESSAGE = "The company name can't be longer than " + this.settings.NAME_MAX_LENGTH + " characters!";
+                } else if (!name.equals(company_information.name)) {
+                    columns.add("name");
+                    values.add(name);
+                }
+                
+                if (website != null && website.length() >= 1 &&
+                        !website.equals(company_information.website)) {
+                    
+                    if (website.length() > this.settings.WEBSITE_MAX_LENGTH) {
+                        this.settings.WEBSITE_ERROR_MESSAGE = "The website link can't be longer than " + this.settings.WEBSITE_MAX_LENGTH + " characters!";
+                    } else {
+                        columns.add("website");
+                        values.add(website);
+                    }
+                }
+
+                if (details != null && details.length() >= 1 &&
+                        !details.equals(company_information.details)) {
+                    
+                    if (details.length() > this.settings.DETAILS_MAX_LENGTH) {
+                        this.settings.DETAILS_ERROR_MESSAGE = "The company details can't be longer than " + this.settings.DETAILS_MAX_LENGTH + " characters!";
+                    } else {
+                        columns.add("details");
+                        values.add(details);
+                    }
+                }
+
+                if (!columns.isEmpty() && !values.isEmpty()) {
+                    
+                    HashMap whereQuery = new HashMap();
+                    whereQuery.put("id", company_information.id);
+                    
+                    database_connection.connect();
+                    database_connection.update(
+                            columns.toArray(new String[columns.size()]),
+                            values.toArray(),
+                            "company",
+                            whereQuery
+                    );
+                    database_connection.close();
+                    
+                    //Return true if company was updated.
+                    return true;
+                }
+            }
+            //Return false if some error was thrown.
+            return false;
+        }
+        //Edit company method end.
     }
     //Administration.Company object end.
     

@@ -194,7 +194,7 @@ public class ClientServlet extends HttpServlet {
             Check if the provided API key is valid and obtain the id related to 
             the key, then pick out the file from the multipart request.
             */
-            Administration administration = new Administration(new UserGroups("1"));
+            Administration administration = new Administration(new UserGroups(true));
             
             String application_id = administration.application.authenticate_API_key(request.getHeader("api-key"));
             
