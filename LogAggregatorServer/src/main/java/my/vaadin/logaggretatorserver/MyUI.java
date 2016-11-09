@@ -1032,6 +1032,75 @@ public class MyUI extends UI {
     }
     //CreateCompanyLayout ends
     
+    //EditCompaniesLayout start
+    public class EditCompaniesLayout extends GridLayout implements View{
+        public TextField companyNameField = new TextField("Company name");
+        public TextField companyWebsiteField = new TextField("Website");
+        public TextField companyDetailsField = new TextField("Details");
+        
+        public EditCompaniesLayout(){
+            
+            setWidth("100%");
+            setHeight("100%");
+            
+            HorizontalLayout mainlayout = new HorizontalLayout();
+            GridLayout editCompanyLayout = new GridLayout(1,5);
+            editCompanyLayout.setStyleName("login-grid-layout");
+            addComponent(mainlayout);
+            setComponentAlignment(mainlayout, Alignment.MIDDLE_CENTER);
+            
+            // components for the layout
+            Label createCompanyTitel = new Label("Create a new company");
+            
+            Button backButton = new Button("Back");
+            backButton.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event){ 
+                    nav.navigateTo(logsView);
+                }
+            });
+            
+            Button createCompanyButton = new Button("Create");
+            createCompanyButton.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    if(companyNameField.getValue() != null){
+                        
+                    }
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+            });
+            
+            //creating a layout for the buttons
+            HorizontalLayout bLayout = new HorizontalLayout();
+            bLayout.setStyleName("top_padding");
+            bLayout.setWidth("100%");
+            bLayout.setHeight("100%");
+            
+            //adding the buttons to the buttonlayout
+            bLayout.addComponent(createCompanyButton);
+            bLayout.addComponent(backButton);
+            bLayout.setComponentAlignment(createCompanyButton, Alignment.MIDDLE_LEFT);
+            bLayout.setComponentAlignment(backButton, Alignment.MIDDLE_RIGHT);
+            
+            //adding the componets to the grid
+            editCompanyLayout.addComponent(createCompanyTitel,0,0);
+            editCompanyLayout.addComponent(companyNameField,0,1);
+            editCompanyLayout.addComponent(companyWebsiteField,0,2);
+            editCompanyLayout.addComponent(companyDetailsField,0,3);
+            editCompanyLayout.addComponent(bLayout,0,4);
+            
+            //adding the createCompanyLayout to the mainLayout
+            mainlayout.addComponent(editCompanyLayout);
+        }
+
+        @Override
+        public void enter(ViewChangeListener.ViewChangeEvent event) {
+            throw new UnsupportedOperationException(); //To change body of generated methods, choose Tools | Templates.
+        }
+    }
+    //EditCompaniesLayout ends
+    
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
     @VaadinServletConfiguration(ui = MyUI.class, productionMode = false)
     public static class MyUIServlet extends VaadinServlet {
