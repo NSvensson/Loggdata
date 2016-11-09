@@ -304,7 +304,12 @@ public class Administration {
                     HashMap whereQuery = new HashMap();
                     whereQuery.put("id", user_information.id);
                     
-                    database_connection.update(columns.toArray(new String[columns.size()]), values.toArray(), "user", whereQuery);
+                    database_connection.update(
+                            columns.toArray(new String[columns.size()]),
+                            values.toArray(),
+                            "user",
+                            whereQuery
+                    );
                     database_connection.close();
                     
                     //Return true if user was updated.
@@ -317,6 +322,24 @@ public class Administration {
             return false;
         }
         //Edit user method end.
+        
+        //Remove user method begin.
+        public boolean remove(String id) {
+            if (this.user_groups.manage_users && id != null) {
+                HashMap whereQuery = new HashMap();
+                whereQuery.put("id", id);
+                
+                database_connection.connect();
+                database_connection.delete_row("user", whereQuery);
+                database_connection.close();
+                
+                //Return true if user was successfully deleted.
+                return true;
+            }
+            //Return false if some error was thrown.
+            return false;
+        }
+        //Remove user method end.
     }
     //Administration.User object end.
     
@@ -501,12 +524,85 @@ public class Administration {
     //Administration.Company object start.
     public class Company {
         
+        public Settings settings;
         private final UserGroups user_groups;
         
         public Company(UserGroups user_groups) {
             
+            this.settings = new Settings();
             this.user_groups = user_groups;
         }
+
+        //Company settings start.
+        public class Settings {
+            
+            public final int NAME_MAX_LENGTH = 45;
+            public final int WEBSITE_MAX_LENGTH = 45;
+            public final int DETAILS_MAX_LENGTH = 45;
+            
+            public String NAME_ERROR_MESSAGE = null;
+            public String WEBSITE_ERROR_MESSAGE = null;
+            public String DETAILS_ERROR_MESSAGE = null;
+            
+            public void clear_error_messages() {
+                if (this.NAME_ERROR_MESSAGE != null) this.NAME_ERROR_MESSAGE = null;
+                if (this.WEBSITE_ERROR_MESSAGE != null) this.WEBSITE_ERROR_MESSAGE = null;
+                if (this.DETAILS_ERROR_MESSAGE != null) this.DETAILS_ERROR_MESSAGE = null;
+            }
+        }
+        //Company settings end.
+        
+        //Create company method start.
+        public boolean create(String name, String website, String details) {
+            if (this.user_groups.manage_users) {
+                ArrayList<String> columns = new ArrayList<String>();
+                ArrayList<Object> values = new ArrayList<Object>();
+                
+                if (name == null || name.length() < 1) {
+                    this.settings.NAME_ERROR_MESSAGE = "This field is required!";
+                } else if (name.length() > this.settings.NAME_MAX_LENGTH) {
+                    this.settings.NAME_ERROR_MESSAGE = "The company name can't be longer than " + this.settings.NAME_MAX_LENGTH + " characters!";
+                } else {
+                    columns.add("name");
+                    values.add(name);
+                }
+                
+                if (website != null && website.length() >= 1) {
+                    if (website.length() > this.settings.WEBSITE_MAX_LENGTH) {
+                        this.settings.WEBSITE_ERROR_MESSAGE = "The website link can't be longer than " + this.settings.WEBSITE_MAX_LENGTH + " characters!";
+                    } else {
+                        columns.add("website");
+                        values.add(website);
+                    }
+                }
+
+                if (details != null && details.length() >= 1) {
+                    if (details.length() > this.settings.DETAILS_MAX_LENGTH) {
+                        this.settings.DETAILS_ERROR_MESSAGE = "The company details can't be longer than " + this.settings.DETAILS_MAX_LENGTH + " characters!";
+                    } else {
+                        columns.add("details");
+                        values.add(details);
+                    }
+                }
+
+                if (!columns.isEmpty() && !values.isEmpty()) {
+
+                    database_connection.connect();
+                    database_connection.insert(
+                            columns.toArray(new String[columns.size()]),
+                            new String[][] { values.toArray(new String[values.size()]) },
+                            "company"
+                    );
+                    database_connection.close();
+                    
+                    //Return true if company was updated.
+                    return true;
+                }
+            }
+            //Return false if some error was thrown.
+            return false;
+        }
+        //Create company method end.
     }
     //Administration.Company object end.
     
