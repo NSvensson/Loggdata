@@ -114,7 +114,7 @@ public class MyUI extends UI {
         }
     }
     //LoginLayout end
-        
+    
     //ViewLogsLayout start
     public class ViewLogsLayout extends GridLayout implements View {
         
@@ -276,6 +276,122 @@ public class MyUI extends UI {
         }
     }
     //ViewLogsLayout end
+    
+    //ManageUsersLayout start
+    public class ManageUsersLayout extends GridLayout implements View {
+        
+        public Administration administration = new Administration();
+        
+        public final String HIDDEN_COLUMN_IDENTIFIER = "id";
+        public final String FIRST_NAME_COLUMN_IDENTIFIER = "Name";
+        public final String LAST_NAME_NAME_COLUMN_IDENTIFIER = "Lastname";
+        public final String EMAIL_COLUMN_IDENTIFIER = "Email";
+        public final String USERNAME_COLUMN_IDENTIFIER = "Username";
+        public final String USER_GROUP_COLUMN_IDENTIFIER = "User group";
+        public final String USER_COMPANY_COLUMN_IDENTIFIER = "User company";
+        
+        public final IndexedContainer tableContainer = new IndexedContainer();
+        public final Grid usertable = new Grid(tableContainer);
+        
+        public ManageUsersLayout(){
+            
+            this.tableContainer.addContainerProperty(this.HIDDEN_COLUMN_IDENTIFIER, String.class, null);
+            this.tableContainer.addContainerProperty(this.FIRST_NAME_COLUMN_IDENTIFIER, String.class, null);
+            this.tableContainer.addContainerProperty(this.LAST_NAME_NAME_COLUMN_IDENTIFIER, String.class, null);
+            this.tableContainer.addContainerProperty(this.EMAIL_COLUMN_IDENTIFIER, String.class, null);
+            this.tableContainer.addContainerProperty(this.USERNAME_COLUMN_IDENTIFIER, String.class, null);
+            this.tableContainer.addContainerProperty(this.USER_GROUP_COLUMN_IDENTIFIER, String.class, null);
+            this.tableContainer.addContainerProperty(this.USER_COMPANY_COLUMN_IDENTIFIER, String.class, null);
+            
+            this.usertable.getColumn(this.HIDDEN_COLUMN_IDENTIFIER).setHidden(true);
+            this.usertable.setSelectionMode(SelectionMode.SINGLE);
+            
+            setWidth("100%");
+            setHeight("100%");
+
+            final GridLayout userlayout = new GridLayout(1,4);
+            userlayout.setWidth("90%");
+            userlayout.setHeight("90%");
+            addComponent(userlayout);
+            setComponentAlignment(userlayout, Alignment.MIDDLE_CENTER);
+
+            Label testLbl = new Label("Users.");
+            userlayout.addComponent(testLbl,0,0);
+            userlayout.addComponent(usertable, 0, 1);
+            userlayout.setColumnExpandRatio(0, 1);
+            userlayout.setRowExpandRatio(1,1);
+            usertable.setSizeFull();
+            
+            //Layout for the buttons
+            HorizontalLayout buttonLayout = new HorizontalLayout();
+            
+            Button back = new Button("Back");
+            back.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    tableContainer.removeAllItems();
+                    nav.navigateTo(logsView);
+                }
+            });
+            
+            Button createUser = new Button("Create user");
+            createUser.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    tableContainer.removeAllItems();
+                    nav.navigateTo(createUserView);
+                }
+            });
+            buttonLayout.addComponent(createUser);
+            buttonLayout.addComponent(back);
+
+            Button editUserButton = new Button("Edit user");
+            editUserButton.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    Object selected = ((SingleSelectionModel) usertable.getSelectionModel()).getSelectedRow();
+
+                    if (selected != null) {
+                        selectedUser = new CurrentUser(usertable.getContainerDataSource().getItem(selected).getItemProperty(HIDDEN_COLUMN_IDENTIFIER).getValue().toString());
+                        System.out.println("Selected user id: " + selectedUser.id);
+                        tableContainer.removeAllItems();
+                        nav.navigateTo(editUserView);
+                    } else {
+                        System.out.println("Nothing selected.");
+                    }
+                }
+            });
+
+            buttonLayout.addComponent(editUserButton);
+            userlayout.addComponent(buttonLayout, 0, 2);
+        }
+
+        @Override
+        public void enter(ViewChangeListener.ViewChangeEvent event) {
+            if (user != null && user.is_authenticated) {
+                if (user.user_group.manage_users) {
+
+                    administration = new Administration(user.user_group);
+                    
+                    for (CurrentUser userRow : administration.object_collections.users()) {
+                        Item userItem = tableContainer.getItem(tableContainer.addItem());
+                        userItem.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(userRow.id);
+                        userItem.getItemProperty(this.FIRST_NAME_COLUMN_IDENTIFIER).setValue(userRow.first_name);
+                        userItem.getItemProperty(this.LAST_NAME_NAME_COLUMN_IDENTIFIER).setValue(userRow.last_name);
+                        userItem.getItemProperty(this.EMAIL_COLUMN_IDENTIFIER).setValue(userRow.email);
+                        userItem.getItemProperty(this.USERNAME_COLUMN_IDENTIFIER).setValue(userRow.username);
+                        userItem.getItemProperty(this.USER_COMPANY_COLUMN_IDENTIFIER).setValue(userRow.company.name);
+                        userItem.getItemProperty(this.USER_GROUP_COLUMN_IDENTIFIER).setValue(userRow.user_group.name);
+                    }
+                } else {
+                    nav.navigateTo(logsView);
+                }
+            } else {
+                nav.navigateTo(loginView);
+            }
+        }
+    }
+    //ManageUsersLayout end
     
     //CreateUserLayout start
     public class CreateUserLayout extends GridLayout implements View {
@@ -511,192 +627,6 @@ public class MyUI extends UI {
     }
     //CreateUserLayout end
     
-    //CreateCompanyLayout start
-    public class CreateCompanyLayout extends GridLayout implements View {
-    
-        public TextField companyNameField = new TextField("Company name");
-        public TextField companyWebsiteField = new TextField("Website");
-        public TextField companyDetailsField = new TextField("Details");
-        
-        public CreateCompanyLayout(){
-            
-            setWidth("100%");
-            setHeight("100%");
-            
-            HorizontalLayout mainlayout = new HorizontalLayout();
-            GridLayout createCompanyLayout = new GridLayout(1,5);
-            createCompanyLayout.setStyleName("login-grid-layout");
-            addComponent(mainlayout);
-            setComponentAlignment(mainlayout, Alignment.MIDDLE_CENTER);
-            
-            // components for the layout
-            Label createCompanyTitel = new Label("Create a new company");
-            
-            Button backButton = new Button("Back");
-            backButton.addClickListener(new Button.ClickListener() {
-                @Override
-                public void buttonClick(Button.ClickEvent event){ 
-                    nav.navigateTo(logsView);
-                }
-            });
-            
-            Button createCompanyButton = new Button("Create");
-            createCompanyButton.addClickListener(new Button.ClickListener() {
-                @Override
-                public void buttonClick(Button.ClickEvent event) {
-                    if(companyNameField.getValue() != null){
-                        
-                    }
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                }
-            });
-            
-            //creating a layout for the buttons
-            HorizontalLayout bLayout = new HorizontalLayout();
-            bLayout.setStyleName("top_padding");
-            bLayout.setWidth("100%");
-            bLayout.setHeight("100%");
-            
-            //adding the buttons to the buttonlayout
-            bLayout.addComponent(createCompanyButton);
-            bLayout.addComponent(backButton);
-            bLayout.setComponentAlignment(createCompanyButton, Alignment.MIDDLE_LEFT);
-            bLayout.setComponentAlignment(backButton, Alignment.MIDDLE_RIGHT);
-            
-            //adding the componets to the grid
-            createCompanyLayout.addComponent(createCompanyTitel,0,0);
-            createCompanyLayout.addComponent(companyNameField,0,1);
-            createCompanyLayout.addComponent(companyWebsiteField,0,2);
-            createCompanyLayout.addComponent(companyDetailsField,0,3);
-            createCompanyLayout.addComponent(bLayout,0,4);
-            
-            //adding the createCompanyLayout to the mainLayout
-            mainlayout.addComponent(createCompanyLayout);
-        }
-
-        @Override
-        public void enter(ViewChangeListener.ViewChangeEvent event) {
-            throw new UnsupportedOperationException(); //To change body of generated methods, choose Tools | Templates.
-        }
-    }
-    //CreateCompanyLayout ends
-    
-    //ManageUserLayout start
-    public class ManageUsersLayout extends GridLayout implements View {
-        
-        public Administration administration = new Administration();
-        
-        public final String HIDDEN_COLUMN_IDENTIFIER = "id";
-        public final String FIRST_NAME_COLUMN_IDENTIFIER = "Name";
-        public final String LAST_NAME_NAME_COLUMN_IDENTIFIER = "Lastname";
-        public final String EMAIL_COLUMN_IDENTIFIER = "Email";
-        public final String USERNAME_COLUMN_IDENTIFIER = "Username";
-        public final String USER_GROUP_COLUMN_IDENTIFIER = "User group";
-        public final String USER_COMPANY_COLUMN_IDENTIFIER = "User company";
-        
-        public final IndexedContainer tableContainer = new IndexedContainer();
-        public final Grid usertable = new Grid(tableContainer);
-        
-        public ManageUsersLayout(){
-            
-            this.tableContainer.addContainerProperty(this.HIDDEN_COLUMN_IDENTIFIER, String.class, null);
-            this.tableContainer.addContainerProperty(this.FIRST_NAME_COLUMN_IDENTIFIER, String.class, null);
-            this.tableContainer.addContainerProperty(this.LAST_NAME_NAME_COLUMN_IDENTIFIER, String.class, null);
-            this.tableContainer.addContainerProperty(this.EMAIL_COLUMN_IDENTIFIER, String.class, null);
-            this.tableContainer.addContainerProperty(this.USERNAME_COLUMN_IDENTIFIER, String.class, null);
-            this.tableContainer.addContainerProperty(this.USER_GROUP_COLUMN_IDENTIFIER, String.class, null);
-            this.tableContainer.addContainerProperty(this.USER_COMPANY_COLUMN_IDENTIFIER, String.class, null);
-            
-            this.usertable.getColumn(this.HIDDEN_COLUMN_IDENTIFIER).setHidden(true);
-            this.usertable.setSelectionMode(SelectionMode.SINGLE);
-            
-            setWidth("100%");
-            setHeight("100%");
-
-            final GridLayout userlayout = new GridLayout(1,4);
-            userlayout.setWidth("90%");
-            userlayout.setHeight("90%");
-            addComponent(userlayout);
-            setComponentAlignment(userlayout, Alignment.MIDDLE_CENTER);
-
-            Label testLbl = new Label("Users.");
-            userlayout.addComponent(testLbl,0,0);
-            userlayout.addComponent(usertable, 0, 1);
-            userlayout.setColumnExpandRatio(0, 1);
-            userlayout.setRowExpandRatio(1,1);
-            usertable.setSizeFull();
-            
-            //Layout for the buttons
-            HorizontalLayout buttonLayout = new HorizontalLayout();
-            
-            Button back = new Button("Back");
-            back.addClickListener(new Button.ClickListener() {
-                @Override
-                public void buttonClick(Button.ClickEvent event) {
-                    tableContainer.removeAllItems();
-                    nav.navigateTo(logsView);
-                }
-            });
-            
-            Button createUser = new Button("Create user");
-            createUser.addClickListener(new Button.ClickListener() {
-                @Override
-                public void buttonClick(Button.ClickEvent event) {
-                    tableContainer.removeAllItems();
-                    nav.navigateTo(createUserView);
-                }
-            });
-            buttonLayout.addComponent(createUser);
-            buttonLayout.addComponent(back);
-
-            Button editUserButton = new Button("Edit user");
-            editUserButton.addClickListener(new Button.ClickListener() {
-                @Override
-                public void buttonClick(Button.ClickEvent event) {
-                    Object selected = ((SingleSelectionModel) usertable.getSelectionModel()).getSelectedRow();
-
-                    if (selected != null) {
-                        selectedUser = new CurrentUser(usertable.getContainerDataSource().getItem(selected).getItemProperty(HIDDEN_COLUMN_IDENTIFIER).getValue().toString());
-                        System.out.println("Selected user id: " + selectedUser.id);
-                        tableContainer.removeAllItems();
-                        nav.navigateTo(editUserView);
-                    } else {
-                        System.out.println("Nothing selected.");
-                    }
-                }
-            });
-
-            buttonLayout.addComponent(editUserButton);
-            userlayout.addComponent(buttonLayout, 0, 2);
-        }
-
-        @Override
-        public void enter(ViewChangeListener.ViewChangeEvent event) {
-            if (user != null && user.is_authenticated) {
-                if (user.user_group.manage_users) {
-
-                    administration = new Administration(user.user_group);
-                    
-                    for (CurrentUser userRow : administration.object_collections.users()) {
-                        Item userItem = tableContainer.getItem(tableContainer.addItem());
-                        userItem.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(userRow.id);
-                        userItem.getItemProperty(this.FIRST_NAME_COLUMN_IDENTIFIER).setValue(userRow.first_name);
-                        userItem.getItemProperty(this.LAST_NAME_NAME_COLUMN_IDENTIFIER).setValue(userRow.last_name);
-                        userItem.getItemProperty(this.EMAIL_COLUMN_IDENTIFIER).setValue(userRow.email);
-                        userItem.getItemProperty(this.USERNAME_COLUMN_IDENTIFIER).setValue(userRow.username);
-                        userItem.getItemProperty(this.USER_COMPANY_COLUMN_IDENTIFIER).setValue(userRow.company.name);
-                        userItem.getItemProperty(this.USER_GROUP_COLUMN_IDENTIFIER).setValue(userRow.user_group.name);
-                    }
-                } else {
-                    nav.navigateTo(logsView);
-                }
-            } else {
-                nav.navigateTo(loginView);
-            }
-        }
-    }
-    //ManageUserLayout end
-    
     //EditUserLayout start
     public class EditUserLayout extends GridLayout implements View {
 
@@ -924,6 +854,76 @@ public class MyUI extends UI {
         }
     }
     //EditUserLayout end
+    
+    //CreateCompanyLayout start
+    public class CreateCompanyLayout extends GridLayout implements View {
+    
+        public TextField companyNameField = new TextField("Company name");
+        public TextField companyWebsiteField = new TextField("Website");
+        public TextField companyDetailsField = new TextField("Details");
+        
+        public CreateCompanyLayout(){
+            
+            setWidth("100%");
+            setHeight("100%");
+            
+            HorizontalLayout mainlayout = new HorizontalLayout();
+            GridLayout createCompanyLayout = new GridLayout(1,5);
+            createCompanyLayout.setStyleName("login-grid-layout");
+            addComponent(mainlayout);
+            setComponentAlignment(mainlayout, Alignment.MIDDLE_CENTER);
+            
+            // components for the layout
+            Label createCompanyTitel = new Label("Create a new company");
+            
+            Button backButton = new Button("Back");
+            backButton.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event){ 
+                    nav.navigateTo(logsView);
+                }
+            });
+            
+            Button createCompanyButton = new Button("Create");
+            createCompanyButton.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    if(companyNameField.getValue() != null){
+                        
+                    }
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+            });
+            
+            //creating a layout for the buttons
+            HorizontalLayout bLayout = new HorizontalLayout();
+            bLayout.setStyleName("top_padding");
+            bLayout.setWidth("100%");
+            bLayout.setHeight("100%");
+            
+            //adding the buttons to the buttonlayout
+            bLayout.addComponent(createCompanyButton);
+            bLayout.addComponent(backButton);
+            bLayout.setComponentAlignment(createCompanyButton, Alignment.MIDDLE_LEFT);
+            bLayout.setComponentAlignment(backButton, Alignment.MIDDLE_RIGHT);
+            
+            //adding the componets to the grid
+            createCompanyLayout.addComponent(createCompanyTitel,0,0);
+            createCompanyLayout.addComponent(companyNameField,0,1);
+            createCompanyLayout.addComponent(companyWebsiteField,0,2);
+            createCompanyLayout.addComponent(companyDetailsField,0,3);
+            createCompanyLayout.addComponent(bLayout,0,4);
+            
+            //adding the createCompanyLayout to the mainLayout
+            mainlayout.addComponent(createCompanyLayout);
+        }
+
+        @Override
+        public void enter(ViewChangeListener.ViewChangeEvent event) {
+            throw new UnsupportedOperationException(); //To change body of generated methods, choose Tools | Templates.
+        }
+    }
+    //CreateCompanyLayout ends
     
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
     @VaadinServletConfiguration(ui = MyUI.class, productionMode = false)
