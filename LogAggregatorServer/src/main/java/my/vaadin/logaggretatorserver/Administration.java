@@ -43,6 +43,8 @@ public class Administration {
         //User settings start.
         public class Settings {
             
+            public final String ADMINISTRATOR_ID = "1";
+            
             public final int FIRST_NAME_MAX_LENGTH = 100;
             public final int LAST_NAME_MAX_LENGTH = 100;
             public final int EMAIL_MAX_LENGTH = 100;
@@ -200,9 +202,9 @@ public class Administration {
         
         //Edit user method start.
         public boolean edit(CurrentUser user_information, String first_name, String last_name, String email, String username, String password, String company_id, String user_group_id) {
-            if (this.user_groups.manage_users) {
-                ArrayList<String> columns = new ArrayList<String>();
-                ArrayList<Object> values = new ArrayList<Object>();
+            if (this.user_groups.manage_users && !user_information.id.equals(this.settings.ADMINISTRATOR_ID)) {
+                ArrayList<String> columns = new ArrayList<>();
+                ArrayList<Object> values = new ArrayList<>();
                 database_connection.connect();
                 
                 if (first_name == null || first_name.length() < 1) {
@@ -323,9 +325,9 @@ public class Administration {
         }
         //Edit user method end.
         
-        //Remove user method begin.
+        //Remove user method start.
         public boolean remove(String id) {
-            if (this.user_groups.manage_users && id != null) {
+            if (this.user_groups.manage_users && id != null && !id.equals(this.settings.ADMINISTRATOR_ID)) {
                 HashMap whereQuery = new HashMap();
                 whereQuery.put("id", id);
                 
@@ -368,7 +370,7 @@ public class Administration {
         }
         //Application settings end.
         
-        //Create application start.
+        //Create application method start.
         public String create(String company_id, String name, String log_type, String update_interval) {
             if (user_groups.manage_applications) {
                 boolean proceed = true;
@@ -451,9 +453,112 @@ public class Administration {
             }
             return null;
         }
-        //Create application end.
+        //Create application method end.
+        
+        //Edit application method start.
+        public boolean edit(ApplicationRow application_information, String company_id, String name, String log_type, String update_interval) {
+            if (this.user_groups.manage_applications) {
+                ArrayList<String> columns = new ArrayList<>();
+                ArrayList<Object> values = new ArrayList<>();
+                database_connection.connect();
+                
+                if (company_id == null || company_id.length() < 1) {
+                    this.settings.COMPANY_ERROR_MESSAGE = "This field is required!";
+                } else if (!company_id.equals(application_information.id)) {
+                    String[] columnQuery = { "id" };
 
-        //Authenticate API key start.
+                    HashMap whereQuery = new HashMap();
+                    whereQuery.put("id", company_id);
+
+                    String[][] select = database_connection.select(columnQuery, "company", whereQuery);
+
+                    if (select == null || select.length == 0) {
+                        this.settings.COMPANY_ERROR_MESSAGE = "This company doesn't exist.";
+                    } else {
+                        columns.add("company_id");
+                        values.add(company_id);
+                    }
+                }
+                
+                if (name == null || name.length() < 1) {
+                    this.settings.NAME_ERROR_MESSAGE = "This field is required!";
+                } else if (name.length() > this.settings.NAME_MAX_LENGTH) {
+                    this.settings.NAME_ERROR_MESSAGE = "The application name can't be longer than " + this.settings.NAME_MAX_LENGTH + " characters!";
+                } else if (!name.equals(application_information.name)) {
+                    columns.add("name");
+                    values.add(name);
+                }
+
+                if (log_type != null && log_type.length() >= 1) {
+                    if (log_type.length() > this.settings.LOG_TYPE_MAX_LENGTH) {
+                        this.settings.LOG_TYPE_ERROR_MESSAGE = "The log type field can't be longer than " + this.settings.LOG_TYPE_MAX_LENGTH + " characters!";
+                    } else if (!log_type.equals(application_information.log_type)) {
+                        columns.add("log_type");
+                        values.add(log_type);
+                    }
+                }
+
+                if (update_interval == null || update_interval.length() < 1) {
+                    this.settings.UPDATE_INTERVAL_ERROR_MESSAGE = "This field is required!";
+                } else {
+                    try {
+                        Integer.parseInt(update_interval);
+                        if (!update_interval.equals(application_information.update_interval)) {
+                            columns.add("update_interval");
+                            values.add(update_interval);
+                        }
+                    } catch (NumberFormatException e) {
+                        this.settings.UPDATE_INTERVAL_ERROR_MESSAGE = "Incorrect value format!";
+                    }
+                }
+
+                if (!columns.isEmpty() && !values.isEmpty()) {
+
+                    HashMap whereQuery = new HashMap();
+                    whereQuery.put("id", application_information.id);
+                    
+                    database_connection.update(
+                            columns.toArray(new String[columns.size()]),
+                            values.toArray(),
+                            "application",
+                            whereQuery
+                    );
+                    database_connection.close();
+                    
+                    //Return true if the application was updated.
+                    return true;
+                }
+                database_connection.close();
+            }
+            //Return false if some error was thrown.
+            return false;
+        }
+        //Edit application method end.
+        
+        //Remove application method start.
+        public boolean remove(String id) {
+            if (this.user_groups.manage_applications && id != null) {
+                HashMap whereQuery = new HashMap();
+                whereQuery.put("application_id", id);
+                
+                database_connection.connect();
+                database_connection.delete_row("log", whereQuery);
+                
+                whereQuery.clear();
+                whereQuery.put("id", id);
+                
+                database_connection.delete_row("application", whereQuery);
+                database_connection.close();
+                
+                //Return true if the application was successfully deleted.
+                return true;
+            }
+            //Return false if some error was thrown.
+            return false;
+        }
+        //Remove application method end.
+        
+        //Authenticate API key method start.
         public String authenticate_API_key(String api_key) {
             if (user_groups.manage_applications) {
                 database_connection.connect();
@@ -471,7 +576,7 @@ public class Administration {
             }
             return null;
         }
-        //Authenticate API key end.
+        //Authenticate API key method end.
         
         //Insert logs method start.
         public boolean insert_logs(String id, String[][] logs) {
@@ -536,6 +641,8 @@ public class Administration {
         //Company settings start.
         public class Settings {
             
+            public final String ADMINISTRATOR_COMPANY_ID = "1";
+            
             public final int NAME_MAX_LENGTH = 45;
             public final int WEBSITE_MAX_LENGTH = 45;
             public final int DETAILS_MAX_LENGTH = 45;
@@ -555,8 +662,8 @@ public class Administration {
         //Create company method start.
         public boolean create(String name, String website, String details) {
             if (this.user_groups.manage_users) {
-                ArrayList<String> columns = new ArrayList<String>();
-                ArrayList<Object> values = new ArrayList<Object>();
+                ArrayList<String> columns = new ArrayList<>();
+                ArrayList<Object> values = new ArrayList<>();
                 
                 if (name == null || name.length() < 1) {
                     this.settings.NAME_ERROR_MESSAGE = "This field is required!";
@@ -585,7 +692,7 @@ public class Administration {
                     }
                 }
 
-                if (!columns.isEmpty() && !values.isEmpty()) {
+                if (!columns.isEmpty() && !values.isEmpty() && columns.contains("name")) {
 
                     database_connection.connect();
                     database_connection.insert(
@@ -606,9 +713,9 @@ public class Administration {
 
         //Edit company method start.
         public boolean edit(CompanyRow company_information, String name, String website, String details) {
-            if (this.user_groups.manage_users) {
-                ArrayList<String> columns = new ArrayList<String>();
-                ArrayList<Object> values = new ArrayList<Object>();
+            if (this.user_groups.manage_users && !company_information.id.equals(this.settings.ADMINISTRATOR_COMPANY_ID)) {
+                ArrayList<String> columns = new ArrayList<>();
+                ArrayList<Object> values = new ArrayList<>();
                 
                 if (name == null || name.length() < 1) {
                     this.settings.NAME_ERROR_MESSAGE = "This field is required!";
@@ -663,6 +770,46 @@ public class Administration {
             return false;
         }
         //Edit company method end.
+        
+        //Remove company method start.
+        public boolean remove(String id) {
+            if (this.user_groups.manage_companies && id != null && !id.equals(this.settings.ADMINISTRATOR_COMPANY_ID)) {
+                String[] columnQuery = { "id" };
+
+                HashMap whereQuery = new HashMap();
+                whereQuery.put("company_id", id);
+
+                database_connection.connect();
+                String[][] select = database_connection.select(columnQuery, "user", whereQuery);
+
+                if (select != null && select.length >= 1 && select[0].length == columnQuery.length) {
+                    for (String[] row : select) {
+                        user.remove(row[0]);
+                    }
+                }
+                
+                select = null;
+                select = database_connection.select(columnQuery, "application", whereQuery);
+
+                if (select != null && select.length >= 1 && select[0].length == columnQuery.length) {
+                    for (String[] row : select) {
+                        application.remove(row[0]);
+                    }
+                }
+                
+                whereQuery.clear();
+                whereQuery.put("id", id);
+                
+                database_connection.delete_row("company", whereQuery);
+                database_connection.close();
+                
+                //Return true if the company and all dependencies was successfully deleted.
+                return true;
+            }
+            //Return false if some error was thrown.
+            return false;
+        }
+        //Remove company method start.
     }
     //Administration.Company object end.
     
@@ -706,21 +853,23 @@ public class Administration {
                 String[][] select = database_connection.select(columnQuery, "user");
                 database_connection.close();
                 
-                CurrentUser[] results = new CurrentUser[select.length];
-                
                 if (select != null && select.length >= 1 && select[0].length == columnQuery.length) {
-                    for (int i = 0; i < select.length; i++) {
-                        results[i] = new CurrentUser(
-                                select[i][0],
-                                select[i][1],
-                                select[i][2],
-                                select[i][3],
-                                select[i][4],
-                                select[i][5],
-                                select[i][6]
-                        );
+                    ArrayList<CurrentUser> results = new ArrayList<>();
+                    
+                    for (String[] row : select) {
+                        if (!row[0].equals(user.settings.ADMINISTRATOR_ID)) {
+                            results.add(new CurrentUser(
+                                    row[0],
+                                    row[1],
+                                    row[2],
+                                    row[3],
+                                    row[4],
+                                    row[5],
+                                    row[6]
+                            ));
+                        }
                     }
-                    return results;
+                    return results.toArray(new CurrentUser[results.size()]);
                 }
             }
             return null;
@@ -742,18 +891,21 @@ public class Administration {
                 String[][] select = database_connection.select(columnQuery, "company");
                 database_connection.close();
                 
-                CompanyRow[] results = new CompanyRow[select.length];
                 
                 if (select != null && select.length >= 1 && select[0].length == columnQuery.length) {
-                    for (int i = 0; i < select.length; i++) {
-                        results[i] = new CompanyRow(
-                                select[i][0],
-                                select[i][1],
-                                select[i][2],
-                                select[i][3]
-                        );
+                    ArrayList<CompanyRow> results = new ArrayList<>();
+                    
+                    for (String[] row : select) {
+                        if (!row[0].equals(company.settings.ADMINISTRATOR_COMPANY_ID)) {
+                            results.add(new CompanyRow(
+                                    row[0],
+                                    row[1],
+                                    row[2],
+                                    row[3]
+                            ));
+                        }
                     }
-                    return results;
+                    return results.toArray(new CompanyRow[results.size()]);
                 }
             }
             return null;
@@ -778,9 +930,9 @@ public class Administration {
                 String[][] select = database_connection.select(columnQuery, "user_groups");
                 database_connection.close();
 
-                UserGroups[] results = new UserGroups[select.length];
-                
                 if (select != null && select.length >= 1 && select[0].length == columnQuery.length) {
+                    UserGroups[] results = new UserGroups[select.length];
+                    
                     for (int i = 0; i < select.length; i++) {
                         results[i] = new UserGroups(
                                 select[i][0],
