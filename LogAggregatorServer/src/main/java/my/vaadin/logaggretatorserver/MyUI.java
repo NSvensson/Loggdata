@@ -25,6 +25,8 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
 
 
 /**
@@ -43,10 +45,13 @@ public class MyUI extends UI {
     private final String createCompanyView = "CreateCompany";
     private final String manageUsersView = "ManageUsers";
     private final String manageCompaniesView = "ManageCompanies";
-    private final String editCompaniesView = "EditCompanies";
+    private final String editCompanyView = "EditCompanies";
     
     private CurrentUser user;
+    
     private CurrentUser selectedUser = null;
+    private CompanyRow selectedCompany = null;
+    
     private Navigator nav = new Navigator(this, this);
     
     @Override
@@ -62,7 +67,7 @@ public class MyUI extends UI {
         nav.addView(manageUsersView, new ManageUsersLayout());
         nav.addView(editUserView, new EditUserLayout());
         nav.addView(manageCompaniesView, new ManageCompanyLayout());
-        nav.addView(editCompaniesView, new EditCompanyLayout());
+        nav.addView(editCompanyView, new EditCompanyLayout());
     }
     
     //LoginLayout start
@@ -295,6 +300,8 @@ public class MyUI extends UI {
         public final IndexedContainer tableContainer = new IndexedContainer();
         public final Grid usertable = new Grid(tableContainer);
         
+        public final Window subConfirmWindow = new Window("Sub-window");
+        
         public ManageUsersLayout(){
             
             this.tableContainer.addContainerProperty(this.HIDDEN_COLUMN_IDENTIFIER, String.class, null);
@@ -354,7 +361,7 @@ public class MyUI extends UI {
                     Object selected = ((SingleSelectionModel) usertable.getSelectionModel()).getSelectedRow();
 
                     if (selected != null) {
-                        selectedUser = new CurrentUser(usertable.getContainerDataSource().getItem(selected).getItemProperty(HIDDEN_COLUMN_IDENTIFIER).getValue().toString());
+                        selectedUser = new CurrentUser(selected.toString());
                         System.out.println("Selected user id: " + selectedUser.id);
                         tableContainer.removeAllItems();
                         nav.navigateTo(editUserView);
@@ -363,8 +370,71 @@ public class MyUI extends UI {
                     }
                 }
             });
+            
+            
+            Button deleteUserButton = new Button("Delete user");
+            deleteUserButton.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    Object selected = ((SingleSelectionModel) usertable.getSelectionModel()).getSelectedRow();
+                    
+                    if (selected != null) {
+                        selectedUser = new CurrentUser(selected.toString());
+                        subConfirmWindow.setHeight(250,Unit.PIXELS);
+                        subConfirmWindow.setWidth(350,Unit.PIXELS);
+                        subConfirmWindow.setResizable(false);
 
+                        GridLayout subConfirmLayout = new GridLayout(1,3);
+                        subConfirmLayout.setMargin(true);
+                        subConfirmLayout.setSizeFull();
+                        subConfirmWindow.setContent(subConfirmLayout);
+
+                        // Put some components in it
+                        Label titelConfirmWindow = new Label("Delete user");
+                        subConfirmLayout.addComponent(titelConfirmWindow, 0, 0);
+                        Label contentConfirmWindow = new Label("You are about to delete "+selectedUser.username+"!\nAre you sure?");
+                        subConfirmLayout.addComponent(contentConfirmWindow, 0, 1);
+                        
+                        Button confirmButton = new Button("Yes");
+                        confirmButton.addClickListener(new Button.ClickListener() {
+                            @Override
+                            public void buttonClick(Button.ClickEvent event) {
+                                if (administration.user.remove(selectedUser.id)) {
+                                    tableContainer.removeItem(selected);
+                                    subConfirmWindow.close();
+                                }
+                            }
+                        });
+                                
+                        Button declineButton = new Button("No");
+                        declineButton.addClickListener(new Button.ClickListener() {
+                            @Override
+                            public void buttonClick(Button.ClickEvent event) {
+                                subConfirmWindow.close();
+                            }
+                        });
+                        
+                        //Adding puttons to the window
+                        HorizontalLayout bLayout = new HorizontalLayout();
+                        bLayout.addComponent(confirmButton);
+                        bLayout.addComponent(declineButton);
+                        
+                        subConfirmLayout.addComponent(bLayout, 0, 2);
+                        // Center it in the browser window
+                        subConfirmWindow.center();
+
+                        // Open it in the UI
+                        addWindow(subConfirmWindow);
+                    
+                            //If user removed
+                    } else {
+                            //If user not removed
+                    }
+                }
+            });
+            
             buttonLayout.addComponent(editUserButton);
+            buttonLayout.addComponent(deleteUserButton);
             userlayout.addComponent(buttonLayout, 0, 2);
         }
 
@@ -376,7 +446,7 @@ public class MyUI extends UI {
                     administration = new Administration(user.user_group);
                     
                     for (CurrentUser userRow : administration.object_collections.users()) {
-                        Item userItem = tableContainer.getItem(tableContainer.addItem());
+                        Item userItem = tableContainer.addItem(userRow.id);
                         userItem.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(userRow.id);
                         userItem.getItemProperty(this.FIRST_NAME_COLUMN_IDENTIFIER).setValue(userRow.first_name);
                         userItem.getItemProperty(this.LAST_NAME_NAME_COLUMN_IDENTIFIER).setValue(userRow.last_name);
@@ -700,6 +770,12 @@ public class MyUI extends UI {
                 public void buttonClick(Button.ClickEvent event){ 
                     company_container.removeAllItems();
                     user_group_container.removeAllItems();
+                    userFnameField.clear();
+                    userLnameField.clear();
+                    userEmailField.clear();
+                    userUnameField.clear();
+                    userPwordField.clear();
+                    userCPwordField.clear();
                     nav.navigateTo(manageUsersView);
                 }
             });
@@ -922,14 +998,14 @@ public class MyUI extends UI {
                 public void buttonClick(Button.ClickEvent event) {
                     Object selected = ((SingleSelectionModel) companyTable.getSelectionModel()).getSelectedRow();
 
-//                    if (selected != null) {
-//                        selectedUser = new CurrentUser(companyTable.getContainerDataSource().getItem(selected).getItemProperty(HIDDEN_COLUMN_IDENTIFIER).getValue().toString());
-//                        System.out.println("Selected company id: " + selectedUser.id);
-//                        tableContainer.removeAllItems();
-//                        nav.navigateTo(editUserView);
-//                    } else {
-//                        System.out.println("Nothing selected.");
-//                    }
+                    if (selected != null) {
+                        selectedCompany = new CompanyRow(companyTable.getContainerDataSource().getItem(selected).getItemProperty(HIDDEN_COLUMN_IDENTIFIER).getValue().toString());
+                        System.out.println("Selected company id: " + selectedCompany.id);
+                        tableContainer.removeAllItems();
+                        nav.navigateTo(editCompanyView);
+                    } else {
+                        System.out.println("Nothing selected.");
+                    }
                 }
             });
             
@@ -1088,6 +1164,12 @@ public class MyUI extends UI {
         public TextField companyWebsiteField = new TextField("Website");
         public TextField companyDetailsField = new TextField("Details");
         
+        public Label company_Name_Label = new Label();
+        public Label company_Website_Label = new Label();
+        public Label company_Details_Label = new Label();
+        
+        public Administration administration = new Administration();
+        
         public EditCompanyLayout() {
             
             setWidth("100%");
@@ -1105,7 +1187,11 @@ public class MyUI extends UI {
             Button backButton = new Button("Back");
             backButton.addClickListener(new Button.ClickListener() {
                 @Override
-                public void buttonClick(Button.ClickEvent event){ 
+                public void buttonClick(Button.ClickEvent event){
+                    companyNameField.clear();
+                    companyWebsiteField.clear();
+                    companyDetailsField.clear();
+                    selectedCompany = null;
                     nav.navigateTo(manageCompaniesView);
                 }
             });
@@ -1114,7 +1200,39 @@ public class MyUI extends UI {
             createCompanyButton.addClickListener(new Button.ClickListener() {
                 @Override
                 public void buttonClick(Button.ClickEvent event) {
+                    administration.company.settings.clear_error_messages();
+                    
+                    company_Name_Label.setVisible(false);
+                    company_Website_Label.setVisible(false);
+                    company_Details_Label.setVisible(false);
+                    
+                    if (administration.company.edit(
+                            selectedCompany,
+                            companyNameField.getValue(),
+                            companyWebsiteField.getValue(),
+                            companyDetailsField.getValue())){
+                        System.out.println("Company changed.");
+                        Notification.show("\tCompany changed\t", Notification.TYPE_HUMANIZED_MESSAGE);
+                    } else {
+                        System.out.println("company not changed.");
+
+                        if (administration.company.settings.NAME_ERROR_MESSAGE != null) {
+                            company_Name_Label.setValue(administration.company.settings.NAME_ERROR_MESSAGE);
+                            if (!company_Name_Label.isVisible()) company_Name_Label.setVisible(true);
+                        }
+
+                        if (administration.company.settings.WEBSITE_ERROR_MESSAGE != null) {
+                            company_Website_Label.setValue(administration.company.settings.WEBSITE_ERROR_MESSAGE);
+                            if (!company_Website_Label.isVisible()) company_Website_Label.setVisible(true);
+                        }
+
+                        if (administration.company.settings.DETAILS_ERROR_MESSAGE != null) {
+                            company_Details_Label.setValue(administration.company.settings.DETAILS_ERROR_MESSAGE);
+                            if (!company_Details_Label.isVisible()) company_Details_Label.setVisible(true);
+                        }
+                    }
                 }
+                
             });
             
             //creating a layout for the buttons
@@ -1142,6 +1260,19 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            if (user != null && user.is_authenticated) {
+                if (user.user_group.manage_companies && selectedCompany != null) {
+                    administration = new Administration(user.user_group);
+                    
+                    companyNameField.setValue(selectedCompany.name);
+                    if (selectedCompany.website != null) companyWebsiteField.setValue(selectedCompany.website);
+                    if (selectedCompany.details != null) companyDetailsField.setValue(selectedCompany.details);
+                } else {
+                    nav.navigateTo(manageUsersView);
+                }
+            } else {
+                nav.navigateTo(loginView);
+            }
         }
     }
     //EditCompaniesLayout ends
