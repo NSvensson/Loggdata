@@ -42,6 +42,7 @@ public class MyUI extends UI {
     private final String editUserView = "EditUser";
     private final String createCompanyView = "CreateCompany";
     private final String manageUsersView = "ManageUsers";
+    private final String manageCompaniesView = "ManageCompanies";
     
     private CurrentUser user;
     private CurrentUser selectedUser = null;
@@ -59,6 +60,7 @@ public class MyUI extends UI {
         nav.addView(createCompanyView, new CreateCompanyLayout());
         nav.addView(manageUsersView, new ManageUsersLayout());
         nav.addView(editUserView, new EditUserLayout());
+        nav.addView(manageCompaniesView, new ManageCompanyLayout());
     }
     
     //LoginLayout start
@@ -126,7 +128,7 @@ public class MyUI extends UI {
         public final Grid logtable = new Grid(tableContainer);
         public final ComboBox app_name = new ComboBox("Applications", comboBoxContainer);
         public final Button manage_users = new Button("Manage users");
-        public final Button create_company = new Button("Create company");
+        public final Button manage_companies = new Button("Manage companies");
         
         public ViewLogsLayout() {
             
@@ -189,7 +191,7 @@ public class MyUI extends UI {
                     tableContainer.removeAllItems();
                     comboBoxContainer.removeAllItems();
                     manage_users.setVisible(false);
-                    create_company.setVisible(false);
+                    manage_companies.setVisible(false);
                     user = null;
                     nav.navigateTo(loginView);
                 }
@@ -210,21 +212,21 @@ public class MyUI extends UI {
                     nav.navigateTo(manageUsersView);
                 }
             });
-            create_company.addClickListener(new Button.ClickListener() {
+            manage_companies.addClickListener(new Button.ClickListener() {
                 @Override
                 public void buttonClick(Button.ClickEvent event){
                     tableContainer.removeAllItems();
                     comboBoxContainer.removeAllItems();
-                    nav.navigateTo(createCompanyView);
+                    nav.navigateTo(manageCompaniesView);
                 }
             });
             
             manage_users.setEnabled(false);
             manage_users.setVisible(false);
-            create_company.setEnabled(false);
-            create_company.setVisible(false);
+            manage_companies.setEnabled(false);
+            manage_companies.setVisible(false);
             administrationLayout.addComponent(manage_users);
-            administrationLayout.addComponent(create_company);
+            administrationLayout.addComponent(manage_companies);
             loglayout.addComponent(administrationLayout,0,3);
             
             loglayout.setRowExpandRatio(1,1);
@@ -265,8 +267,8 @@ public class MyUI extends UI {
                     if (!manage_users.isEnabled()) manage_users.setEnabled(true);
                 }
                 if (user.user_group.manage_companies) {
-                    if (!create_company.isVisible()) create_company.setVisible(true);
-                    if (!create_company.isEnabled()) create_company.setEnabled(true);
+                    if (!manage_companies.isVisible()) manage_companies.setVisible(true);
+                    if (!manage_companies.isEnabled()) manage_companies.setEnabled(true);
                 }
             } else {
                 nav.navigateTo(loginView);
@@ -852,6 +854,113 @@ public class MyUI extends UI {
         }
     }
     //EditUserLayout end
+    
+    //ManageCompanyLayout start
+    public class ManageCompanyLayout extends GridLayout implements View{
+        public Administration administration = new Administration();
+        
+        public final String HIDDEN_COLUMN_IDENTIFIER = "id";
+        public final String COMPANY_NAME_COLUMN_IDENTIFIER = "Name";
+        public final String WEBSITE_COLUMN_IDENTIFIER = "Website";
+        public final String DETAILS_COLUMN_IDENTIFIER = "Details";
+        
+        public final IndexedContainer tableContainer = new IndexedContainer();
+        public final Grid companyTable = new Grid(tableContainer);
+        
+        public ManageCompanyLayout(){
+            
+            this.tableContainer.addContainerProperty(this.HIDDEN_COLUMN_IDENTIFIER, String.class, null);
+            this.tableContainer.addContainerProperty(this.COMPANY_NAME_COLUMN_IDENTIFIER, String.class, null);
+            this.tableContainer.addContainerProperty(this.WEBSITE_COLUMN_IDENTIFIER, String.class, null);
+            this.tableContainer.addContainerProperty(this.DETAILS_COLUMN_IDENTIFIER, String.class, null);
+            
+            this.companyTable.getColumn(this.HIDDEN_COLUMN_IDENTIFIER).setHidden(true);
+            this.companyTable.setSelectionMode(SelectionMode.SINGLE);
+            
+            setWidth("100%");
+            setHeight("100%");
+
+            final GridLayout companylayout = new GridLayout(1,4);
+            companylayout.setWidth("90%");
+            companylayout.setHeight("90%");
+            addComponent(companylayout);
+            setComponentAlignment(companylayout, Alignment.MIDDLE_CENTER);
+
+            Label testLbl = new Label("Companys");
+            companylayout.addComponent(testLbl,0,0);
+            companylayout.addComponent(companyTable, 0, 1);
+            companylayout.setColumnExpandRatio(0, 1);
+            companylayout.setRowExpandRatio(1,1);
+            companyTable.setSizeFull();
+            
+            //Layout for the buttons
+            HorizontalLayout buttonLayout = new HorizontalLayout();
+            
+            Button back = new Button("Back");
+            back.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    tableContainer.removeAllItems();
+                    nav.navigateTo(logsView);
+                }
+            });
+            
+            Button createCompany = new Button("Create company");
+            createCompany.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    tableContainer.removeAllItems();
+                    nav.navigateTo(createCompanyView);
+                }
+            });
+
+            Button editCompanyButton = new Button("Edit Company");
+            editCompanyButton.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    Object selected = ((SingleSelectionModel) companyTable.getSelectionModel()).getSelectedRow();
+
+//                    if (selected != null) {
+//                        selectedUser = new CurrentUser(companyTable.getContainerDataSource().getItem(selected).getItemProperty(HIDDEN_COLUMN_IDENTIFIER).getValue().toString());
+//                        System.out.println("Selected company id: " + selectedUser.id);
+//                        tableContainer.removeAllItems();
+//                        nav.navigateTo(editUserView);
+//                    } else {
+//                        System.out.println("Nothing selected.");
+//                    }
+                }
+            });
+            
+            //Adding the buttons to the layout
+            buttonLayout.addComponent(createCompany);
+            buttonLayout.addComponent(editCompanyButton);
+            buttonLayout.addComponent(back);
+            companylayout.addComponent(buttonLayout, 0, 2);
+        }
+
+        @Override
+        public void enter(ViewChangeListener.ViewChangeEvent event) {
+            if (user != null && user.is_authenticated) {
+                if (user.user_group.manage_users) {
+
+                    administration = new Administration(user.user_group);
+                    
+                    for (CompanyRow companyRow : administration.object_collections.companies()) {
+                        Item userItem = tableContainer.addItem(companyRow.id);
+                        userItem.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(companyRow.id);
+                        userItem.getItemProperty(this.COMPANY_NAME_COLUMN_IDENTIFIER).setValue(companyRow.name);
+                        userItem.getItemProperty(this.WEBSITE_COLUMN_IDENTIFIER).setValue(companyRow.website);
+                        userItem.getItemProperty(this.DETAILS_COLUMN_IDENTIFIER).setValue(companyRow.details);
+                    }
+                } else {
+                    nav.navigateTo(logsView);
+                }
+            } else {
+                nav.navigateTo(loginView);
+            }
+        }
+    }
+    //ManageCompanyLayout end
     
     //CreateCompanyLayout start
     public class CreateCompanyLayout extends GridLayout implements View {
