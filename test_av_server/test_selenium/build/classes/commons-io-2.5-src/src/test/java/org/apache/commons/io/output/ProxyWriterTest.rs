@@ -1,0 +1,11 @@
+org.apache.commons.io.output.ProxyWriterTest$1
+org.apache.commons.io.output.ProxyWriterTest$10
+org.apache.commons.io.output.ProxyWriterTest$9
+org.apache.commons.io.output.ProxyWriterTest
+org.apache.commons.io.output.ProxyWriterTest$8
+org.apache.commons.io.output.ProxyWriterTest$7
+org.apache.commons.io.output.ProxyWriterTest$6
+org.apache.commons.io.output.ProxyWriterTest$5
+org.apache.commons.io.output.ProxyWriterTest$4
+org.apache.commons.io.output.ProxyWriterTest$3
+org.apache.commons.io.output.ProxyWriterTest$2

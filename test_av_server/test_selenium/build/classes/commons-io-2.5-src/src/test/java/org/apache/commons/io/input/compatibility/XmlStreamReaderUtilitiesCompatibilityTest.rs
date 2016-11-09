@@ -1,0 +1,2 @@
+org.apache.commons.io.input.compatibility.XmlStreamReaderUtilitiesCompatibilityTest$MockXmlStreamReader
+org.apache.commons.io.input.compatibility.XmlStreamReaderUtilitiesCompatibilityTest

@@ -1,0 +1,3 @@
+org.apache.commons.io.filefilter.IOFileFilterAbstractTestCase
+org.apache.commons.io.filefilter.IOFileFilterAbstractTestCase$TesterFalseFileFilter
+org.apache.commons.io.filefilter.IOFileFilterAbstractTestCase$TesterTrueFileFilter

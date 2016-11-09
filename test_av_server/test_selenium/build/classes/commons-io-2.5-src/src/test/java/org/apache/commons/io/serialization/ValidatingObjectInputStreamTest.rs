@@ -1,0 +1,3 @@
+org.apache.commons.io.serialization.ValidatingObjectInputStreamTest$1
+org.apache.commons.io.serialization.ValidatingObjectInputStreamTest
+org.apache.commons.io.serialization.ValidatingObjectInputStreamTest$1CustomVOIS
