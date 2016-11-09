@@ -43,6 +43,7 @@ public class MyUI extends UI {
     private final String createCompanyView = "CreateCompany";
     private final String manageUsersView = "ManageUsers";
     private final String manageCompaniesView = "ManageCompanies";
+    private final String editCompaniesView = "EditCompanies";
     
     private CurrentUser user;
     private CurrentUser selectedUser = null;
@@ -61,6 +62,7 @@ public class MyUI extends UI {
         nav.addView(manageUsersView, new ManageUsersLayout());
         nav.addView(editUserView, new EditUserLayout());
         nav.addView(manageCompaniesView, new ManageCompanyLayout());
+        nav.addView(editCompaniesView, new EditCompanyLayout());
     }
     
     //LoginLayout start
@@ -941,7 +943,7 @@ public class MyUI extends UI {
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
             if (user != null && user.is_authenticated) {
-                if (user.user_group.manage_users) {
+                if (user.user_group.manage_companies) {
 
                     administration = new Administration(user.user_group);
                     
@@ -964,18 +966,28 @@ public class MyUI extends UI {
     
     //CreateCompanyLayout start
     public class CreateCompanyLayout extends GridLayout implements View {
-    
+        
+        public Administration administration = new Administration();
+        
         public TextField companyNameField = new TextField("Company name");
         public TextField companyWebsiteField = new TextField("Website");
         public TextField companyDetailsField = new TextField("Details");
         
-        public CreateCompanyLayout(){
+        public Label company_Name_Label = new Label();
+        public Label company_Website_Label = new Label();
+        public Label company_Details_Label = new Label();
+        
+        public CreateCompanyLayout() {
+            
+            company_Name_Label.setVisible(false);
+            company_Website_Label.setVisible(false);
+            company_Details_Label.setVisible(false);
             
             setWidth("100%");
             setHeight("100%");
             
             HorizontalLayout mainlayout = new HorizontalLayout();
-            GridLayout createCompanyLayout = new GridLayout(1,5);
+            GridLayout createCompanyLayout = new GridLayout(2,5);
             createCompanyLayout.setStyleName("login-grid-layout");
             addComponent(mainlayout);
             setComponentAlignment(mainlayout, Alignment.MIDDLE_CENTER);
@@ -987,7 +999,7 @@ public class MyUI extends UI {
             backButton.addClickListener(new Button.ClickListener() {
                 @Override
                 public void buttonClick(Button.ClickEvent event){ 
-                    nav.navigateTo(logsView);
+                    nav.navigateTo(manageCompaniesView);
                 }
             });
             
@@ -995,10 +1007,36 @@ public class MyUI extends UI {
             createCompanyButton.addClickListener(new Button.ClickListener() {
                 @Override
                 public void buttonClick(Button.ClickEvent event) {
-                    if(companyNameField.getValue() != null){
-                        
+                    administration.company.settings.clear_error_messages();
+                    
+                    company_Name_Label.setVisible(false);
+                    company_Website_Label.setVisible(false);
+                    company_Details_Label.setVisible(false);
+                    
+                    if (administration.company.create(
+                            companyNameField.getValue(),
+                            companyWebsiteField.getValue(),
+                            companyDetailsField.getValue())){
+                        System.out.println("Company created.");
+                        Notification.show("\tCompany created\t", Notification.TYPE_HUMANIZED_MESSAGE);
+                    } else {
+                        System.out.println("company not created.");
+
+                        if (administration.company.settings.NAME_ERROR_MESSAGE != null) {
+                            company_Name_Label.setValue(administration.company.settings.NAME_ERROR_MESSAGE);
+                            if (!company_Name_Label.isVisible()) company_Name_Label.setVisible(true);
+                        }
+
+                        if (administration.company.settings.WEBSITE_ERROR_MESSAGE != null) {
+                            company_Website_Label.setValue(administration.company.settings.WEBSITE_ERROR_MESSAGE);
+                            if (!company_Website_Label.isVisible()) company_Website_Label.setVisible(true);
+                        }
+
+                        if (administration.company.settings.DETAILS_ERROR_MESSAGE != null) {
+                            company_Details_Label.setValue(administration.company.settings.DETAILS_ERROR_MESSAGE);
+                            if (!company_Details_Label.isVisible()) company_Details_Label.setVisible(true);
+                        }
                     }
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                 }
             });
             
@@ -1017,8 +1055,11 @@ public class MyUI extends UI {
             //adding the componets to the grid
             createCompanyLayout.addComponent(createCompanyTitel,0,0);
             createCompanyLayout.addComponent(companyNameField,0,1);
+            createCompanyLayout.addComponent(company_Name_Label,1,1);
             createCompanyLayout.addComponent(companyWebsiteField,0,2);
+            createCompanyLayout.addComponent(company_Website_Label,1,2);
             createCompanyLayout.addComponent(companyDetailsField,0,3);
+            createCompanyLayout.addComponent(company_Details_Label,1,3);
             createCompanyLayout.addComponent(bLayout,0,4);
             
             //adding the createCompanyLayout to the mainLayout
@@ -1027,18 +1068,27 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
-            throw new UnsupportedOperationException(); //To change body of generated methods, choose Tools | Templates.
+            if (user != null && user.is_authenticated) {
+                if (user.user_group.manage_companies) {
+                    administration = new Administration(user.user_group);
+                } else {
+                    nav.navigateTo(logsView);
+                }
+            } else {
+                nav.navigateTo(loginView);
+            }
         }
     }
     //CreateCompanyLayout ends
     
     //EditCompaniesLayout start
-    public class EditCompaniesLayout extends GridLayout implements View{
+    public class EditCompanyLayout extends GridLayout implements View {
+        
         public TextField companyNameField = new TextField("Company name");
         public TextField companyWebsiteField = new TextField("Website");
         public TextField companyDetailsField = new TextField("Details");
         
-        public EditCompaniesLayout(){
+        public EditCompanyLayout() {
             
             setWidth("100%");
             setHeight("100%");
@@ -1050,24 +1100,20 @@ public class MyUI extends UI {
             setComponentAlignment(mainlayout, Alignment.MIDDLE_CENTER);
             
             // components for the layout
-            Label createCompanyTitel = new Label("Create a new company");
+            Label createCompanyTitel = new Label("Edit company");
             
             Button backButton = new Button("Back");
             backButton.addClickListener(new Button.ClickListener() {
                 @Override
                 public void buttonClick(Button.ClickEvent event){ 
-                    nav.navigateTo(logsView);
+                    nav.navigateTo(manageCompaniesView);
                 }
             });
             
-            Button createCompanyButton = new Button("Create");
+            Button createCompanyButton = new Button("Done");
             createCompanyButton.addClickListener(new Button.ClickListener() {
                 @Override
                 public void buttonClick(Button.ClickEvent event) {
-                    if(companyNameField.getValue() != null){
-                        
-                    }
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                 }
             });
             
@@ -1096,7 +1142,6 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
-            throw new UnsupportedOperationException(); //To change body of generated methods, choose Tools | Templates.
         }
     }
     //EditCompaniesLayout ends
