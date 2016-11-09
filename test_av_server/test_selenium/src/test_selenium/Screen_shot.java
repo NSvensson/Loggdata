@@ -48,19 +48,41 @@ driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
         
         driver.manage().timeouts().implicitlyWait(1000, TimeUnit.SECONDS);
        
-        driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[2]/div/div[5]/div/div/div")).click();
+        driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[2]/div/div[5]/div/div[1]/div")).click();
+        
+        driver.manage().timeouts().implicitlyWait(100, TimeUnit.SECONDS);
+        
+        driver.findElement(By.xpath("//span[contains(text(), 'Create user')]")).click();
+        
+        //driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[2]/div/div[4]/div/div[3]/div")).click(); //edit user
+        
+        //driver.findElement(By.name("button")).click();
+        
+        
+        //
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         driver.findElement(By.cssSelector("#gwt-uid-9")).sendKeys("he");
         driver.findElement(By.cssSelector("#gwt-uid-11")).sendKeys("llo");
         driver.findElement(By.cssSelector("#gwt-uid-13")).sendKeys("hello@gmail.com");
         driver.findElement(By.cssSelector("#gwt-uid-15")).sendKeys("hello");
         driver.findElement(By.cssSelector("#gwt-uid-17")).sendKeys("hello");
         driver.findElement(By.cssSelector("#gwt-uid-19")).sendKeys("hello");
-        driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[2]/div/div[1]/div/div[11]/div/div[2]/div")).click();
+        
+        driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[2]/div/div[1]/div/div[11]/div/div[2]/div")).click(); //create
+        
         driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[2]/div/div[1]/div/div[11]/div/div[3]/div")).click();
+        //driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[2]/div/div[1]/div/div[11]/div/div[3]/div")).click();
+        
 
         driver.manage().timeouts().implicitlyWait(100, TimeUnit.SECONDS);
+        
+        driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[2]/div/div[4]/div/div[2]/div")).click(); //back button
 
-        driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[2]/div/div[4]/div/div/div")).click();
+        //driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[2]/div/div[4]/div/div/div")).click();
+        
+        driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
+        
+        driver.findElement(By.xpath("//span[contains(text(), 'Logout')]")).click();
         //SeleniumUtil.fluentWait(By.name("handle"), driver);
         //WebElement pass = driver.findElement(By.tagName("password:"));
         //pass.sendKeys("admin");
