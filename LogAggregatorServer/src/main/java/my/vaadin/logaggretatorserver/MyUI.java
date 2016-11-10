@@ -45,6 +45,7 @@ public class MyUI extends UI {
     private final String manageUsersView = "ManageUsers";
     private final String manageCompaniesView = "ManageCompanies";
     private final String editCompanyView = "EditCompanies";
+    private final String manageApplicationView = "ManageApplications";
     
     private CurrentUser user;
     
@@ -68,6 +69,7 @@ public class MyUI extends UI {
         nav.addView(editUserView, new EditUserLayout());
         nav.addView(manageCompaniesView, new ManageCompanyLayout());
         nav.addView(editCompanyView, new EditCompanyLayout());
+        nav.addView(manageApplicationView, new ManageApplicationLayout());
     }
     
     //LoginLayout start
@@ -136,6 +138,7 @@ public class MyUI extends UI {
         public final ComboBox app_name = new ComboBox("Applications", comboBoxContainer);
         public final Button manage_users = new Button("Manage users");
         public final Button manage_companies = new Button("Manage companies");
+        public final Button manage_applications = new Button("Manage applications");
         
         public ViewLogsLayout() {
             
@@ -227,13 +230,25 @@ public class MyUI extends UI {
                     nav.navigateTo(manageCompaniesView);
                 }
             });
+            manage_applications.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event){
+                    tableContainer.removeAllItems();
+                    comboBoxContainer.removeAllItems();
+                    nav.navigateTo(manageApplicationView);
+                }
+            });
             
             manage_users.setEnabled(false);
             manage_users.setVisible(false);
             manage_companies.setEnabled(false);
             manage_companies.setVisible(false);
+            manage_applications.setEnabled(false);
+            manage_applications.setVisible(false);
+            
             administrationLayout.addComponent(manage_users);
             administrationLayout.addComponent(manage_companies);
+            administrationLayout.addComponent(manage_applications);
             loglayout.addComponent(administrationLayout,0,3);
             
             loglayout.setRowExpandRatio(1,1);
@@ -1467,7 +1482,7 @@ public class MyUI extends UI {
                     Object selected = ((SingleSelectionModel) applicationTable.getSelectionModel()).getSelectedRow();
                     
                     if (selected != null) {
-                        selectedApplication = new ApplicationRow(selected.toString());
+                        selectedApplication = new ApplicationRow(selected.toString(), false);
                         subConfirmWindow.setHeight(250,Unit.PIXELS);
                         subConfirmWindow.setWidth(350,Unit.PIXELS);
                         subConfirmWindow.setResizable(false);
@@ -1581,7 +1596,7 @@ public class MyUI extends UI {
                         userItem.getItemProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER).setValue(applicationRow.name);
                         userItem.getItemProperty(this.UPDATE_INTERVAL_COLUMN_IDENTIFIER).setValue(applicationRow.update_interval);
                         userItem.getItemProperty(this.LATEST_UPDATE_COLUMN_IDENTIFIER).setValue(applicationRow.latest_update);
-//                        userItem.getItemProperty(this.COMPANY_COLUMN_IDENTIFIER).setValue(applicationRow.company.name);
+                        userItem.getItemProperty(this.COMPANY_COLUMN_IDENTIFIER).setValue(applicationRow.company.name);
                     }
                 } else {
                     nav.navigateTo(logsView);
