@@ -1037,10 +1037,49 @@ public class MyUI extends UI {
                         confirmButton.addClickListener(new Button.ClickListener() {
                             @Override
                             public void buttonClick(Button.ClickEvent event) {
-                                if (administration.company.remove(selectedCompany.id)) {
-                                    tableContainer.removeItem(selected);
-                                    subConfirmWindow.close();
-                                }
+                                
+                                GridLayout subExtraConfirmLayout = new GridLayout(1,3);
+                                subExtraConfirmLayout.setMargin(true);
+                                subExtraConfirmLayout.setSizeFull();
+                                subConfirmWindow.setContent(subExtraConfirmLayout);
+                                
+                                Label ConfirmWindowLabel = new Label("This will delete all users ,\n"
+                                                                    +"applications and logs bound to "+selectedCompany.name);
+                                subExtraConfirmLayout.addComponent(ConfirmWindowLabel, 0, 0);
+                                Label contentConfirmWindow = new Label("\nAre you sure?");
+                                subExtraConfirmLayout.addComponent(contentConfirmWindow, 0, 1);
+                                
+                                Button confirmExtra = new Button("Yes");
+                                confirmExtra.addClickListener(new Button.ClickListener() {
+                                    @Override
+                                    public void buttonClick(Button.ClickEvent event) {
+                                        if (administration.company.remove(selectedCompany.id)) {
+                                            tableContainer.removeItem(selected);
+                                            subConfirmWindow.close();
+                                        } else {
+                                        }
+                                    }
+                                });
+                                
+                                Button declineButton = new Button("No");
+                                declineButton.addClickListener(new Button.ClickListener() {
+                                    @Override
+                                    public void buttonClick(Button.ClickEvent event) {
+                                        subConfirmWindow.close();
+                                    }
+                                });
+                                HorizontalLayout bLayout = new HorizontalLayout();
+                                bLayout.addComponent(confirmExtra);
+                                bLayout.addComponent(declineButton);
+                        
+                                 subExtraConfirmLayout.addComponent(bLayout, 0, 2);
+                                // Center it in the browser window
+                                subConfirmWindow.center();
+
+                                // Open it in the UI
+                                
+//                                addWindow(subConfirmWindow);
+//                                
                             }
                         });
                                 
