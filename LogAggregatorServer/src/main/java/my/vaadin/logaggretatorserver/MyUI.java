@@ -25,7 +25,6 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
 
@@ -414,7 +413,7 @@ public class MyUI extends UI {
                             }
                         });
                         
-                        //Adding puttons to the window
+                        //Adding buttons to the window
                         HorizontalLayout bLayout = new HorizontalLayout();
                         bLayout.addComponent(confirmButton);
                         bLayout.addComponent(declineButton);
@@ -945,6 +944,8 @@ public class MyUI extends UI {
         public final IndexedContainer tableContainer = new IndexedContainer();
         public final Grid companyTable = new Grid(tableContainer);
         
+        public final Window subConfirmWindow = new Window();
+        
         public ManageCompanyLayout(){
             
             this.tableContainer.addContainerProperty(this.HIDDEN_COLUMN_IDENTIFIER, String.class, null);
@@ -999,7 +1000,7 @@ public class MyUI extends UI {
                     Object selected = ((SingleSelectionModel) companyTable.getSelectionModel()).getSelectedRow();
 
                     if (selected != null) {
-                        selectedCompany = new CompanyRow(companyTable.getContainerDataSource().getItem(selected).getItemProperty(HIDDEN_COLUMN_IDENTIFIER).getValue().toString());
+                        selectedCompany = new CompanyRow(selected.toString());
                         System.out.println("Selected company id: " + selectedCompany.id);
                         tableContainer.removeAllItems();
                         nav.navigateTo(editCompanyView);
@@ -1009,9 +1010,71 @@ public class MyUI extends UI {
                 }
             });
             
+            Button deleteCompanyButton = new Button("Delete company");
+            deleteCompanyButton.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    Object selected = ((SingleSelectionModel) companyTable.getSelectionModel()).getSelectedRow();
+                    
+                    if (selected != null) {
+                        selectedCompany = new CompanyRow(selected.toString());
+                        subConfirmWindow.setHeight(250,Unit.PIXELS);
+                        subConfirmWindow.setWidth(350,Unit.PIXELS);
+                        subConfirmWindow.setResizable(false);
+
+                        GridLayout subConfirmLayout = new GridLayout(1,4);
+                        subConfirmLayout.setMargin(true);
+                        subConfirmLayout.setSizeFull();
+                        subConfirmWindow.setContent(subConfirmLayout);
+
+                        // Put some components in it
+                        Label titelConfirmWindow = new Label("Delete company");
+                        subConfirmLayout.addComponent(titelConfirmWindow, 0, 0);
+                        Label contentConfirmWindow = new Label("You are about to delete "+selectedCompany.name+"!\nAre you sure?");
+                        subConfirmLayout.addComponent(contentConfirmWindow, 0, 1);
+                        
+                        Button confirmButton = new Button("Yes");
+                        confirmButton.addClickListener(new Button.ClickListener() {
+                            @Override
+                            public void buttonClick(Button.ClickEvent event) {
+                                if (administration.company.remove(selectedCompany.id)) {
+                                    tableContainer.removeItem(selected);
+                                    subConfirmWindow.close();
+                                }
+                            }
+                        });
+                                
+                        Button declineButton = new Button("No");
+                        declineButton.addClickListener(new Button.ClickListener() {
+                            @Override
+                            public void buttonClick(Button.ClickEvent event) {
+                                subConfirmWindow.close();
+                            }
+                        });
+                        
+                        //Adding buttons to the window
+                        HorizontalLayout bLayout = new HorizontalLayout();
+                        bLayout.addComponent(confirmButton);
+                        bLayout.addComponent(declineButton);
+                        
+                        subConfirmLayout.addComponent(bLayout, 0, 2);
+                        // Center it in the browser window
+                        subConfirmWindow.center();
+
+                        // Open it in the UI
+                        addWindow(subConfirmWindow);
+                    
+                            //If user removed
+                    } else {
+                            //If user not removed
+                    }
+                }
+            });
+            
             //Adding the buttons to the layout
             buttonLayout.addComponent(createCompany);
             buttonLayout.addComponent(editCompanyButton);
+            buttonLayout.addComponent(deleteCompanyButton);
             buttonLayout.addComponent(back);
             companylayout.addComponent(buttonLayout, 0, 2);
         }
