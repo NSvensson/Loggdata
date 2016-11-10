@@ -31,7 +31,7 @@ public class Administration {
     //Administration.User object start.
     public class User {
         
-        public Settings settings;
+        public final Settings settings;
         private final UserGroups user_groups;
         
         public User(UserGroups user_groups) {
@@ -348,7 +348,7 @@ public class Administration {
     //Administration.Application object start.
     public class Application {
         
-        public Settings settings;
+        public final Settings settings;
         private final UserGroups user_groups;
         
         public Application(UserGroups user_groups) {
@@ -367,6 +367,13 @@ public class Administration {
             public String NAME_ERROR_MESSAGE = null;
             public String LOG_TYPE_ERROR_MESSAGE = null;
             public String UPDATE_INTERVAL_ERROR_MESSAGE = null;
+            
+            public void clear_error_messages() {
+                if (this.COMPANY_ERROR_MESSAGE != null) this.COMPANY_ERROR_MESSAGE = null;
+                if (this.NAME_ERROR_MESSAGE != null) this.NAME_ERROR_MESSAGE = null;
+                if (this.LOG_TYPE_ERROR_MESSAGE != null) this.LOG_TYPE_ERROR_MESSAGE = null;
+                if (this.UPDATE_INTERVAL_ERROR_MESSAGE != null) this.UPDATE_INTERVAL_ERROR_MESSAGE = null;
+            }
         }
         //Application settings end.
         
@@ -629,7 +636,7 @@ public class Administration {
     //Administration.Company object start.
     public class Company {
         
-        public Settings settings;
+        public final Settings settings;
         private final UserGroups user_groups;
         
         public Company(UserGroups user_groups) {
@@ -816,12 +823,157 @@ public class Administration {
     //Administration.UserGroup object start.
     public class UserGroup {
         
+        public final Settings settings;
         private final UserGroups user_groups;
         
         public UserGroup(UserGroups user_groups) {
             
+            this.settings = new Settings();
             this.user_groups = user_groups;
         }
+        
+        //UserGroup settings start.
+        public class Settings {
+            
+            public final String ADMINISTRATOR_USER_GROUP = "1";
+            
+            public final int NAME_MAX_LENGTH = 20;
+            
+            public String NAME_ERROR_MESSAGE = null;
+            
+            public void clear_error_messages() {
+                if (this.NAME_ERROR_MESSAGE != null) this.NAME_ERROR_MESSAGE = null;
+            }
+        }
+        //UserGroup settings end.
+        
+        //Create user group method start.
+        public boolean create(String name, boolean view_logs, boolean manage_applications, boolean manage_users, boolean manage_companies, boolean manage_groups) {
+            if (this.user_groups.manage_groups) {
+                boolean proceed = true;
+                
+                if (name == null || name.length() < 1) {
+                    this.settings.NAME_ERROR_MESSAGE = "This field is required!";
+                    if (proceed) proceed = false;
+                } else if (name.length() > this.settings.NAME_MAX_LENGTH) {
+                    this.settings.NAME_ERROR_MESSAGE = "The user group name can't be longer than " + this.settings.NAME_MAX_LENGTH + " characters!";
+                    if (proceed) proceed = false;
+                }
+                
+                if (proceed) {
+                    String[] columnQuery = new String[] {
+                                "name",
+                                "view_logs",
+                                "manage_applications",
+                                "manage_users",
+                                "manage_companies",
+                                "manage_groups"
+                    };
+
+                    Object[][] values = {
+                        {
+                                name,
+                                view_logs,
+                                manage_applications,
+                                manage_users,
+                                manage_companies,
+                                manage_groups
+                        }
+                    };
+
+                    database_connection.connect();
+                    database_connection.insert(columnQuery, values, "user_groups");
+                    database_connection.close();
+                    
+                    //Return true if the user group was successfully created.
+                    return true;
+                }
+            }
+            //Return false if some error was thrown.
+            return false;
+        }
+        //Create user group method end.
+        
+        //Edit user group method start.
+        public boolean edit(UserGroups group_information, String name, boolean view_logs, boolean manage_applications, boolean manage_users, boolean manage_companies, boolean manage_groups) {
+            if (this.user_groups.manage_groups) {
+                ArrayList<String> columns = new ArrayList<>();
+                ArrayList<Object> values = new ArrayList<>();
+                
+                if (name == null || name.length() < 1) {
+                    this.settings.NAME_ERROR_MESSAGE = "This field is required!";
+                } else if (name.length() > this.settings.NAME_MAX_LENGTH) {
+                    this.settings.NAME_ERROR_MESSAGE = "The user group name can't be longer than " + this.settings.NAME_MAX_LENGTH + " characters!";
+                } else if (!name.equals(group_information.name)) {
+                    columns.add("name");
+                    values.add(name);
+                }
+                
+                if (view_logs != group_information.view_logs) {
+                    columns.add("view_logs");
+                    values.add(view_logs);
+                }
+                
+                if (manage_applications != group_information.manage_applications) {
+                    columns.add("manage_applications");
+                    values.add(manage_applications);
+                }
+                
+                if (manage_users != group_information.manage_users) {
+                    columns.add("manage_users");
+                    values.add(manage_users);
+                }
+                
+                if (manage_companies != group_information.manage_companies) {
+                    columns.add("manage_companies");
+                    values.add(manage_companies);
+                }
+                
+                if (manage_groups != group_information.manage_groups) {
+                    columns.add("manage_groups");
+                    values.add(manage_groups);
+                }
+                
+                if (!columns.isEmpty() && !values.isEmpty()) {
+                    
+                    HashMap whereQuery = new HashMap();
+                    whereQuery.put("id", group_information.id);
+                    
+                    database_connection.connect();
+                    database_connection.update(
+                            columns.toArray(new String[columns.size()]),
+                            values.toArray(),
+                            "user_groups",
+                            whereQuery
+                    );
+                    database_connection.close();
+                    
+                    //Return true if the user group was updated.
+                    return true;
+                }
+            }
+            //Return false if some error was thrown.
+            return false;
+        }
+        //Edit user group method end.
+
+        //Remove user group method start.
+        public boolean remove(String id) {
+            if (this.user_groups.manage_groups && id != null && !id.equals(this.settings.ADMINISTRATOR_USER_GROUP)) {
+                HashMap whereQuery = new HashMap();
+                whereQuery.put("id", id);
+                
+                database_connection.connect();
+                database_connection.delete_row("user_groups", whereQuery);
+                database_connection.close();
+                
+                //Return true if the user group was successfully deleted.
+                return true;
+            }
+            //Return false if some error was thrown.
+            return false;
+        }
+        //Remove user group method end.
     }
     //Administration.UserGroup object end.
     
@@ -955,6 +1107,36 @@ public class Administration {
         public ApplicationRow[] applications() {
             if (this.user_groups.manage_applications) {
                 
+                String[] columnQuery = {
+                        "id",
+                        "company_id",
+                        "name",
+                        "latest_update",
+                        "update_interval",
+                        "api_key",
+                        "log_type"
+                };
+
+                database_connection.connect();
+                String[][] select = database_connection.select(columnQuery, "application");
+                database_connection.close();
+
+                if (select != null && select.length >= 1 && select[0].length == columnQuery.length) {
+                    ApplicationRow[] results = new ApplicationRow[select.length];
+                    
+                    for (int i = 0; i < select.length; i++) {
+                        results[i] = new ApplicationRow(
+                                select[i][0],
+                                select[i][1],
+                                select[i][2],
+                                select[i][3],
+                                select[i][4],
+                                select[i][5],
+                                select[i][6]
+                        );
+                    }
+                    return results;
+                }
             }
             return null;
         }
