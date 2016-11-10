@@ -47,6 +47,7 @@ public class MyUI extends UI {
     private final String editCompanyView = "EditCompanies";
     private final String manageApplicationView = "ManageApplications";
     private final String createApplicationView = "CreateApplications";
+    private final String editApplicationView = "EditApplications";
     
     private CurrentUser user;
     
@@ -72,6 +73,7 @@ public class MyUI extends UI {
         nav.addView(editCompanyView, new EditCompanyLayout());
         nav.addView(manageApplicationView, new ManageApplicationLayout());
         nav.addView(createApplicationView, new CreateApplicationLayout());
+        nav.addView(editApplicationView, new EditApplicationLayout());
     }
     
     //LoginLayout start
@@ -1466,7 +1468,7 @@ public class MyUI extends UI {
                         selectedApplication = new ApplicationRow(selected.toString());
                         System.out.println("Selected application id: " + selectedApplication.id);
                         tableContainer.removeAllItems();
-                        nav.navigateTo(editCompanyView);
+                        nav.navigateTo(editApplicationView);
                     } else {
                         System.out.println("Nothing selected.");
                     }
@@ -1613,7 +1615,7 @@ public class MyUI extends UI {
         
         public Administration administration = new Administration();
         
-        public TextField applicationNameField = new TextField("Company name");
+        public TextField applicationNameField = new TextField("Application name");
         public TextField uppdateIntevalField = new TextField("Update inteval");
         
         public final IndexedContainer company_container = new IndexedContainer();
@@ -1737,8 +1739,147 @@ public class MyUI extends UI {
             }
         }
     }
-
     //CreateApplicationLayout end
+    
+    //EditApplicationLayout start
+    public class EditApplicationLayout extends GridLayout implements View{
+        
+        public final String NAME_COLUMN_IDENTIFIER = "Name";
+        
+        public Administration administration = new Administration();
+        
+        public TextField applicationNameField = new TextField("Application name");
+        public TextField uppdateIntevalField = new TextField("Update inteval in sec");
+        
+        public final IndexedContainer company_container = new IndexedContainer();
+        public final ComboBox company_name = new ComboBox("Company", company_container);
+        
+        public Label application_Name_Label = new Label();
+        public Label application_update_interval_Label = new Label();
+        public Label application_Company_Label = new Label();
+        
+        public EditApplicationLayout(){
+        this.company_container.addContainerProperty(this.NAME_COLUMN_IDENTIFIER, String.class, null);
+            
+            this.company_name.setItemCaptionPropertyId(this.NAME_COLUMN_IDENTIFIER);
+            
+            application_Name_Label.setVisible(false);
+            application_update_interval_Label.setVisible(false);
+            application_Company_Label.setVisible(false);
+            
+            setWidth("100%");
+            setHeight("100%");
+            
+            HorizontalLayout mainlayout = new HorizontalLayout();
+            GridLayout createApplicationLayout = new GridLayout(2,5);
+            createApplicationLayout.setStyleName("login-grid-layout");
+            addComponent(mainlayout);
+            setComponentAlignment(mainlayout, Alignment.MIDDLE_CENTER);
+            
+            // components for the layout
+            Label editApplicationTitel = new Label("Edit application");
+            
+            Button backButton = new Button("Back");
+            backButton.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event){
+                    applicationNameField.clear();
+                    uppdateIntevalField.clear();
+                    nav.navigateTo(manageApplicationView);
+                }
+            });
+            
+            Button editCompanyButton = new Button("Done");
+            editCompanyButton.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    administration.application.settings.clear_error_messages();
+                    
+                    application_Name_Label.setVisible(false);
+                    application_update_interval_Label.setVisible(false);
+                    application_Company_Label.setVisible(false);
+                    
+                    if (administration.application.edit(
+                            selectedApplication,
+                            company_name.getValue().toString(),
+                            applicationNameField.getValue(),
+                            null,
+                            uppdateIntevalField.getValue().toString()
+                    )) {
+                        System.out.println("Application changed.");
+                        Notification.show("\tApplication changed\t", Notification.TYPE_HUMANIZED_MESSAGE);
+                    } else {
+                        System.out.println("Application not changed.");
+
+                        if (administration.application.settings.NAME_ERROR_MESSAGE != null) {
+                            application_Name_Label.setValue(administration.application.settings.NAME_ERROR_MESSAGE);
+                            if (!application_Name_Label.isVisible()) application_Name_Label.setVisible(true);
+                        }
+
+                        if (administration.application.settings.UPDATE_INTERVAL_ERROR_MESSAGE != null) {
+                            application_update_interval_Label.setValue(administration.application.settings.UPDATE_INTERVAL_ERROR_MESSAGE);
+                            if (!application_update_interval_Label.isVisible()) application_update_interval_Label.setVisible(true);
+                        }
+
+                        if (administration.application.settings.COMPANY_ERROR_MESSAGE != null) {
+                            application_Company_Label.setValue(administration.application.settings.COMPANY_ERROR_MESSAGE);
+                            if (!application_Company_Label.isVisible()) application_Company_Label.setVisible(true);
+                        }
+                    }
+                }
+            });
+            
+            //creating a layout for the buttons
+            HorizontalLayout bLayout = new HorizontalLayout();
+            bLayout.setStyleName("top_padding");
+            bLayout.setWidth("100%");
+            bLayout.setHeight("100%");
+            
+            //adding the buttons to the buttonlayout
+            bLayout.addComponent(editCompanyButton);
+            bLayout.addComponent(backButton);
+            bLayout.setComponentAlignment(editCompanyButton, Alignment.MIDDLE_LEFT);
+            bLayout.setComponentAlignment(backButton, Alignment.MIDDLE_RIGHT);
+            
+            //adding the componets to the grid
+            createApplicationLayout.addComponent(editApplicationTitel,0,0);
+            createApplicationLayout.addComponent(applicationNameField,0,1);
+            createApplicationLayout.addComponent(application_Name_Label,1,1);
+            createApplicationLayout.addComponent(uppdateIntevalField,0,2);
+            createApplicationLayout.addComponent(application_update_interval_Label,1,2);
+            createApplicationLayout.addComponent(company_name,0,3);
+            createApplicationLayout.addComponent(application_Company_Label,1,3);
+            createApplicationLayout.addComponent(bLayout,0,4);
+            
+            //adding the createCompanyLayout to the mainLayout
+            mainlayout.addComponent(createApplicationLayout);
+        }
+
+        @Override
+        public void enter(ViewChangeListener.ViewChangeEvent event) {
+            if (user != null && user.is_authenticated) {
+                if (user.user_group.manage_applications) {
+                    
+                    administration = new Administration(user.user_group);
+                    
+                    applicationNameField.setValue(selectedApplication.name);
+                    uppdateIntevalField.setValue(selectedApplication.update_interval);
+                    
+                    for (CompanyRow company : administration.object_collections.companies()) {
+                        Item newItem = company_container.addItem(company.id);
+                        newItem.getItemProperty(this.NAME_COLUMN_IDENTIFIER).setValue(company.name);
+                    }
+                    
+                    company_name.setValue(selectedApplication.company.id);
+                } else {
+                    nav.navigateTo(logsView);
+                }
+            } else {
+                nav.navigateTo(loginView);
+            }
+        }
+    }
+    //EditApplicationLayout end
     
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
     @VaadinServletConfiguration(ui = MyUI.class, productionMode = false)
