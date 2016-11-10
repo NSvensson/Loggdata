@@ -45,11 +45,13 @@ public class MyUI extends UI {
     private final String manageUsersView = "ManageUsers";
     private final String manageCompaniesView = "ManageCompanies";
     private final String editCompanyView = "EditCompanies";
+    private final String manageApplicationView = "ManageApplications";
     
     private CurrentUser user;
     
     private CurrentUser selectedUser = null;
     private CompanyRow selectedCompany = null;
+    private ApplicationRow selectedApplication = null;
     
     private Navigator nav = new Navigator(this, this);
     
@@ -67,6 +69,7 @@ public class MyUI extends UI {
         nav.addView(editUserView, new EditUserLayout());
         nav.addView(manageCompaniesView, new ManageCompanyLayout());
         nav.addView(editCompanyView, new EditCompanyLayout());
+        nav.addView(manageApplicationView, new ManageApplicationLayout());
     }
     
     //LoginLayout start
@@ -135,6 +138,7 @@ public class MyUI extends UI {
         public final ComboBox app_name = new ComboBox("Applications", comboBoxContainer);
         public final Button manage_users = new Button("Manage users");
         public final Button manage_companies = new Button("Manage companies");
+        public final Button manage_applications = new Button("Manage applications");
         
         public ViewLogsLayout() {
             
@@ -226,13 +230,25 @@ public class MyUI extends UI {
                     nav.navigateTo(manageCompaniesView);
                 }
             });
+            manage_applications.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event){
+                    tableContainer.removeAllItems();
+                    comboBoxContainer.removeAllItems();
+                    nav.navigateTo(manageApplicationView);
+                }
+            });
             
             manage_users.setEnabled(false);
             manage_users.setVisible(false);
             manage_companies.setEnabled(false);
             manage_companies.setVisible(false);
+            manage_applications.setEnabled(false);
+            manage_applications.setVisible(false);
+            
             administrationLayout.addComponent(manage_users);
             administrationLayout.addComponent(manage_companies);
+            administrationLayout.addComponent(manage_applications);
             loglayout.addComponent(administrationLayout,0,3);
             
             loglayout.setRowExpandRatio(1,1);
@@ -1378,6 +1394,219 @@ public class MyUI extends UI {
         }
     }
     //EditCompaniesLayout ends
+    
+    //ManageApplicationLayout start
+    public class ManageApplicationLayout extends GridLayout implements View {
+        public Administration administration = new Administration();
+        
+        public final String HIDDEN_COLUMN_IDENTIFIER = "id";
+        public final String APPLICATION_NAME_COLUMN_IDENTIFIER = "Name";
+        public final String UPDATE_INTERVAL_COLUMN_IDENTIFIER = "Update interval";
+        public final String LATEST_UPDATE_COLUMN_IDENTIFIER = "Latest update";
+        public final String COMPANY_COLUMN_IDENTIFIER = "Company";
+        
+        public final IndexedContainer tableContainer = new IndexedContainer();
+        public final Grid applicationTable = new Grid(tableContainer);
+        
+        public final Window subConfirmWindow = new Window();
+        
+        public ManageApplicationLayout(){
+            
+            this.tableContainer.addContainerProperty(this.HIDDEN_COLUMN_IDENTIFIER, String.class, null);
+            this.tableContainer.addContainerProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER, String.class, null);
+            this.tableContainer.addContainerProperty(this.UPDATE_INTERVAL_COLUMN_IDENTIFIER, String.class, null);
+            this.tableContainer.addContainerProperty(this.LATEST_UPDATE_COLUMN_IDENTIFIER, String.class, null);
+            this.tableContainer.addContainerProperty(this.COMPANY_COLUMN_IDENTIFIER, String.class, null);
+            
+            this.applicationTable.getColumn(this.HIDDEN_COLUMN_IDENTIFIER).setHidden(true);
+            this.applicationTable.setSelectionMode(SelectionMode.SINGLE);
+            
+            setWidth("100%");
+            setHeight("100%");
+
+            final GridLayout applicationLayout = new GridLayout(1,4);
+            applicationLayout.setWidth("90%");
+            applicationLayout.setHeight("90%");
+            addComponent(applicationLayout);
+            setComponentAlignment(applicationLayout, Alignment.MIDDLE_CENTER);
+
+            Label testLbl = new Label("Applications");
+            applicationLayout.addComponent(testLbl,0,0);
+            applicationLayout.addComponent(applicationTable, 0, 1);
+            applicationLayout.setColumnExpandRatio(0, 1);
+            applicationLayout.setRowExpandRatio(1,1);
+            applicationTable.setSizeFull();
+            
+            //Layout for the buttons
+            HorizontalLayout buttonLayout = new HorizontalLayout();
+            
+            Button back = new Button("Back");
+            back.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    tableContainer.removeAllItems();
+                    nav.navigateTo(logsView);
+                }
+            });
+            
+            Button createApplicationButton = new Button("Create application");
+            createApplicationButton.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    tableContainer.removeAllItems();
+                    nav.navigateTo(createCompanyView);
+                }
+            });
+
+            Button editApplicationButton = new Button("Edit application");
+            editApplicationButton.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    Object selected = ((SingleSelectionModel) applicationTable.getSelectionModel()).getSelectedRow();
+
+                    if (selected != null) {
+                        selectedApplication = new ApplicationRow(selected.toString());
+                        System.out.println("Selected application id: " + selectedApplication.id);
+                        tableContainer.removeAllItems();
+                        nav.navigateTo(editCompanyView);
+                    } else {
+                        System.out.println("Nothing selected.");
+                    }
+                }
+            });
+            
+            Button deleteCompanyButton = new Button("Delete company");
+            deleteCompanyButton.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    Object selected = ((SingleSelectionModel) applicationTable.getSelectionModel()).getSelectedRow();
+                    
+                    if (selected != null) {
+                        selectedApplication = new ApplicationRow(selected.toString(), false);
+                        subConfirmWindow.setHeight(250,Unit.PIXELS);
+                        subConfirmWindow.setWidth(350,Unit.PIXELS);
+                        subConfirmWindow.setResizable(false);
+
+                        GridLayout subConfirmLayout = new GridLayout(1,4);
+                        subConfirmLayout.setMargin(true);
+                        subConfirmLayout.setSizeFull();
+                        subConfirmWindow.setContent(subConfirmLayout);
+
+                        // Put some components in it
+                        Label titelConfirmWindow = new Label("Delete company");
+                        subConfirmLayout.addComponent(titelConfirmWindow, 0, 0);
+                        Label contentConfirmWindow = new Label("You are about to delete "+selectedApplication.name+"!\nAre you sure?");
+                        subConfirmLayout.addComponent(contentConfirmWindow, 0, 1);
+                        
+                        Button confirmButton = new Button("Yes");
+                        confirmButton.addClickListener(new Button.ClickListener() {
+                            @Override
+                            public void buttonClick(Button.ClickEvent event) {
+                                
+                                GridLayout subExtraConfirmLayout = new GridLayout(1,3);
+                                subExtraConfirmLayout.setMargin(true);
+                                subExtraConfirmLayout.setSizeFull();
+                                subConfirmWindow.setContent(subExtraConfirmLayout);
+                                
+                                Label ConfirmWindowLabel = new Label("This will delete all configs ,\n"
+                                                                    +"and logs bound to "+selectedApplication.name);
+                                subExtraConfirmLayout.addComponent(ConfirmWindowLabel, 0, 0);
+                                Label contentConfirmWindow = new Label("\nAre you sure?");
+                                subExtraConfirmLayout.addComponent(contentConfirmWindow, 0, 1);
+                                
+                                Button confirmExtra = new Button("Yes");
+                                confirmExtra.addClickListener(new Button.ClickListener() {
+                                    @Override
+                                    public void buttonClick(Button.ClickEvent event) {
+                                        if (administration.application.remove(selectedApplication.id)) {
+                                            tableContainer.removeItem(selected);
+                                            subConfirmWindow.close();
+                                        } else {
+                                        }
+                                    }
+                                });
+                                
+                                Button declineButton = new Button("No");
+                                declineButton.addClickListener(new Button.ClickListener() {
+                                    @Override
+                                    public void buttonClick(Button.ClickEvent event) {
+                                        subConfirmWindow.close();
+                                    }
+                                });
+                                HorizontalLayout bLayout = new HorizontalLayout();
+                                bLayout.addComponent(confirmExtra);
+                                bLayout.addComponent(declineButton);
+                        
+                                 subExtraConfirmLayout.addComponent(bLayout, 0, 2);
+                                // Center it in the browser window
+                                subConfirmWindow.center();
+
+                                // Open it in the UI
+                                
+//                                addWindow(subConfirmWindow);
+//                                
+                            }
+                        });
+                                
+                        Button declineButton = new Button("No");
+                        declineButton.addClickListener(new Button.ClickListener() {
+                            @Override
+                            public void buttonClick(Button.ClickEvent event) {
+                                subConfirmWindow.close();
+                            }
+                        });
+                        
+                        //Adding buttons to the window
+                        HorizontalLayout bLayout = new HorizontalLayout();
+                        bLayout.addComponent(confirmButton);
+                        bLayout.addComponent(declineButton);
+                        
+                        subConfirmLayout.addComponent(bLayout, 0, 2);
+                        // Center it in the browser window
+                        subConfirmWindow.center();
+
+                        // Open it in the UI
+                        addWindow(subConfirmWindow);
+                    
+                            //If user removed
+                    } else {
+                            //If user not removed
+                    }
+                }
+            });
+            
+            //Adding the buttons to the layout
+            buttonLayout.addComponent(createApplicationButton);
+            buttonLayout.addComponent(editApplicationButton);
+            buttonLayout.addComponent(deleteCompanyButton);
+            buttonLayout.addComponent(back);
+            applicationLayout.addComponent(buttonLayout, 0, 2);
+        }
+
+        @Override
+        public void enter(ViewChangeListener.ViewChangeEvent event) {
+            if (user != null && user.is_authenticated) {
+                if (user.user_group.manage_companies) {
+
+                    administration = new Administration(user.user_group);
+                    
+                    for (ApplicationRow applicationRow : administration.object_collections.applications()) {
+                        Item userItem = tableContainer.addItem(applicationRow.id);
+                        userItem.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(applicationRow.id);
+                        userItem.getItemProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER).setValue(applicationRow.name);
+                        userItem.getItemProperty(this.UPDATE_INTERVAL_COLUMN_IDENTIFIER).setValue(applicationRow.update_interval);
+                        userItem.getItemProperty(this.LATEST_UPDATE_COLUMN_IDENTIFIER).setValue(applicationRow.latest_update);
+                        userItem.getItemProperty(this.COMPANY_COLUMN_IDENTIFIER).setValue(applicationRow.company.name);
+                    }
+                } else {
+                    nav.navigateTo(logsView);
+                }
+            } else {
+                nav.navigateTo(loginView);
+            }
+        }
+    }
+    //ManageApplicationLayout ends
     
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
     @VaadinServletConfiguration(ui = MyUI.class, productionMode = false)
