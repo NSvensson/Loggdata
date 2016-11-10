@@ -546,7 +546,7 @@ public class MyUI extends UI {
             setHeight("100%");
             
             HorizontalLayout mainlayout = new HorizontalLayout();
-            GridLayout createUserLayout = new GridLayout(1,10);
+            GridLayout createUserLayout = new GridLayout(2,10);
             createUserLayout.setStyleName("login-grid-layout");
             addComponent(mainlayout);
             setComponentAlignment(mainlayout, Alignment.MIDDLE_CENTER);
@@ -658,33 +658,25 @@ public class MyUI extends UI {
             
             createUserLayout.addComponent(bLayout, 0, 9);
             
+            createUserLayout.addComponent(this.user_group_label, 0, 8);
+            createUserLayout.setComponentAlignment(this.user_group_label, Alignment.BOTTOM_LEFT);
+            createUserLayout.addComponent(this.company_label, 0, 7);
+            createUserLayout.setComponentAlignment(this.company_label, Alignment.BOTTOM_LEFT);
+            createUserLayout.addComponent(this.confirm_password_label, 0, 6);
+            createUserLayout.setComponentAlignment(this.confirm_password_label, Alignment.BOTTOM_LEFT);
+            createUserLayout.addComponent(this.password_label, 0, 5);
+            createUserLayout.setComponentAlignment(this.password_label, Alignment.BOTTOM_LEFT);
+            createUserLayout.addComponent(this.username_label, 0, 4);
+            createUserLayout.setComponentAlignment(this.username_label, Alignment.BOTTOM_LEFT);
+            createUserLayout.addComponent(this.email_label, 0, 3);
+            createUserLayout.setComponentAlignment(this.email_label, Alignment.BOTTOM_LEFT);
+            createUserLayout.addComponent(this.last_name_label, 0, 2);
+            createUserLayout.setComponentAlignment(this.last_name_label, Alignment.BOTTOM_LEFT);
+            createUserLayout.addComponent(this.first_name_label, 0, 1);
+            createUserLayout.setComponentAlignment(this.first_name_label, Alignment.BOTTOM_LEFT);
             
-            //Label layout for the side of the view to display error messeges
-            GridLayout labelLayout = new GridLayout(1,10);
-            labelLayout.addComponent(this.user_group_label, 0, 8);
-            labelLayout.setComponentAlignment(this.user_group_label, Alignment.MIDDLE_LEFT);
-            labelLayout.addComponent(this.company_label, 0, 7);
-            labelLayout.setComponentAlignment(this.company_label, Alignment.MIDDLE_LEFT);
-            labelLayout.addComponent(this.confirm_password_label, 0, 6);
-            labelLayout.setComponentAlignment(this.confirm_password_label, Alignment.MIDDLE_LEFT);
-            labelLayout.addComponent(this.password_label, 0, 5);
-            labelLayout.setComponentAlignment(this.password_label, Alignment.MIDDLE_LEFT);
-            labelLayout.addComponent(this.username_label, 0, 4);
-            labelLayout.setComponentAlignment(this.username_label, Alignment.MIDDLE_LEFT);
-            labelLayout.addComponent(this.email_label, 0, 3);
-            labelLayout.setComponentAlignment(this.email_label, Alignment.MIDDLE_LEFT);
-            labelLayout.addComponent(this.last_name_label, 0, 2);
-            labelLayout.setComponentAlignment(this.last_name_label, Alignment.MIDDLE_LEFT);
-            labelLayout.addComponent(this.first_name_label, 0, 1);
-            labelLayout.setComponentAlignment(this.first_name_label, Alignment.MIDDLE_LEFT);
-//            addComponent(labelLayout);
-
-            labelLayout.setHeight("100%");
-            labelLayout.setWidth("100%");
             mainlayout.addComponent(createUserLayout);
             mainlayout.setComponentAlignment(createUserLayout, Alignment.MIDDLE_RIGHT);
-            mainlayout.addComponent(labelLayout);
-            mainlayout.setComponentAlignment(labelLayout, Alignment.MIDDLE_LEFT);
         }
         
         @Override
