@@ -196,11 +196,15 @@ public class ClientServlet extends HttpServlet {
             */
             Administration administration = new Administration(new UserGroups(true));
             
-            String application_id = administration.application.authenticate_API_key(request.getHeader("api-key"));
+            ApplicationRow application = administration.application.authenticate_API_key(request.getHeader("api-key"));
             
             Part given_file;
-            if (application_id != null && (given_file = request.getPart("file")) != null) {
+            if (application != null && (given_file = request.getPart("file")) != null) {
                 System.out.println("API key is valid.");
+                
+                response.addHeader("api-authenticated", "true");
+                response.addHeader("application-name", application.name);
+                response.addHeader("update-interval", application.update_interval);
 
                 /*
                 Check if the content-type of the provided file is zip or
@@ -257,7 +261,7 @@ public class ClientServlet extends HttpServlet {
                             String regex = "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:{0,1}\\d{0,2}";
                             Pattern pattern = Pattern.compile(regex);
                             
-                            ArrayList<String[]> results_array_list = new ArrayList<String[]>();
+                            ArrayList<String[]> results_array_list = new ArrayList<>();
                             
                             BufferedReader br = new BufferedReader(new InputStreamReader(zip_input_stream));
                             
@@ -293,14 +297,15 @@ public class ClientServlet extends HttpServlet {
                                 is built, we send it to the administration object to process and insert
                                 the logs found.
                                 */
-                                if (administration.application.insert_logs(application_id, results)) System.out.println("Logs successfully inserted.");
+                                if (administration.application.insert_logs(application.id, results)) System.out.println("Logs successfully inserted.");
                                 else System.out.println("Logs unsuccessfully inserted.");
                             }
                         }
                     }
                 } else {
-                    System.out.println("API key is invalid.");
+                    System.out.println("API key doesn't exist.");
                     
+                    response.addHeader("api-authenticated", "false");
                 }
             }
             System.out.println("Post successfully read.");
