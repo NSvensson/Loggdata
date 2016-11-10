@@ -298,6 +298,9 @@ public class ClientServlet extends HttpServlet {
                             }
                         }
                     }
+                } else {
+                    System.out.println("API key is invalid.");
+                    
                 }
             }
             System.out.println("Post successfully read.");

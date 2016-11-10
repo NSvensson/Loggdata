@@ -795,7 +795,6 @@ public class Administration {
                     }
                 }
                 
-                select = null;
                 select = database_connection.select(columnQuery, "application", whereQuery);
 
                 if (select != null && select.length >= 1 && select[0].length == columnQuery.length) {
@@ -1132,7 +1131,8 @@ public class Administration {
                                 select[i][3],
                                 select[i][4],
                                 select[i][5],
-                                select[i][6]
+                                select[i][6],
+                                false
                         );
                     }
                     return results;

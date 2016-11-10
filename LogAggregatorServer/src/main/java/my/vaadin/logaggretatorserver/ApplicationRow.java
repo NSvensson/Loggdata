@@ -5,7 +5,7 @@ import java.util.HashMap;
 public class ApplicationRow {
     
     public String id = null;
-    public String company_id = null;
+    public CompanyRow company = null;
     public String name = null;
     public String latest_update = null;
     public String update_interval = null;
@@ -15,19 +15,24 @@ public class ApplicationRow {
     
     private final ServerDataBase database_connection = new ServerDataBase();
     
-    public ApplicationRow(String id, String company_id, String name, String latest_update, String update_interval, String api_key, String log_type) {
+    public ApplicationRow(String id, String company_id, String name, String latest_update, String update_interval, String api_key, String log_type, boolean load_logs) {
         
         this.id = id;
-        this.company_id = company_id;
+        this.company = new CompanyRow(company_id);
         this.name = name;
         this.latest_update = latest_update;
         this.update_interval = update_interval;
         this.api_key = api_key;
         this.log_type = log_type;
-        this.logs = this.get_logs(id);
+        
+        if (load_logs) this.logs = this.get_logs(id);
     }
     
-    public ApplicationRow(String id) {
+    public ApplicationRow(String id, String company_id, String name, String latest_update, String update_interval, String api_key, String log_type) {
+        this(id, company_id, name, latest_update, update_interval, api_key, log_type, true);
+    }
+    
+    public ApplicationRow(String id, boolean load_logs) {
         
         String[] columnQuery = {
                 "company_id",
@@ -47,15 +52,19 @@ public class ApplicationRow {
         
         if (select != null && select.length >= 1 && select[0].length == columnQuery.length) {
             this.id = id;
-            this.company_id = select[0][0];
+            this.company = new CompanyRow(select[0][0]);
             this.name = select[0][1];
             this.latest_update = select[0][2];
             this.update_interval = select[0][3];
             this.api_key = select[0][4];
             this.log_type = select[0][5];
             
-            this.logs = this.get_logs(id);
+            if (load_logs) this.logs = this.get_logs(id);
         }
+    }
+    
+    public ApplicationRow(String id) {
+        this(id, true);
     }
     
     private LogRow[] get_logs(String application_id) {
