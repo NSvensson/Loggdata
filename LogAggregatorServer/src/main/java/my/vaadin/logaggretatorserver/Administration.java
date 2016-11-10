@@ -566,11 +566,18 @@ public class Administration {
         //Remove application method end.
         
         //Authenticate API key method start.
-        public String authenticate_API_key(String api_key) {
+        public ApplicationRow authenticate_API_key(String api_key) {
             if (user_groups.manage_applications) {
                 database_connection.connect();
                 
-                String[] columnQuery = { "id" };
+                String[] columnQuery = {
+                        "id",
+                        "company_id",
+                        "name",
+                        "latest_update",
+                        "update_interval",
+                        "log_type"
+                };
 
                 HashMap whereQuery = new HashMap();
                 whereQuery.put("api_key", api_key);
@@ -578,7 +585,16 @@ public class Administration {
                 String[][] select = database_connection.select(columnQuery, "application", whereQuery);
 
                 if (select != null && select.length == 1 && select[0].length == columnQuery.length) {
-                    return select[0][0];
+                    return new ApplicationRow(
+                            select[0][0],
+                            select[0][1],
+                            select[0][2],
+                            select[0][3],
+                            select[0][4],
+                            api_key,
+                            select[0][5],
+                            false
+                    );
                 }
             }
             return null;
