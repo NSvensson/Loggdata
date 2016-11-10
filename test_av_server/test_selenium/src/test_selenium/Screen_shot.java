@@ -31,10 +31,10 @@ public static void main(String[] args) throws IOException {
 // Initialize WebDriver
 WebDriver driver;
 System.setProperty("webdriver.gecko.driver", "src/test_selenium/geckodriver");
-    driver = new FirefoxDriver();
+        driver = new FirefoxDriver();
 // Wait For Page To Load
 
-driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
 // Go to URL
 
         driver.get("http://localhost:8080/LogAggregatorServer/");
@@ -61,24 +61,32 @@ driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
         
         //
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-        driver.findElement(By.cssSelector("#gwt-uid-9")).sendKeys("he");
+        driver.findElement(By.cssSelector("#gwt-uid-9")).sendKeys("ha");
         driver.findElement(By.cssSelector("#gwt-uid-11")).sendKeys("llo");
-        driver.findElement(By.cssSelector("#gwt-uid-13")).sendKeys("hello@gmail.com");
-        driver.findElement(By.cssSelector("#gwt-uid-15")).sendKeys("hello");
-        driver.findElement(By.cssSelector("#gwt-uid-17")).sendKeys("hello");
-        driver.findElement(By.cssSelector("#gwt-uid-19")).sendKeys("hello");
+        driver.findElement(By.cssSelector("#gwt-uid-13")).sendKeys("hallo@gmail.com");
+        driver.findElement(By.cssSelector("#gwt-uid-15")).sendKeys("hallo");
+        driver.findElement(By.cssSelector("#gwt-uid-17")).sendKeys("hallo");
+        driver.findElement(By.cssSelector("#gwt-uid-19")).sendKeys("hallo");
         
-        driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[2]/div/div[1]/div/div[11]/div/div[2]/div")).click(); //create
         
+        driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[2]/div/div[1]/div/div[10]/div[2]/input")).click();
+        
+        driver.findElement(By.xpath("/html/body/div[2]/div[2]/div/div[2]/table/tbody/tr[1]/td/span")).click(); // administor
+        //driver.findElement(By.xpath("/html/body/div[2]/div[2]/div/div[2]/table/tbody/tr[2]/td/span")).click(); // regular user
+        
+        driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
+      
+        driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[2]/div/div[1]/div")).click(); //just click anywhere
+        
+        driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[2]/div/div[1]/div/div[11]/div/div[2]/div")).click();
         driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[2]/div/div[1]/div/div[11]/div/div[3]/div")).click();
-        //driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[2]/div/div[1]/div/div[11]/div/div[3]/div")).click();
         
 
         driver.manage().timeouts().implicitlyWait(100, TimeUnit.SECONDS);
         
         driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[2]/div/div[4]/div/div[2]/div")).click(); //back button
 
-        //driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[2]/div/div[4]/div/div/div")).click();
+        
         
         driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
         
