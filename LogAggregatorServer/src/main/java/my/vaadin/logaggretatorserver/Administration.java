@@ -15,6 +15,11 @@ public class Administration {
 
     private final ServerDataBase database_connection = new ServerDataBase();
     
+    /**
+     * Constructs the Administration object.
+     * 
+     * @param user_groups UserGroups object
+     */
     public Administration(UserGroups user_groups) {
         
         this.user = new User(user_groups);
@@ -24,6 +29,9 @@ public class Administration {
         this.object_collections = new ObjectCollections(user_groups);
     }
     
+    /**
+     * Constructs a Administration object with zero administration rights.
+     */
     public Administration() {
         this(new UserGroups());
     }
@@ -31,6 +39,9 @@ public class Administration {
     //Administration.User object start.
     public class User {
         
+        /**
+         * The settings related to the Administration.User object.
+         */
         public final Settings settings;
         private final UserGroups user_groups;
         
@@ -59,6 +70,9 @@ public class Administration {
             public String USERNAME_ERROR_MESSAGE = null;
             public String PASSWORD_ERROR_MESSAGE = null;
             
+            /**
+             * This method set all error messages back to null.
+             */
             public void clear_error_messages() {
                 if (this.FIRST_NAME_ERROR_MESSAGE != null) this.FIRST_NAME_ERROR_MESSAGE = null;
                 if (this.LAST_NAME_ERROR_MESSAGE != null) this.LAST_NAME_ERROR_MESSAGE = null;
@@ -72,6 +86,18 @@ public class Administration {
         //User settings end.
         
         //Create user method start.
+        /**
+         * Creates a user in the user table.
+         * 
+         * @param first_name The user's first name.
+         * @param last_name The user's surname.
+         * @param email The user's email address.
+         * @param username The user's desired username.
+         * @param password The user's desired password.
+         * @param company_id The id for the user's company.
+         * @param user_group_id The id for the user's user group.
+         * @return true if user was created, false if there was an issue.
+         */
         public boolean create(String first_name, String last_name, String email, String username, String password, String company_id, String user_group_id) {
             if (this.user_groups.manage_users) {
                 boolean proceed = true;
@@ -201,6 +227,20 @@ public class Administration {
         //Create user method end.
         
         //Edit user method start.
+        /**
+         * Change a existing user's information.
+         * The provided user's id can't belong to the main administrator.
+         * 
+         * @param user_information CurrentUser object with the information related to the user subjected to change.
+         * @param first_name The new first name of the user subject to change.
+         * @param last_name The new surname of the user subject to change.
+         * @param email The new email of the user subject to change.
+         * @param username The new username of the user subject to change.
+         * @param password The new password for the user subject to change.
+         * @param company_id The new company id for the user subject to change.
+         * @param user_group_id The new user group id for the user subject to change.
+         * @return true if the user information was updated, false if there was an issue.
+         */
         public boolean edit(CurrentUser user_information, String first_name, String last_name, String email, String username, String password, String company_id, String user_group_id) {
             if (this.user_groups.manage_users && !user_information.id.equals(this.settings.ADMINISTRATOR_ID)) {
                 ArrayList<String> columns = new ArrayList<>();
@@ -326,6 +366,13 @@ public class Administration {
         //Edit user method end.
         
         //Remove user method start.
+        /**
+         * Removes the user related to the provided id.
+         * The provided user's id can't belong to the main administrator.
+         * 
+         * @param id Id related to the user being removed.
+         * @return true if the user was removed or doesn't exist, false if there was an issue.
+         */
         public boolean remove(String id) {
             if (this.user_groups.manage_users && id != null && !id.equals(this.settings.ADMINISTRATOR_ID)) {
                 HashMap whereQuery = new HashMap();
@@ -348,6 +395,9 @@ public class Administration {
     //Administration.Application object start.
     public class Application {
         
+        /**
+         * The settings related to the Administration.Application object.
+         */
         public final Settings settings;
         private final UserGroups user_groups;
         
@@ -368,6 +418,9 @@ public class Administration {
             public String LOG_TYPE_ERROR_MESSAGE = null;
             public String UPDATE_INTERVAL_ERROR_MESSAGE = null;
             
+            /**
+             * This method set all error messages back to null.
+             */
             public void clear_error_messages() {
                 if (this.COMPANY_ERROR_MESSAGE != null) this.COMPANY_ERROR_MESSAGE = null;
                 if (this.NAME_ERROR_MESSAGE != null) this.NAME_ERROR_MESSAGE = null;
@@ -378,6 +431,15 @@ public class Administration {
         //Application settings end.
         
         //Create application method start.
+        /**
+         * Creates a new application in the application table.
+         * 
+         * @param company_id The id related to the company that this new application will belong to.
+         * @param name The name for the new application.
+         * @param log_type What log type this application has - can be null.
+         * @param update_interval The amount of seconds the interval will be in between each log update.
+         * @return The API key related to the application created.
+         */
         public String create(String company_id, String name, String log_type, String update_interval) {
             if (user_groups.manage_applications) {
                 boolean proceed = true;
@@ -463,6 +525,16 @@ public class Administration {
         //Create application method end.
         
         //Edit application method start.
+        /**
+         * Update an existing application's information.
+         * 
+         * @param application_information ApplicationRow object containing the information related to the application being subject to change.
+         * @param company_id The id of the new company this application will belong to.
+         * @param name The new name for this application.
+         * @param log_type The new log type for this application - can be null.
+         * @param update_interval The new update interval for this application.
+         * @return true if application was updated, false if there was an issue.
+         */
         public boolean edit(ApplicationRow application_information, String company_id, String name, String log_type, String update_interval) {
             if (this.user_groups.manage_applications) {
                 ArrayList<String> columns = new ArrayList<>();
@@ -543,6 +615,12 @@ public class Administration {
         //Edit application method end.
         
         //Remove application method start.
+        /**
+         * Removes the application related to the provided id along with all logs related to this application.
+         * 
+         * @param id Id related to the application being removed.
+         * @return true if the application was removed or doesn't exist, false if there was an issue.
+         */
         public boolean remove(String id) {
             if (this.user_groups.manage_applications && id != null) {
                 HashMap whereQuery = new HashMap();
@@ -566,6 +644,12 @@ public class Administration {
         //Remove application method end.
         
         //Authenticate API key method start.
+        /**
+         * Authenticates the provided API key.
+         * 
+         * @param api_key API key being authenticated.
+         * @return ApplicationRow containing the information of the application related to the authenticated API key.
+         */
         public ApplicationRow authenticate_API_key(String api_key) {
             if (user_groups.manage_applications) {
                 database_connection.connect();
@@ -602,6 +686,13 @@ public class Administration {
         //Authenticate API key method end.
         
         //Insert logs method start.
+        /**
+         * Inserts logs to an existing application.
+         * 
+         * @param id The id of the application the logs belong to.
+         * @param logs A two dimensional array containing the logs being inserted into the database.
+         * @return true of the logs were inserted, false if there was an issue.
+         */
         public boolean insert_logs(String id, String[][] logs) {
             if (user_groups.manage_applications) {
                 database_connection.connect();
@@ -652,6 +743,9 @@ public class Administration {
     //Administration.Company object start.
     public class Company {
         
+        /**
+         * The settings related to the Administration.Company object.
+         */
         public final Settings settings;
         private final UserGroups user_groups;
         
@@ -674,6 +768,9 @@ public class Administration {
             public String WEBSITE_ERROR_MESSAGE = null;
             public String DETAILS_ERROR_MESSAGE = null;
             
+            /**
+             * This method set all error messages back to null.
+             */
             public void clear_error_messages() {
                 if (this.NAME_ERROR_MESSAGE != null) this.NAME_ERROR_MESSAGE = null;
                 if (this.WEBSITE_ERROR_MESSAGE != null) this.WEBSITE_ERROR_MESSAGE = null;
@@ -683,6 +780,14 @@ public class Administration {
         //Company settings end.
         
         //Create company method start.
+        /**
+         * Creates a new company in the company table.
+         * 
+         * @param name The name of the new company.
+         * @param website The website of the new company - can be null.
+         * @param details Extra details of the new company - can be null.
+         * @return true if a new company was created, false if there was an issue.
+         */
         public boolean create(String name, String website, String details) {
             if (this.user_groups.manage_users) {
                 ArrayList<String> columns = new ArrayList<>();
@@ -735,6 +840,15 @@ public class Administration {
         //Create company method end.
 
         //Edit company method start.
+        /**
+         * Update an existing company's information.
+         * 
+         * @param company_information CompanyRow object containing the information of the company being subject to change.
+         * @param name The new name for this company.
+         * @param website The new website for this company - can be null.
+         * @param details The new details for this company - can be null.
+         * @return true if the company information was updated, false if there was an issue.
+         */
         public boolean edit(CompanyRow company_information, String name, String website, String details) {
             if (this.user_groups.manage_users && !company_information.id.equals(this.settings.ADMINISTRATOR_COMPANY_ID)) {
                 ArrayList<String> columns = new ArrayList<>();
@@ -795,6 +909,12 @@ public class Administration {
         //Edit company method end.
         
         //Remove company method start.
+        /**
+         * Removes the company related to the provided id along with all of the users and applications related to this application.
+         * 
+         * @param id Id related to the company being removed.
+         * @return true if the company was removed or doesn't exist, false if there was an issue.
+         */
         public boolean remove(String id) {
             if (this.user_groups.manage_companies && id != null && !id.equals(this.settings.ADMINISTRATOR_COMPANY_ID)) {
                 String[] columnQuery = { "id" };
@@ -838,6 +958,9 @@ public class Administration {
     //Administration.UserGroup object start.
     public class UserGroup {
         
+        /**
+         * The settings related to the Administration.UserGroup object.
+         */
         public final Settings settings;
         private final UserGroups user_groups;
         
@@ -856,6 +979,9 @@ public class Administration {
             
             public String NAME_ERROR_MESSAGE = null;
             
+            /**
+             * This method set all error messages back to null.
+             */
             public void clear_error_messages() {
                 if (this.NAME_ERROR_MESSAGE != null) this.NAME_ERROR_MESSAGE = null;
             }
@@ -863,6 +989,17 @@ public class Administration {
         //UserGroup settings end.
         
         //Create user group method start.
+        /**
+         * Creates a new user group in the user_groups table.
+         * 
+         * @param name The name of the new user group.
+         * @param view_logs The rights of being able to view logs.
+         * @param manage_applications The rights of being able to create, update and delete applications.
+         * @param manage_users The rights of being able to create, update and delete users.
+         * @param manage_companies The rights of being able to create, update and delete companies.
+         * @param manage_groups The rights of being able to create, update and delete user groups.
+         * @return true if the new user groups was created, false if there was an issue.
+         */
         public boolean create(String name, boolean view_logs, boolean manage_applications, boolean manage_users, boolean manage_companies, boolean manage_groups) {
             if (this.user_groups.manage_groups) {
                 boolean proceed = true;
@@ -910,6 +1047,18 @@ public class Administration {
         //Create user group method end.
         
         //Edit user group method start.
+        /**
+         * Update an existing user group, not being the main administration user group.
+         * 
+         * @param group_information UserGroups object containing the information related to the user group being subject to change.
+         * @param name The new name for this user group.
+         * @param view_logs The new view logs right for this user group.
+         * @param manage_applications The new manage application right for this user group.
+         * @param manage_users The new manage users right for this user group.
+         * @param manage_companies The new manage companies right for this user group.
+         * @param manage_groups The new manage groups right for this user group.
+         * @return true if the user group was updated, false if there was an issue.
+         */
         public boolean edit(UserGroups group_information, String name, boolean view_logs, boolean manage_applications, boolean manage_users, boolean manage_companies, boolean manage_groups) {
             if (this.user_groups.manage_groups) {
                 ArrayList<String> columns = new ArrayList<>();
@@ -973,6 +1122,12 @@ public class Administration {
         //Edit user group method end.
 
         //Remove user group method start.
+        /**
+         * Removes the user group related to the provided id, not being the main administration user group id.
+         * 
+         * @param id The id related to the user group being removed.
+         * @return true if the user group was removed or doesn't exist, false if there was an issue.
+         */
         public boolean remove(String id) {
             if (this.user_groups.manage_groups && id != null && !id.equals(this.settings.ADMINISTRATOR_USER_GROUP)) {
                 HashMap whereQuery = new HashMap();
@@ -1003,6 +1158,11 @@ public class Administration {
         }
         
         //CurrentUser collection begin.
+        /**
+         * This method retrieves all the users in the database except from the main administrator.
+         * 
+         * @return An array of CurrentUser objects containing each found user's information.
+         */
         public CurrentUser[] users() {
             if (this.user_groups.manage_users) {
                 
@@ -1044,6 +1204,11 @@ public class Administration {
         //CurrentUser collection end.
         
         //CompanyRow collection begin.
+        /**
+         * This method retrieves all the companies in the database except from the main administrator's company.
+         * 
+         * @return An array of CompanyRow objects containing each found company's information.
+         */
         public CompanyRow[] companies() {
             if (this.user_groups.manage_companies) {
                 
@@ -1080,6 +1245,11 @@ public class Administration {
         //CompanyRow collection end.
         
         //UserGroups collection begin.
+        /**
+         * This method retrieves all the user groups in the database.
+         * 
+         * @return An array of UserGroups objects containing each found user group's information.
+         */
         public UserGroups[] user_groups() {
             if (this.user_groups.manage_groups || this.user_groups.manage_users) {
                 
@@ -1119,6 +1289,11 @@ public class Administration {
         //UserGroups collection end.
         
         //ApplicationRow collection begin.
+        /**
+         * This method retrieves all the applications in the database.
+         * 
+         * @return An array of ApplicationRow objects containing each found application's information.
+         */
         public ApplicationRow[] applications() {
             if (this.user_groups.manage_applications) {
                 
