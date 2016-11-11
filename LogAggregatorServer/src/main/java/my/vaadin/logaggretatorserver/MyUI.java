@@ -48,12 +48,14 @@ public class MyUI extends UI {
     private final String manageApplicationView = "ManageApplications";
     private final String createApplicationView = "CreateApplications";
     private final String editApplicationView = "EditApplications";
+    private final String manageUserGroupsView = "ManageUserGroups";
     
     private CurrentUser user;
     
     private CurrentUser selectedUser = null;
     private CompanyRow selectedCompany = null;
     private ApplicationRow selectedApplication = null;
+    private UserGroups selectedUserGroup = null;
     
     private Navigator nav = new Navigator(this, this);
     
@@ -74,6 +76,7 @@ public class MyUI extends UI {
         nav.addView(manageApplicationView, new ManageApplicationLayout());
         nav.addView(createApplicationView, new CreateApplicationLayout());
         nav.addView(editApplicationView, new EditApplicationLayout());
+        nav.addView(manageUserGroupsView, new ManageUserGroupLayout());
     }
     
     //LoginLayout start
@@ -143,6 +146,7 @@ public class MyUI extends UI {
         public final Button manage_users = new Button("Manage users");
         public final Button manage_companies = new Button("Manage companies");
         public final Button manage_applications = new Button("Manage applications");
+        public final Button manage_usergroups = new Button("Manage user groups");
         
         public ViewLogsLayout() {
             
@@ -243,16 +247,28 @@ public class MyUI extends UI {
                 }
             });
             
+            manage_usergroups.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event){
+                    tableContainer.removeAllItems();
+                    comboBoxContainer.removeAllItems();
+                    nav.navigateTo(manageUserGroupsView);
+                }
+            });
+            
             manage_users.setEnabled(false);
             manage_users.setVisible(false);
             manage_companies.setEnabled(false);
             manage_companies.setVisible(false);
             manage_applications.setEnabled(false);
             manage_applications.setVisible(false);
+            manage_usergroups.setEnabled(false);
+            manage_usergroups.setVisible(false);
             
             administrationLayout.addComponent(manage_users);
             administrationLayout.addComponent(manage_companies);
             administrationLayout.addComponent(manage_applications);
+            administrationLayout.addComponent(manage_usergroups);
             loglayout.addComponent(administrationLayout,0,3);
             
             loglayout.setRowExpandRatio(1,1);
@@ -296,9 +312,13 @@ public class MyUI extends UI {
                     if (!manage_companies.isVisible()) manage_companies.setVisible(true);
                     if (!manage_companies.isEnabled()) manage_companies.setEnabled(true);
                 }
-                    if (user.user_group.manage_applications) {
+                if (user.user_group.manage_applications) {
                     if (!manage_applications.isVisible()) manage_applications.setVisible(true);
                     if (!manage_applications.isEnabled()) manage_applications.setEnabled(true);
+                }
+                if (user.user_group.manage_groups) {
+                    if (!manage_usergroups.isVisible()) manage_usergroups.setVisible(true);
+                    if (!manage_usergroups.isEnabled()) manage_usergroups.setEnabled(true);
                 }
             } else {
                 nav.navigateTo(loginView);
@@ -1888,6 +1908,227 @@ public class MyUI extends UI {
         }
     }
     //EditApplicationLayout end
+    
+    //ManageUserGroup start
+    public class ManageUserGroupLayout extends GridLayout implements View {
+        public Administration administration = new Administration();
+        
+        public final String HIDDEN_COLUMN_IDENTIFIER = "id";
+        public final String NAME_COLUMN_IDENTIFIER = "Name";
+        public final String VIEW_LOGS_COLUMN_IDENTIFIER = "View logs access";
+        public final String MANAGE_APPLICATIONS_COLUMN_IDENTIFIER = "Manage application access";
+        public final String MANAGE_USERS_COLUMN_IDENTIFIER = "Manage users access";
+        public final String MANAGE_COMPANIES_COLUMN_IDENTIFIER = "Manage companies access";
+        public final String MANAGE_GROUPS_COLUMN_IDENTIFIER = "Manage groups access";
+        
+        public final IndexedContainer tableContainer = new IndexedContainer();
+        public final Grid userGroupTable = new Grid(tableContainer);
+        
+        public final Window subConfirmWindow = new Window();
+        
+        public ManageUserGroupLayout(){
+            
+            this.tableContainer.addContainerProperty(this.HIDDEN_COLUMN_IDENTIFIER, String.class, null);
+            this.tableContainer.addContainerProperty(this.NAME_COLUMN_IDENTIFIER, String.class, null);
+            this.tableContainer.addContainerProperty(this.VIEW_LOGS_COLUMN_IDENTIFIER, Boolean.class, null);
+            this.tableContainer.addContainerProperty(this.MANAGE_APPLICATIONS_COLUMN_IDENTIFIER, Boolean.class, null);
+            this.tableContainer.addContainerProperty(this.MANAGE_USERS_COLUMN_IDENTIFIER, Boolean.class, null);
+            this.tableContainer.addContainerProperty(this.MANAGE_COMPANIES_COLUMN_IDENTIFIER, Boolean.class, null);
+            this.tableContainer.addContainerProperty(this.MANAGE_GROUPS_COLUMN_IDENTIFIER, Boolean.class, null);
+            
+            this.userGroupTable.getColumn(this.HIDDEN_COLUMN_IDENTIFIER).setHidden(true);
+            this.userGroupTable.setSelectionMode(SelectionMode.SINGLE);
+            
+            setWidth("100%");
+            setHeight("100%");
+
+            final GridLayout UserGroupsLayout = new GridLayout(1,4);
+            UserGroupsLayout.setWidth("90%");
+            UserGroupsLayout.setHeight("90%");
+            addComponent(UserGroupsLayout);
+            setComponentAlignment(UserGroupsLayout, Alignment.MIDDLE_CENTER);
+
+            Label testLbl = new Label("User groups");
+            UserGroupsLayout.addComponent(testLbl,0,0);
+            UserGroupsLayout.addComponent(userGroupTable, 0, 1);
+            UserGroupsLayout.setColumnExpandRatio(0, 1);
+            UserGroupsLayout.setRowExpandRatio(1,1);
+            userGroupTable.setSizeFull();
+            
+            //Layout for the buttons
+            HorizontalLayout buttonLayout = new HorizontalLayout();
+            
+            Button back = new Button("Back");
+            back.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    tableContainer.removeAllItems();
+                    nav.navigateTo(logsView);
+                }
+            });
+            
+            Button createUserGroupButton = new Button("Create user group");
+            createUserGroupButton.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    tableContainer.removeAllItems();
+                    nav.navigateTo(createApplicationView);
+                }
+            });
+
+            Button editUserGroupButton = new Button("Edit user group");
+            editUserGroupButton.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    Object selected = ((SingleSelectionModel) userGroupTable.getSelectionModel()).getSelectedRow();
+
+                    if (selected != null) {
+                        selectedApplication = new ApplicationRow(selected.toString());
+                        System.out.println("Selected application id: " + selectedApplication.id);
+                        tableContainer.removeAllItems();
+                        nav.navigateTo(editApplicationView);
+                    } else {
+                        System.out.println("Nothing selected.");
+                    }
+                }
+            });
+            
+            Button deleteUserGroupButton = new Button("Delete user group");
+            deleteUserGroupButton.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    Object selected = ((SingleSelectionModel) userGroupTable.getSelectionModel()).getSelectedRow();
+                    
+                    if (selected != null) {
+                        selectedApplication = new ApplicationRow(selected.toString(), false);
+                        subConfirmWindow.setHeight(250,Unit.PIXELS);
+                        subConfirmWindow.setWidth(350,Unit.PIXELS);
+                        subConfirmWindow.setResizable(false);
+
+                        GridLayout subConfirmLayout = new GridLayout(1,4);
+                        subConfirmLayout.setMargin(true);
+                        subConfirmLayout.setSizeFull();
+                        subConfirmWindow.setContent(subConfirmLayout);
+
+                        // Put some components in it
+                        Label titelConfirmWindow = new Label("Delete user group");
+                        subConfirmLayout.addComponent(titelConfirmWindow, 0, 0);
+                        Label contentConfirmWindow = new Label("You are about to delete "+selectedUserGroup.name+"!\nAre you sure?");
+                        subConfirmLayout.addComponent(contentConfirmWindow, 0, 1);
+                        
+                        Button confirmButton = new Button("Yes");
+                        confirmButton.addClickListener(new Button.ClickListener() {
+                            @Override
+                            public void buttonClick(Button.ClickEvent event) {
+                                
+                                GridLayout subExtraConfirmLayout = new GridLayout(1,3);
+                                subExtraConfirmLayout.setMargin(true);
+                                subExtraConfirmLayout.setSizeFull();
+                                subConfirmWindow.setContent(subExtraConfirmLayout);
+                                
+                                Label ConfirmWindowLabel = new Label("This will also delete all \n"
+                                                                    +"users that are still part of "+selectedUserGroup.name);
+                                subExtraConfirmLayout.addComponent(ConfirmWindowLabel, 0, 0);
+                                Label contentConfirmWindow = new Label("\nAre you sure?");
+                                subExtraConfirmLayout.addComponent(contentConfirmWindow, 0, 1);
+                                
+                                Button confirmExtra = new Button("Yes");
+                                confirmExtra.addClickListener(new Button.ClickListener() {
+                                    @Override
+                                    public void buttonClick(Button.ClickEvent event) {
+                                        if (administration.user_group.remove(selectedUserGroup.id)) {
+                                            tableContainer.removeItem(selected);
+                                            subConfirmWindow.close();
+                                        } else {
+                                        }
+                                    }
+                                });
+                                
+                                Button declineButton = new Button("No");
+                                declineButton.addClickListener(new Button.ClickListener() {
+                                    @Override
+                                    public void buttonClick(Button.ClickEvent event) {
+                                        subConfirmWindow.close();
+                                    }
+                                });
+                                HorizontalLayout bLayout = new HorizontalLayout();
+                                bLayout.addComponent(confirmExtra);
+                                bLayout.addComponent(declineButton);
+                        
+                                 subExtraConfirmLayout.addComponent(bLayout, 0, 2);
+                                // Center it in the browser window
+                                subConfirmWindow.center();
+
+                                // Open it in the UI
+                                
+//                                addWindow(subConfirmWindow);
+//                                
+                            }
+                        });
+                                
+                        Button declineButton = new Button("No");
+                        declineButton.addClickListener(new Button.ClickListener() {
+                            @Override
+                            public void buttonClick(Button.ClickEvent event) {
+                                subConfirmWindow.close();
+                            }
+                        });
+                        
+                        //Adding buttons to the window
+                        HorizontalLayout bLayout = new HorizontalLayout();
+                        bLayout.addComponent(confirmButton);
+                        bLayout.addComponent(declineButton);
+                        
+                        subConfirmLayout.addComponent(bLayout, 0, 2);
+                        // Center it in the browser window
+                        subConfirmWindow.center();
+
+                        // Open it in the UI
+                        addWindow(subConfirmWindow);
+                    
+                            //If user removed
+                    } else {
+                            //If user not removed
+                    }
+                }
+            });
+            
+            //Adding the buttons to the layout
+            buttonLayout.addComponent(createUserGroupButton);
+            buttonLayout.addComponent(editUserGroupButton);
+            buttonLayout.addComponent(deleteUserGroupButton);
+            buttonLayout.addComponent(back);
+            UserGroupsLayout.addComponent(buttonLayout, 0, 2);
+        }
+
+        @Override
+        public void enter(ViewChangeListener.ViewChangeEvent event) {
+            if (user != null && user.is_authenticated) {
+                if (user.user_group.manage_companies) {
+
+                    administration = new Administration(user.user_group);
+                    
+                    for (UserGroups UserRow : administration.object_collections.user_groups()) {
+                        Item userItem = tableContainer.addItem(UserRow.id);
+                        userItem.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(UserRow.id);
+                        userItem.getItemProperty(this.NAME_COLUMN_IDENTIFIER).setValue(UserRow.name);
+                        userItem.getItemProperty(this.VIEW_LOGS_COLUMN_IDENTIFIER).setValue(UserRow.view_logs);
+                        userItem.getItemProperty(this.MANAGE_APPLICATIONS_COLUMN_IDENTIFIER).setValue(UserRow.manage_applications);
+                        userItem.getItemProperty(this.MANAGE_USERS_COLUMN_IDENTIFIER).setValue(UserRow.manage_users);
+                        userItem.getItemProperty(this.MANAGE_COMPANIES_COLUMN_IDENTIFIER).setValue(UserRow.manage_companies);
+                        userItem.getItemProperty(this.MANAGE_GROUPS_COLUMN_IDENTIFIER).setValue(UserRow.manage_groups);
+                    }
+                } else {
+                    nav.navigateTo(logsView);
+                }
+            } else {
+                nav.navigateTo(loginView);
+            }
+        }
+    }
+    
+    //ManageUserGroup end
+    
     
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
     @VaadinServletConfiguration(ui = MyUI.class, productionMode = false)
