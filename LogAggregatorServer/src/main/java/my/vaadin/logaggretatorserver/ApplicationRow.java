@@ -96,7 +96,7 @@ public class ApplicationRow {
         return null;
     }
 
-    private LogRow[] get_logs() {
+    public LogRow[] get_logs() {
         return get_logs(this.id);
     }
 }
