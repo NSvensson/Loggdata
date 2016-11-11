@@ -5,35 +5,43 @@
  */
 package test_selenium;
 
+import java.util.concurrent.TimeUnit;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.junit.Assert.*;
+import org.junit.FixMethodOrder;
+import org.junit.runners.MethodSorters;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+
 /**
  *
  * @author josanbir
  */
-
-
-     import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
-import org.openqa.selenium.By;
-
-     import org.openqa.selenium.WebDriver;
-
-     import org.openqa.selenium.firefox.FirefoxDriver;
-
-     // Import package pageObject.*
-
-     
-
-     import test_selenium.Login_page;
-
-public class PageObjectModel {
-
-     private static WebDriver driver = null;
-     public static  String str = "admin";
-
-   public static void main(String[] args) {
-
-     //WebDriver driver;
-System.setProperty("webdriver.gecko.driver", "src/test_selenium/geckodriver");
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+public class GUIJUnitTest {
+    private static WebDriver driver = null;
+    
+    public GUIJUnitTest() {
+    }
+    
+    @BeforeClass
+    public static void setUpClass() {
+    }
+    
+    @AfterClass
+    public static void tearDownClass() {
+    }
+    
+    @Before
+    public void setUp() {
+        
+        System.setProperty("webdriver.gecko.driver", "src/test_selenium/geckodriver");
         driver = new FirefoxDriver();
 // Wait For Page To Load
 
@@ -43,12 +51,21 @@ System.setProperty("webdriver.gecko.driver", "src/test_selenium/geckodriver");
         driver.get("http://localhost:8080/LogAggregatorServer/");
         driver.manage().window().maximize();
         driver.manage().timeouts().implicitlyWait(100, TimeUnit.SECONDS);
+    }
+    
+    @After
+    public void tearDown() {
+        System.out.println(" Logout Successfully");
 
-     // Use page Object library now
+    //driver.quit();
+    }
 
-     
-
-     Login_page.txtbx_UserName(driver).sendKeys(str);
+    // TODO add test methods here.
+    // The methods must be annotated with annotation @Test. For example:
+    //
+    @Test
+     public void Login_test() {
+         Login_page.txtbx_UserName(driver).sendKeys("admin");
 
      Login_page.txtbx_Password(driver).sendKeys("admin");
 
@@ -58,9 +75,19 @@ System.setProperty("webdriver.gecko.driver", "src/test_selenium/geckodriver");
      Assert.assertTrue(verifytext.toLowerCase().contains("your log"));
      System.out.println(" Login Successfully" +  verifytext);
      
-     
      ManageUserPage.Managa_User(driver).click();
+     
+     String verify_crp = driver.findElement(By.xpath("//span[contains(text(), 'Create user')]")).getText();
+     Assert.assertTrue(verify_crp.toLowerCase().contains("create user"));
+     System.out.println(" entered users page" +  verify_crp);
+     
      ManageUserPage.Create_User(driver).click();
+     
+     String enter_crp = driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[2]/div/div[1]/div/div[2]/div")).getText();
+     Assert.assertTrue(enter_crp.toLowerCase().contains("create user"));
+     System.out.println(" entered create users menu" +  enter_crp);
+     
+     
      ManageUserPage.First_name(driver).sendKeys("chu");
      ManageUserPage.last_name(driver).sendKeys("chu");
      ManageUserPage.E_mail(driver).sendKeys("chuchu@gmail");
@@ -73,16 +100,9 @@ System.setProperty("webdriver.gecko.driver", "src/test_selenium/geckodriver");
      ManageUserPage.just_click_anywhere(driver).click();
      ManageUserPage.Create(driver).click();
      ManageUserPage.Back(driver).click();
-     
      ManageUserPage.Back_frm_userspage(driver).click();
      ManageUserPage.Logout(driver).click();
-     
-     //Home_Page.lnk_LogOut(driver).click(); 
-     
-     System.out.println(" Logout Successfully");
-
-     //driver.quit();
-
      }
-
+     
+     
 }
