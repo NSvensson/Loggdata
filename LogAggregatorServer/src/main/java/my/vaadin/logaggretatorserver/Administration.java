@@ -910,7 +910,8 @@ public class Administration {
         
         //Remove company method start.
         /**
-         * Removes the company related to the provided id along with all of the users and applications related to this application.
+         * Removes the company related to the provided id along with all of the users and applications related to this company.
+         * The main administrator company can't be removed.
          * 
          * @param id Id related to the company being removed.
          * @return true if the company was removed or doesn't exist, false if there was an issue.
@@ -1123,14 +1124,29 @@ public class Administration {
 
         //Remove user group method start.
         /**
-         * Removes the user group related to the provided id, not being the main administration user group id.
+         * Removes the user group related to the provided id along with all users related to this user group.
+         * The main administration user group can't however be removed.
          * 
          * @param id The id related to the user group being removed.
          * @return true if the user group was removed or doesn't exist, false if there was an issue.
          */
         public boolean remove(String id) {
             if (this.user_groups.manage_groups && id != null && !id.equals(this.settings.ADMINISTRATOR_USER_GROUP)) {
+                String[] columnQuery = { "id" };
+
                 HashMap whereQuery = new HashMap();
+                whereQuery.put("user_group_id", id);
+
+                database_connection.connect();
+                String[][] select = database_connection.select(columnQuery, "user", whereQuery);
+
+                if (select != null && select.length >= 1 && select[0].length == columnQuery.length) {
+                    for (String[] row : select) {
+                        user.remove(row[0]);
+                    }
+                }
+                
+                whereQuery.clear();
                 whereQuery.put("id", id);
                 
                 database_connection.connect();

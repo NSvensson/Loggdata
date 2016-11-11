@@ -24,7 +24,7 @@ public class DataManaging {
         Properties prop = new Properties();
         OutputStream output = null;
         
-        try{
+        try {
             output = new FileOutputStream(this.FILE_PATH);
             
             prop.setProperty(this.LOG_URI, log_uri);
