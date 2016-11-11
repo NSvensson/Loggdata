@@ -38,7 +38,7 @@ public class DataManaging {
                 application_name,
                 application_source_uri,
                 responses.application_api_key,
-                update_interval,
+                update_interval_calculated,
                 log_handler.last_read_line_one,
                 log_handler.last_read_line_two,
                 log_handler.last_read_line_three

@@ -173,7 +173,14 @@ public final class Configurations {
                 properties_input_stream.close();
                 
                 if (application_id != null) {
-                    if (application_IDs == null || application_IDs.length == 0) {
+                    if (application_IDs == null ||
+                        application_IDs.length == 0 || (
+                            application_IDs.length == 1 && (
+                                application_IDs[0] == null ||
+                                application_IDs[0].length() == 0
+                            )
+                        )
+                    ) {
                         properties.setProperty(KEY_APPLICATION_IDS, application_id);
                         application_IDs = new String[] { application_id };
                     } else {
@@ -182,6 +189,8 @@ public final class Configurations {
                             application_id_string += existing_application_id + APPLICATION_SEPERATOR;
                         }
                         application_id_string += application_id;
+                        
+                        properties.setProperty(KEY_APPLICATION_IDS, application_id_string);
                         application_IDs = application_id_string.split(APPLICATION_SEPERATOR);
                     }
                 } else {
@@ -189,7 +198,7 @@ public final class Configurations {
                     application_IDs = null;
                 }
                 
-                properties_output_stream = new FileOutputStream(properties_file);
+                properties_output_stream = new FileOutputStream(CLIENT_CONFIGURATIONS_FILE_PATH);
                 properties.store(properties_output_stream, null);
                 
             } catch (IOException e) {
