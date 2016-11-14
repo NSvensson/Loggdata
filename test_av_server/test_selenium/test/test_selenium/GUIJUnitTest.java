@@ -93,6 +93,33 @@ public class GUIJUnitTest {
      ManageCompaniesPage.Enter_Details(driver).sendKeys("soft");
      ManageCompaniesPage.Click_create(driver).click();
      ManageCompaniesPage.Click_back(driver).click();
+     
+     //---------------------------edit company-----------------------------------
+     
+     ManageCompaniesPage.select_company_to_edit(driver).click();
+     
+     ManageCompaniesPage.Click_edit_company(driver).click();
+     
+     String verify_enter_edit = ManageCompaniesPage.entered_edit_company(driver).getText();
+     Assert.assertTrue(verify_enter_edit.toLowerCase().contains("company name"));
+     System.out.println("entered edit company grid" +  verify_enter_edit);
+     
+     
+     ManageCompaniesPage.Click_to_edit_company_name(driver).sendKeys("pnova");
+     
+     ManageCompaniesPage.Click_to_edit_website(driver).sendKeys("pnova.se");
+     
+     ManageCompaniesPage.Click_to_edit_details(driver).sendKeys("soft");
+     
+     ManageCompaniesPage.Click_done(driver).click();
+     
+     ManageCompaniesPage.Click_back_edit(driver).click();
+     
+     
+     
+     
+     
+     
      ManageCompaniesPage.Click_back_again(driver).click();
      ManageUserPage.Logout(driver).click();
      
@@ -138,7 +165,8 @@ public class GUIJUnitTest {
      ManageUserPage.just_click_anywhere(driver).click();
      ManageUserPage.Create(driver).click();
      ManageUserPage.Back(driver).click();
-     ManageUserPage.Back_frm_userspage(driver).click();
+     //ManageUserPage.Back_frm_userspage(driver).click();
+     ManageCompaniesPage.Click_back_again(driver).click();
      ManageUserPage.Logout(driver).click(); 
      }
 
