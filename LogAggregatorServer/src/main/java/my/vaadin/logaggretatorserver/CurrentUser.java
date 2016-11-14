@@ -118,8 +118,4 @@ public class CurrentUser {
             this.applications = results;
         }
     }
-    
-//    private ApplicationRow[] available_applications() {
-//        return available_applications(this.company.id);
-//    }
 }

@@ -438,9 +438,9 @@ public class Administration {
          * @param name The name for the new application.
          * @param log_type What log type this application has - can be null.
          * @param update_interval The amount of seconds the interval will be in between each log update.
-         * @return The API key related to the application created.
+         * @return An ApplicationRow object containing the information for the application created, returns null if there was an issue.
          */
-        public String create(String company_id, String name, String log_type, String update_interval) {
+        public ApplicationRow create(String company_id, String name, String log_type, String update_interval) {
             if (user_groups.manage_applications) {
                 boolean proceed = true;
                 database_connection.connect();
@@ -514,7 +514,7 @@ public class Administration {
                         
                         database_connection.update(columnQuery, values, "application", whereQuery);
                         database_connection.close();
-                        return api_key;
+                        return new ApplicationRow(created_id, false);
                     }
                     
                     database_connection.close();

@@ -2,6 +2,12 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/home/max/NetBeansProjects/LogAggregator/LogAggregatorClient/src/logaggregatorclient/GUI.java</file>
+            <file>file:/home/max/NetBeansProjects/LogAggregator/LogAggregatorClient/src/logaggregatorclient/Configurations.java</file>
+            <file>file:/home/max/NetBeansProjects/LogAggregator/LogAggregatorClient/src/logaggregatorclient/Connections.java</file>
+            <file>file:/home/max/NetBeansProjects/LogAggregator/LogAggregatorClient/src/logaggregatorclient/AutomaticUpdate.java</file>
+            <file>file:/home/max/NetBeansProjects/LogAggregator/LogAggregatorClient/src/logaggregatorclient/DataManaging.java</file>
+        </group>
     </open-files>
 </project-private>

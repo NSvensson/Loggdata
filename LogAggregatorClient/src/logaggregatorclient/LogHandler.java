@@ -21,11 +21,26 @@ public class LogHandler {
     the log files given.
     */
     
-    public String zip_path = null;
-
+    public final String COMPLETE_ZIP_PATH;
+    private final String COMPLETE_LOG_PATH;
+    
+    private final String ZIP_PATH = "./";
+    private final String ZIP_NAME = "PackedLog";
+    private final String ZIP_FILE_TYPE = ".zip";
+    
+    private final String LOG_PATH = "./";
+    private final String LOG_NAME = "Log";
+    private final String LOG_FILE_TYPE = ".txt";
+    
     public String last_read_line_one = null;
     public String last_read_line_two = null;
     public String last_read_line_three = null;
+    
+    public LogHandler(String application_id) {
+        
+        this.COMPLETE_ZIP_PATH = this.ZIP_PATH + this.ZIP_NAME + application_id + this.ZIP_FILE_TYPE;
+        this.COMPLETE_LOG_PATH = this.LOG_PATH + this.LOG_NAME + this.LOG_FILE_TYPE;
+    }
     
     public void read(String source_URI, String line_one, String line_two, String line_three) {
         /*
@@ -125,22 +140,18 @@ public class LogHandler {
     }
     
     public void packLog(String[][] stringArray) {
-        String logName = "Log";
-        String logFileType = ".txt";
-        String zipName = "PackedLog";
-        this.zip_path = "./" + zipName + ".zip";
         try {
-            String logg = "";
+            String log = "";
 
             for (String[] row : stringArray) {
                 if (row == null) break;
                 for (String value : row) {
-                    logg += value;
+                    log += value;
                 }
-                logg += "\n";
+                log += "\n";
             }
 
-            File file = new File("./" + logName + logFileType);
+            File file = new File(this.COMPLETE_LOG_PATH);
 
             // if file doesnt exists, then create it
             if (!file.exists()) {
@@ -149,7 +160,7 @@ public class LogHandler {
 
             FileWriter fw = new FileWriter(file.getAbsoluteFile());
             BufferedWriter bw = new BufferedWriter(fw);
-            bw.write(logg);
+            bw.write(log);
             bw.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -159,11 +170,11 @@ public class LogHandler {
 
         try {
 
-            FileOutputStream fos = new FileOutputStream(this.zip_path);
+            FileOutputStream fos = new FileOutputStream(this.COMPLETE_ZIP_PATH);
             ZipOutputStream zos = new ZipOutputStream(fos);
-            ZipEntry ze = new ZipEntry(logName + logFileType);
+            ZipEntry ze = new ZipEntry(this.LOG_NAME + this.LOG_FILE_TYPE);
             zos.putNextEntry(ze);
-            FileInputStream in = new FileInputStream("./" + logName + logFileType);
+            FileInputStream in = new FileInputStream(this.COMPLETE_LOG_PATH);
 
             int len;
             while ((len = in.read(buffer)) > 0) {
