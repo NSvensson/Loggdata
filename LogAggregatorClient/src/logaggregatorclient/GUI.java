@@ -20,6 +20,8 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.control.Alert;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 
 public class GUI extends Application {
     
@@ -48,7 +50,6 @@ public class GUI extends Application {
             primaryStage.setScene(noConfigScene(primaryStage));
         }
         
-//        primaryStage.setTitle("Login");
         primaryStage.show();
     }
     
@@ -76,8 +77,31 @@ public class GUI extends Application {
         return new Scene(grid);
     }
     
+    private Scene startupMenu(Stage primaryStage) {
+        Configurations.Application[] applications = Configurations.getApplicationConfigurations();
+        
+        GridPane grid = new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(25, 25, 25, 25));
+        
+        Text title = new Text("Logs on this device.");
+        grid.add(title, 0, 0, 5, 1);
+        
+        TableView<Configurations.Application> table = new TableView();
+        
+        TableColumn application_name_column = new TableColumn("Application name");
+        TableColumn update_interval_column = new TableColumn("Update interval");
+        TableColumn local_source_column = new TableColumn("Local source");
+        
+        
+        
+        return new Scene(grid);
+    }
+    
     private Scene login(Stage primaryStage){
-    GridPane grid = new GridPane();
+        GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
         grid.setHgap(10);
         grid.setVgap(10);
@@ -116,9 +140,9 @@ public class GUI extends Application {
     private Scene app(Stage primaryStage) {
         final FileChooser fileChooser = new FileChooser();
         final ComboBox interval = new ComboBox();
-        interval.getItems().addAll(this.COMBOBOX_HOURS,
-                                   this.COMBOBOX_MINUTES,
-                                   this.COMBOBOX_SECONDS);
+        interval.getItems().addAll(COMBOBOX_HOURS,
+                                   COMBOBOX_MINUTES,
+                                   COMBOBOX_SECONDS);
         interval.getSelectionModel().selectFirst();
         
         primaryStage.setTitle("Register service");

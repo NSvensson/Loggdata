@@ -235,6 +235,7 @@ public final class Configurations {
     }
     
     public static Application[] getApplicationConfigurations() {
+        readPropertiesFile();
         
         int id_amount;
         if (application_IDs != null && (id_amount = application_IDs.length) >= 1) {
