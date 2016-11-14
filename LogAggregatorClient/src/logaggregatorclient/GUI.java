@@ -2,6 +2,7 @@ package logaggregatorclient;
 
 import java.io.File;
 import javafx.application.Application;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -27,7 +28,13 @@ public class GUI extends Application {
     
     private String username = null;
     private String password = null;
-
+    
+    public Configurations.Application[] applications;
+    private final AutomaticUpdate automatic_update = new AutomaticUpdate();
+    
+    private final Button start_updates_button = new Button("Start updates");
+    private final Button stop_updates_button = new Button("Stop updates");
+    
     public static final String COMBOBOX_HOURS = "Hours";
     public static final String COMBOBOX_MINUTES = "Minutes";
     public static final String COMBOBOX_SECONDS = "Seconds";
@@ -42,10 +49,27 @@ public class GUI extends Application {
         
         Maybe a login window or something similar could be created here.
         */
-        Configurations.readPropertiesFile();
+        this.applications = Configurations.getApplicationConfigurations();
+        
+        this.start_updates_button.setDisable(false);
+        this.start_updates_button.setOnAction((ActionEvent e) -> {
+            automatic_update.loadApplications();
+            automatic_update.startAllUpdaters();
+            
+            if (stop_updates_button.isDisable()) stop_updates_button.setDisable(false);
+            if (!start_updates_button.isDisable()) start_updates_button.setDisable(true);
+        });
+        
+        this.stop_updates_button.setDisable(true);
+        this.stop_updates_button.setOnAction((ActionEvent e) -> {
+            automatic_update.stopAllUpdaters();
+            
+            if (start_updates_button.isDisable()) start_updates_button.setDisable(false);
+            if (!stop_updates_button.isDisable()) stop_updates_button.setDisable(true);
+        });
         
         if (Configurations.client_configurations_found) {
-            primaryStage.setScene(betaMenu(primaryStage));
+            primaryStage.setScene(startupMenu(primaryStage));
         } else {
             primaryStage.setScene(noConfigScene(primaryStage));
         }
@@ -53,7 +77,73 @@ public class GUI extends Application {
         primaryStage.show();
     }
     
-    private Scene betaMenu(Stage primaryStage) {
+    private Scene startupMenu(Stage primaryStage) {
+        GridPane grid = new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(25, 25, 25, 25));
+        
+        Text title = new Text("Application logs on this device.");
+        title.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        grid.add(title, 0, 0, 5, 1);
+        
+        TableView<Configurations.Application> table = new TableView();
+        for (Configurations.Application application : this.applications) {
+            table.getItems().add(application);
+        }
+        
+        TableColumn<Configurations.Application, String> application_name_column = new TableColumn<>("Application name");
+        application_name_column.setMinWidth(150);
+        application_name_column.setCellValueFactory(cell_data -> {
+            return new ReadOnlyStringWrapper(cell_data.getValue().application_name);
+        });
+        
+        TableColumn<Configurations.Application, String> update_interval_column = new TableColumn<>("Update interval");
+        update_interval_column.setMinWidth(150);
+        update_interval_column.setCellValueFactory(cell_data -> {
+            return new ReadOnlyStringWrapper(cell_data.getValue().update_interval);
+        });
+        
+        TableColumn<Configurations.Application, String> local_source_column = new TableColumn<>("Local source");
+        local_source_column.setMinWidth(500);
+        local_source_column.setCellValueFactory(cell_data -> {
+            return new ReadOnlyStringWrapper(cell_data.getValue().log_uri);
+        });
+        
+        table.getColumns().addAll(application_name_column, update_interval_column, local_source_column);
+        grid.add(table, 0, 1, 5, 1);
+        
+        HBox start_updates_button_hbox = new HBox(10);
+        start_updates_button_hbox.setAlignment(Pos.BOTTOM_LEFT);
+        start_updates_button_hbox.getChildren().add(this.start_updates_button);
+        grid.add(start_updates_button_hbox, 0, 2, 1, 1);
+        
+        HBox stop_updates_button_hbox = new HBox(10);
+        stop_updates_button_hbox.setAlignment(Pos.BOTTOM_LEFT);
+        stop_updates_button_hbox.getChildren().add(this.stop_updates_button);
+        grid.add(stop_updates_button_hbox, 1, 2, 1, 1);
+        
+        Button new_application_button = new Button("New application");
+        new_application_button.setOnAction(e -> primaryStage.setScene(loginScene(primaryStage)));
+        
+        HBox new_application_button_hbox = new HBox(10);
+        new_application_button_hbox.setAlignment(Pos.BOTTOM_RIGHT);
+        new_application_button_hbox.getChildren().add(new_application_button);
+        grid.add(new_application_button_hbox, 4, 2, 1, 1);
+        
+        Button change_url_botton = new Button("Change server URL");
+        change_url_botton.setOnAction(e -> primaryStage.setScene(configInputPromptScene(primaryStage)));
+        
+        HBox change_url_botton_hbox = new HBox(10);
+        change_url_botton_hbox.setAlignment(Pos.BOTTOM_RIGHT);
+        change_url_botton_hbox.getChildren().add(change_url_botton);
+        grid.add(change_url_botton_hbox, 3, 2, 1, 1);
+        
+        return new Scene(grid, 860, 400);
+    }
+    
+    private Scene loginScene(Stage primaryStage){
         connections.checkConfigurations();
         
         GridPane grid = new GridPane();
@@ -62,52 +152,7 @@ public class GUI extends Application {
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
         
-        Text titel = new Text("what do you want to do");
-        grid.add(titel, 0, 0);
-        
-        Button next = new Button("To login");
-        grid.add(next, 1, 1);
-        next.setOnAction(e-> primaryStage.setScene(login(primaryStage)));
-        
-        
-        Button update = new Button("Update log");
-        grid.add(update, 0, 1);
-        update.setOnAction(e -> betaAutomaticUpdates(primaryStage));
-        
-        return new Scene(grid);
-    }
-    
-    private Scene startupMenu(Stage primaryStage) {
-        Configurations.Application[] applications = Configurations.getApplicationConfigurations();
-        
-        GridPane grid = new GridPane();
-        grid.setAlignment(Pos.CENTER);
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(25, 25, 25, 25));
-        
-        Text title = new Text("Logs on this device.");
-        grid.add(title, 0, 0, 5, 1);
-        
-        TableView<Configurations.Application> table = new TableView();
-        
-        TableColumn application_name_column = new TableColumn("Application name");
-        TableColumn update_interval_column = new TableColumn("Update interval");
-        TableColumn local_source_column = new TableColumn("Local source");
-        
-        
-        
-        return new Scene(grid);
-    }
-    
-    private Scene login(Stage primaryStage){
-        GridPane grid = new GridPane();
-        grid.setAlignment(Pos.CENTER);
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(25, 25, 25, 25));
-        
-        Text login_title = new Text("Welcome");
+        Text login_title = new Text("Login");
         login_title.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         grid.add(login_title, 0, 0, 2, 1);
         
@@ -121,23 +166,32 @@ public class GUI extends Application {
         grid.add(password_passwordfield, 1, 2);
         
         Button login_button = new Button("Login");
-        HBox login_button_hbox = new HBox(10);
-        login_button_hbox.setAlignment(Pos.BOTTOM_RIGHT);
-        login_button_hbox.getChildren().add(login_button);
-        grid.add(login_button_hbox, 1, 4);
         
+        HBox login_button_hbox = new HBox(10);
         login_button.setOnAction(e ->
                 this.loginCheck(username_textfield.getText(),
                                 password_passwordfield.getText(),
                                 primaryStage)
         );
         
+        login_button_hbox.setAlignment(Pos.BOTTOM_RIGHT);
+        login_button_hbox.getChildren().add(login_button);
+        grid.add(login_button_hbox, 1, 4);
+        
+        Button return_button = new Button("Return");
+        return_button.setOnAction(e -> primaryStage.setScene(startupMenu(primaryStage)));
+        
+        HBox return_button_hbox = new HBox(10);
+        return_button_hbox.setAlignment(Pos.BOTTOM_LEFT);
+        return_button_hbox.getChildren().add(return_button);
+        grid.add(return_button_hbox, 0, 4);
+        
         Scene login = new Scene(grid, 350, 270);
         
         return login;
     }
     
-    private Scene app(Stage primaryStage) {
+    private Scene newApplicationScene(Stage primaryStage) {
         final FileChooser fileChooser = new FileChooser();
         final ComboBox interval = new ComboBox();
         interval.getItems().addAll(COMBOBOX_HOURS,
@@ -174,7 +228,6 @@ public class GUI extends Application {
             public void handle(final ActionEvent e){
                 File logfile = fileChooser.showOpenDialog(primaryStage);
                 if (logfile != null){
-//                  texser = logfile.getAbsolutePath();
                   textfield_application_source.setText(logfile.getAbsolutePath());
                 }
                 
@@ -183,18 +236,30 @@ public class GUI extends Application {
         
         Button exportbtn = new Button("Export");
         grid.add(exportbtn, 0, 6);
-        exportbtn.setOnAction(e ->
-                this.newApplication(primaryStage,
-                                    textfield_application_name.getText(),
-                                    textfield_application_source.getText(),
-                                    textfield_update_interval.getText(),
-                                    interval.getValue().toString())
-        );
+        exportbtn.setOnAction((ActionEvent e) -> {
+            String tmpName, tmpSource, tmpInterval;
+            if ((tmpName = textfield_application_name.getText()) != null &&
+                 tmpName.length() >= 1 && (
+                 tmpSource = textfield_application_source.getText()) != null &&
+                 tmpSource.length() >= 1 && (
+                 tmpInterval = textfield_update_interval.getText()) != null &&
+                 tmpInterval.length() >= 1
+            ) {
+                
+                exportbtn.setDisable(true);
+                newApplication(tmpName,
+                               tmpSource,
+                               tmpInterval,
+                               interval.getValue().toString());
+                applications = Configurations.getApplicationConfigurations();
+                primaryStage.setScene(startupMenu(primaryStage));
+            }
+        });
         
-        Button logout = new Button("Exit");
+        Button logout = new Button("Return");
         grid.add(logout,1,6);
-        logout.setOnAction(e -> System.exit(0));
-       
+        logout.setOnAction(e -> primaryStage.setScene(startupMenu(primaryStage)));
+        
         Scene app = new Scene(grid);
         
         return app;
@@ -206,7 +271,7 @@ public class GUI extends Application {
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
-
+        
         Text prompt_title = new Text("Warning!");
         prompt_title.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         grid.add(prompt_title, 0, 0, 2, 1);
@@ -218,17 +283,17 @@ public class GUI extends Application {
         grid.add(prompt_question, 0, 2, 2, 1);
 
         Button accept_button = new Button("Proceed");
-        accept_button.setOnAction(e -> primaryStage.setScene(configInputPrompt(primaryStage)));
+        accept_button.setOnAction(e -> primaryStage.setScene(configInputPromptScene(primaryStage)));
         grid.add(accept_button, 0, 3);
-
-        Button decline_button = new Button("Quit");
+        
+        Button decline_button = new Button("Exit");
         decline_button.setOnAction(e -> System.exit(0));
         grid.add(decline_button, 1, 3);
 
         return new Scene(grid);
     }
 
-    private Scene configInputPrompt(Stage primaryStage) {
+    private Scene configInputPromptScene(Stage primaryStage) {
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
         grid.setHgap(10);
@@ -243,17 +308,18 @@ public class GUI extends Application {
 
         Button accept_button = new Button("Done");
         accept_button.setOnAction((ActionEvent e) -> {
-            Configurations.generateClientPropertiesFile(url_input.getText());
+            Configurations.changeServerURL(url_input.getText());
             Configurations.readPropertiesFile();
-            primaryStage.setScene(betaMenu(primaryStage));
+            applications = Configurations.getApplicationConfigurations();
+            primaryStage.setScene(startupMenu(primaryStage));
         });
         grid.add(accept_button, 0, 2);
-
-        Button decline_button = new Button("Quit");
-        decline_button.setOnAction(e -> System.exit(0));
+        
+        Button decline_button = new Button("Cancel");
+        decline_button.setOnAction(e -> primaryStage.setScene(loginScene(primaryStage)));
         grid.add(decline_button, 1, 2);
 
-        return new Scene(grid);
+        return new Scene(grid, 350, 270);
     }
 
     private void loginCheck(String username, String password, Stage primaryStage) {
@@ -266,7 +332,7 @@ public class GUI extends Application {
             this.password != null && this.password.length() >= 1) {
             
             if (this.connections.authenticate(this.username, this.password)) {
-                primaryStage.setScene(app(primaryStage));
+                primaryStage.setScene(newApplicationScene(primaryStage));
             } else {
                 if (this.connections.AUTHENTICATION_ERROR_MESSAGE != null) {
                     alert.setTitle("Invalid login");
@@ -275,14 +341,13 @@ public class GUI extends Application {
                 } else {
                     alert.setContentText("Couldn't connect to the URL provided\nin the configuration file.");
                     alert.show();
-                    primaryStage.setScene(configInputPrompt(primaryStage));
+                    primaryStage.setScene(configInputPromptScene(primaryStage));
                 }
             }
         }
     }
     
-    private void newApplication(Stage primaryStage,
-                                String application_name,
+    private void newApplication(String application_name,
                                 String application_source_uri,
                                 String update_interval,
                                 String interval_option) {
@@ -300,15 +365,6 @@ public class GUI extends Application {
                 update_interval,
                 interval_option
         );
-        
-        betaAutomaticUpdates(primaryStage);
-    }
-    
-    private void betaAutomaticUpdates(Stage primaryStage) {
-        primaryStage.close();
-        
-        AutomaticUpdate automatic_update = new AutomaticUpdate();
-        automatic_update.startAllUpdaters();
     }
     
     public static void main(String[] args) {

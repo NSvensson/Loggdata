@@ -13,7 +13,7 @@ public final class AutomaticUpdate {
     }
     
     public void loadApplications() {
-        if (Configurations.application_IDs.length >= 1) {
+        if (Configurations.application_IDs != null && Configurations.application_IDs.length >= 1) {
             this.application_updaters = new ApplicationUpdater[Configurations.application_IDs.length];
             
             Configurations.Application[] applications = Configurations.getApplicationConfigurations();
