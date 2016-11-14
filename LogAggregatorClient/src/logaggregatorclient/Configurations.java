@@ -148,6 +148,7 @@ public final class Configurations {
         } else {
             // Properties file not found error handeling here
             client_configurations_found = false;
+            generateClientPropertiesFile(server_url);
         }
     }
     
