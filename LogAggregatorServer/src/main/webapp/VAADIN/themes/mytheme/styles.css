@@ -12991,3 +12991,11 @@ div.v-layout.v-horizontal.v-widget {
 .mytheme .top_padding {
 	padding-top: 5px;
 }
+
+.mytheme .v-grid-cell.red {
+	background-color: #FFAAAA;
+}
+
+.mytheme .v-grid-cell.yellow {
+	background-color: #ffdb4d;
+}

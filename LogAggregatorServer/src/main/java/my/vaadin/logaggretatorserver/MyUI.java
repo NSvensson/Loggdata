@@ -27,6 +27,7 @@ import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
+import java.util.ArrayList;
 
 
 /**
@@ -146,8 +147,11 @@ public class MyUI extends UI {
         
         public final IndexedContainer tableContainer = new IndexedContainer();
         public final IndexedContainer comboBoxContainer = new IndexedContainer();
+        
         public final Grid logtable = new Grid(tableContainer);
+        
         public final ComboBox app_name = new ComboBox("Applications", comboBoxContainer);
+        
         public final Button manage_users = new Button("Manage users");
         public final Button manage_companies = new Button("Manage companies");
         public final Button manage_applications = new Button("Manage applications");
@@ -173,7 +177,7 @@ public class MyUI extends UI {
             addComponent(loglayout);
             setComponentAlignment(loglayout, Alignment.MIDDLE_CENTER);
 
-            final GridLayout gTitleLayout = new GridLayout(2,1);
+            final GridLayout gTitleLayout = new GridLayout(3,1);
             gTitleLayout.setStyleName("titel_padding");
             Label testLbl = new Label("Your log.");
             gTitleLayout.addComponent(testLbl,0,0);
@@ -281,6 +285,7 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            tableContainer.removeAllItems();
             if (user != null && user.is_authenticated) {
                 
                 String nonSpecifiedOption = "All applications";
@@ -296,7 +301,7 @@ public class MyUI extends UI {
                         
                         if (application.logs != null) {
                             for (LogRow log : application.logs) {
-                                Item newLog = tableContainer.getItem(tableContainer.addItem());
+                                Item newLog = tableContainer.addItem(log.id);
                                 newLog.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(application.id);
                                 newLog.getItemProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER).setValue(application.name);
                                 newLog.getItemProperty(this.DATE_COLUMN_NAME_IDENTIFIER).setValue(log.date);
@@ -325,6 +330,20 @@ public class MyUI extends UI {
                     if (!manage_usergroups.isVisible()) manage_usergroups.setVisible(true);
                     if (!manage_usergroups.isEnabled()) manage_usergroups.setEnabled(true);
                 }
+                
+                logtable.setCellStyleGenerator(rowRef -> {
+                        if (this.EVENT_COLUMN_NAME_IDENTIFIER.equals(rowRef.getPropertyId())) {
+                            String logEvent = rowRef.getItem()
+                                                    .getItemProperty(this.EVENT_COLUMN_NAME_IDENTIFIER)
+                                                    .getValue()
+                                                    .toString()
+                                                    .toLowerCase();
+                            
+                            if (logEvent.contains("error")) return "red";
+                            if (logEvent.contains("failure") || logEvent.contains("failed")) return "yellow";
+                            else return null;
+                        } else return null;
+                });
             } else {
                 nav.navigateTo(loginView);
             }
@@ -488,6 +507,7 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            tableContainer.removeAllItems();
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_users) {
 
@@ -1179,9 +1199,10 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            tableContainer.removeAllItems();
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_companies) {
-
+                    
                     administration = new Administration(user.user_group);
                     
                     for (CompanyRow companyRow : administration.object_collections.companies()) {
@@ -1628,8 +1649,9 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            tableContainer.removeAllItems();
             if (user != null && user.is_authenticated) {
-                if (user.user_group.manage_companies) {
+                if (user.user_group.manage_applications) {
 
                     administration = new Administration(user.user_group);
                     
@@ -1768,7 +1790,8 @@ public class MyUI extends UI {
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_applications) {
                     administration = new Administration(user.user_group);
-                    
+                     
+                   
                     for (CompanyRow company : administration.object_collections.companies()) {
                         Item newItem = company_container.addItem(company.id);
                         newItem.getItemProperty(this.NAME_COLUMN_IDENTIFIER).setValue(company.name);
@@ -2118,6 +2141,7 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            tableContainer.removeAllItems();
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_companies) {
 

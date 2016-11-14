@@ -57,7 +57,7 @@ public class GUIJUnitTest {
     public void tearDown() {
         System.out.println(" Logout Successfully");
 
-    //driver.quit();
+    driver.quit();
     }
 
     // TODO add test methods here.
@@ -75,11 +75,49 @@ public class GUIJUnitTest {
      Assert.assertTrue(verifytext.toLowerCase().contains("your log"));
      System.out.println(" Login Successfully" +  verifytext);
      
-     ManageUserPage.Managa_User(driver).click();
+     ManageCompaniesPage.Manage_Companies(driver).click();
+     
+     String verify_manage_comp = ManageCompaniesPage.entered_Manage_Companies(driver).getText();
+     Assert.assertTrue(verify_manage_comp.toLowerCase().contains("create company"));
+     System.out.println("entered manage companies page" +  verify_manage_comp);
+     
+     
+     ManageCompaniesPage.Create_Company(driver).click();
+     
+     String verify_enter_cc = ManageCompaniesPage.entered_create_Company_grid(driver).getText();
+     Assert.assertTrue(verify_enter_cc.toLowerCase().contains("company name"));
+     System.out.println("entered create company grid" +  verify_enter_cc);
+     
+     ManageCompaniesPage.Enter_Company_name(driver).sendKeys("enp");
+     ManageCompaniesPage.Enter_Website(driver).sendKeys("enp.se");
+     ManageCompaniesPage.Enter_Details(driver).sendKeys("soft");
+     ManageCompaniesPage.Click_create(driver).click();
+     ManageCompaniesPage.Click_back(driver).click();
+     ManageCompaniesPage.Click_back_again(driver).click();
+     ManageUserPage.Logout(driver).click();
+     
+     }
+     
+     
+     @Test
+     public void ManageUserPage_Test(){
+         
+     Login_page.txtbx_UserName(driver).sendKeys("admin");
+
+     Login_page.txtbx_Password(driver).sendKeys("admin");
+
+     Login_page.btn_LogIn(driver).click();
+     
+     String verifytext = driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[2]/div/div[2]/div/div[2]/div")).getText();
+     Assert.assertTrue(verifytext.toLowerCase().contains("your log"));
+     System.out.println(" Login Successfully" +  verifytext);
+      
+     
+    ManageUserPage.Managa_User(driver).click();
      
      String verify_crp = driver.findElement(By.xpath("//span[contains(text(), 'Create user')]")).getText();
      Assert.assertTrue(verify_crp.toLowerCase().contains("create user"));
-     System.out.println(" entered users page" +  verify_crp);
+     System.out.println(" entered manage users page" +  verify_crp);
      
      ManageUserPage.Create_User(driver).click();
      
@@ -101,8 +139,10 @@ public class GUIJUnitTest {
      ManageUserPage.Create(driver).click();
      ManageUserPage.Back(driver).click();
      ManageUserPage.Back_frm_userspage(driver).click();
-     ManageUserPage.Logout(driver).click();
+     ManageUserPage.Logout(driver).click(); 
      }
+
+
      
      
 }
