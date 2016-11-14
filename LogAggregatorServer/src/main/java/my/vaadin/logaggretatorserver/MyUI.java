@@ -87,6 +87,10 @@ public class MyUI extends UI {
     
     //LoginLayout start
     public class LoginLayout extends GridLayout implements View {
+        
+        public final TextField usernameTextField = new TextField("Username");
+        public final PasswordField passwordTextField = new PasswordField("Password");
+        
         public LoginLayout() {
             final GridLayout layout = new GridLayout(1,4);
             setWidth("100%");
@@ -97,25 +101,23 @@ public class MyUI extends UI {
             addComponent(layout);
             setComponentAlignment(layout, Alignment.MIDDLE_CENTER);
 
-            Label start = new Label("Login");
-            layout.addComponent(start, 0, 0);
-            layout.setComponentAlignment(start, Alignment.MIDDLE_CENTER);
+            Label startTitelLogin = new Label("Login");
+            layout.addComponent(startTitelLogin, 0, 0);
+            layout.setComponentAlignment(startTitelLogin, Alignment.MIDDLE_CENTER);
 
-            TextField usernametxf = new TextField("Username");
-            layout.addComponent(usernametxf,0,1);
-            layout.setComponentAlignment(usernametxf, Alignment.TOP_LEFT);
+            layout.addComponent(usernameTextField,0,1);
+            layout.setComponentAlignment(usernameTextField, Alignment.TOP_LEFT);
 
-            PasswordField passwordpwf = new PasswordField("Password");
-            layout.addComponent(passwordpwf,0,2);
-            layout.setComponentAlignment(passwordpwf, Alignment.TOP_LEFT);
+            layout.addComponent(passwordTextField,0,2);
+            layout.setComponentAlignment(passwordTextField, Alignment.TOP_LEFT);
 
             Button loginbtn = new Button("Login");
             loginbtn.addClickListener(new Button.ClickListener() {
                 @Override
                 public void buttonClick(Button.ClickEvent event) {
                     user = new CurrentUser(
-                            usernametxf.getValue(),
-                            DataManaging.hashString(passwordpwf.getValue()));
+                            usernameTextField.getValue(),
+                            DataManaging.hashString(passwordTextField.getValue()));
                     
                     if (user.is_authenticated) {
                         System.out.println("User authenticated.");
@@ -132,7 +134,8 @@ public class MyUI extends UI {
         
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
-            //LoginLayout entered.
+            usernameTextField.clear();
+            passwordTextField.clear();
         }
     }
     //LoginLayout end
@@ -418,8 +421,6 @@ public class MyUI extends UI {
                     nav.navigateTo(createUserView);
                 }
             });
-            buttonLayout.addComponent(createUser);
-            buttonLayout.addComponent(back);
 
             Button editUserButton = new Button("Edit user");
             editUserButton.addClickListener(new Button.ClickListener() {
@@ -500,8 +501,10 @@ public class MyUI extends UI {
                 }
             });
             
+            buttonLayout.addComponent(createUser);
             buttonLayout.addComponent(editUserButton);
             buttonLayout.addComponent(deleteUserButton);
+            buttonLayout.addComponent(back);
             userlayout.addComponent(buttonLayout, 0, 2);
         }
 
@@ -977,6 +980,14 @@ public class MyUI extends UI {
         
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            
+            userFnameField.clear();
+            userLnameField.clear();
+            userEmailField.clear();
+            userUnameField.clear();
+            userPwordField.clear();
+            userCPwordField.clear();
+            
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_users && selectedUser != null) {
                     company_name.removeAllItems();
@@ -1326,6 +1337,9 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            companyNameField.clear();
+            companyWebsiteField.clear();
+            companyDetailsField.clear();
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_companies) {
                     administration = new Administration(user.user_group);
@@ -1442,6 +1456,10 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            
+            companyNameField.clear();
+            companyWebsiteField.clear();
+            companyDetailsField.clear();
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_companies && selectedCompany != null) {
                     administration = new Administration(user.user_group);
@@ -1787,6 +1805,10 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            
+            applicationNameField.clear();
+            company_container.removeAllItems();
+            uppdateIntevalField.clear();
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_applications) {
                     administration = new Administration(user.user_group);
@@ -1923,6 +1945,10 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            
+            applicationNameField.clear();
+            company_container.removeAllItems();
+            uppdateIntevalField.clear();
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_applications) {
                     
@@ -2264,6 +2290,13 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            
+            userGroupNameField.clear();
+            viewLogsCheckbox.setValue(true);
+            manageApplicationCheckbox.setValue(false);
+            manageUsersCheckbox.setValue(false);
+            manageCompaniesCheckbox.setValue(false);
+            manageUserGroupsCheckbox.setValue(false);
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_companies) {
                     administration = new Administration(user.user_group);
@@ -2375,6 +2408,13 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            
+            userGroupNameField.clear();
+            viewLogsCheckbox.setValue(false);
+            manageApplicationCheckbox.setValue(false);
+            manageUsersCheckbox.setValue(false);
+            manageCompaniesCheckbox.setValue(false);
+            manageUserGroupsCheckbox.setValue(false);
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_companies) {
                     administration = new Administration(user.user_group);
