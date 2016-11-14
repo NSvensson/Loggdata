@@ -288,6 +288,7 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            logtable.deselectAll();
             tableContainer.removeAllItems();
             if (user != null && user.is_authenticated) {
                 
@@ -510,6 +511,8 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            
+            usertable.deselectAll();
             tableContainer.removeAllItems();
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_users) {
@@ -1210,6 +1213,7 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            companyTable.deselectAll();
             tableContainer.removeAllItems();
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_companies) {
@@ -1667,6 +1671,7 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            applicationTable.deselectAll();
             tableContainer.removeAllItems();
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_applications) {
@@ -2167,6 +2172,7 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            userGroupTable.deselectAll();
             tableContainer.removeAllItems();
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_companies) {
