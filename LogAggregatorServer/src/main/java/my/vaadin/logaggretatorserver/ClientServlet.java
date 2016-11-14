@@ -142,17 +142,18 @@ public class ClientServlet extends HttpServlet {
                 
                 Administration administration = new Administration(user.user_group);
                 
-                String api_key = administration.application.create(
+                ApplicationRow created_application = administration.application.create(
                         user.company.id,
                         request.getHeader("application-name"),
                         null,
                         request.getHeader("update-interval"));
 
-                if (api_key != null) {
+                if (created_application != null) {
                     System.out.println("New application created.");
                     response.addHeader("application-added", "true");
                     
-                    response.addHeader("api-key", api_key);
+                    response.addHeader("api-key", created_application.api_key);
+                    response.addHeader("application-id", created_application.id);
                 } else {
                     System.out.println("New application not created.");
                     response.addHeader("application-added", "false");
@@ -203,6 +204,7 @@ public class ClientServlet extends HttpServlet {
                 System.out.println("API key is valid.");
                 
                 response.addHeader("api-authenticated", "true");
+                response.addHeader("application-id", application.id);
                 response.addHeader("application-name", application.name);
                 response.addHeader("update-interval", application.update_interval);
 

@@ -72,7 +72,7 @@ public final class Connections {
         return false;
     }
     
-    public String new_application(String username, String password, String application_name, String update_interval) {
+    public ServerResponses new_application(String username, String password, String application_name, String update_interval) {
         try {
             URL url_object = new URL(this.url);
             HttpURLConnection connection = (HttpURLConnection) url_object.openConnection();
@@ -91,9 +91,13 @@ public final class Connections {
                         connection.getHeaderField("api-key") != null) {
                         
                         //Application added.
-                        String api_key = connection.getHeaderField("api-key");
+                        ServerResponses responses = new ServerResponses();
+                        
+                        responses.application_api_key = connection.getHeaderField("api-key");
+                        responses.application_id = connection.getHeaderField("application-id");
                         connection.disconnect();
-                        return api_key;
+                        
+                        return responses;
                     } else if (application_created_header.equals("false")) {
                         
                         //New application denied.
@@ -116,7 +120,7 @@ public final class Connections {
         return null;
     }
     
-    public void send_logs(String api_key, String packed_log_source) {
+    public ServerResponses send_logs(String api_key, String packed_log_source) {
         try {
             String boundary = "gg" + System.currentTimeMillis() + "gg";
             String LINE_FEED = "\r\n";
@@ -164,12 +168,31 @@ public final class Connections {
             
             if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 System.out.println("Server returned OK status.");
+                
+                ServerResponses responses = new ServerResponses();
+                
+                responses.application_id = connection.getHeaderField("application-id");
+                responses.application_name = connection.getHeaderField("application-name");
+                responses.application_update_interval = connection.getHeaderField("update-interval");
+                
                 connection.disconnect();
+                
+                return responses;
             } else {
                 System.out.println("Server returned non-OK status.");
             }
         } catch (Exception e) {
             System.out.println("Send logs exception caught: " + e);
         }
+        return null;
+    }
+    
+    public class ServerResponses {
+        
+        public String api_authenticated = null;
+        public String application_id = null;
+        public String application_name = null;
+        public String application_update_interval = null;
+        public String application_api_key = null;
     }
 }

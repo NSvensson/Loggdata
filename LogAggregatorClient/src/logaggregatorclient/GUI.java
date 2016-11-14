@@ -26,13 +26,11 @@ public class GUI extends Application {
     private String username = null;
     private String password = null;
 
-    private final String COMBOBOX_HOURS = "Hours";
-    private final String COMBOBOX_MINUTES = "Minutes";
-    private final String COMBOBOX_SECONDS = "Seconds";
+    public static final String COMBOBOX_HOURS = "Hours";
+    public static final String COMBOBOX_MINUTES = "Minutes";
+    public static final String COMBOBOX_SECONDS = "Seconds";
     
     private final Connections connections = new Connections();
-    private final LogHandler logs = new LogHandler();
-    private final DataManaging data_managing = new DataManaging();
     
     @Override
     public void start(Stage primaryStage) {
@@ -44,10 +42,10 @@ public class GUI extends Application {
         */
         Configurations.readPropertiesFile();
         
-        if (Configurations.server_URL == null) {
-            primaryStage.setScene(noConfigScene(primaryStage));
-        } else {
+        if (Configurations.client_configurations_found) {
             primaryStage.setScene(betaMenu(primaryStage));
+        } else {
+            primaryStage.setScene(noConfigScene(primaryStage));
         }
         
 //        primaryStage.setTitle("Login");
@@ -221,7 +219,7 @@ public class GUI extends Application {
 
         Button accept_button = new Button("Done");
         accept_button.setOnAction((ActionEvent e) -> {
-            Configurations.generatePropertiesFile(url_input.getText());
+            Configurations.generateClientPropertiesFile(url_input.getText());
             Configurations.readPropertiesFile();
             primaryStage.setScene(betaMenu(primaryStage));
         });
@@ -265,35 +263,19 @@ public class GUI extends Application {
                                 String update_interval,
                                 String interval_option) {
         
-        String update_interval_calculated = update_interval;
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Sending log");
         alert.setContentText("Sending log may take a few minutes.\nPress OK to proceed.");
         alert.showAndWait();
         
-        if (interval_option.equals(this.COMBOBOX_HOURS)) {
-            update_interval_calculated = Integer.toString(Integer.parseInt(update_interval) * 60 * 60);
-        } else if (interval_option.equals(this.COMBOBOX_MINUTES)) {
-            update_interval_calculated = Integer.toString(Integer.parseInt(update_interval) * 60);
-        }
-        
-        String api_key = this.connections.new_application(
+        DataManaging.newApplication(
                 this.username,
                 this.password,
                 application_name,
-                update_interval_calculated);
-        
-        this.logs.read(application_source_uri, null, null, null);
-        
-        this.data_managing.generatePropertiesFile(
                 application_source_uri,
-                api_key,
-                update_interval_calculated,
-                this.logs.last_read_line_one,
-                this.logs.last_read_line_two,
-                this.logs.last_read_line_three);
-        
-        this.connections.send_logs(api_key, this.logs.zip_path);
+                update_interval,
+                interval_option
+        );
         
         betaAutomaticUpdates(primaryStage);
     }
@@ -302,7 +284,7 @@ public class GUI extends Application {
         primaryStage.close();
         
         AutomaticUpdate automatic_update = new AutomaticUpdate();
-        automatic_update.start();
+        automatic_update.startAllUpdaters();
     }
     
     public static void main(String[] args) {
