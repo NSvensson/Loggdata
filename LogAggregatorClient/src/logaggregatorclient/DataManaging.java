@@ -32,9 +32,9 @@ public class DataManaging {
         LogHandler log_handler = new LogHandler(responses.application_id);
         log_handler.read(application_source_uri, null, null, null);
         
-        Configurations.Application applications = Configurations.newApplication(responses.application_id);
+        Configurations.Application application = Configurations.newApplication(responses.application_id);
         
-        applications.updateApplicationConfigurations(
+        application.updateApplicationConfigurations(
                 application_name,
                 application_source_uri,
                 responses.application_api_key,
@@ -44,7 +44,13 @@ public class DataManaging {
                 log_handler.last_read_line_three
         );
         
-        connections.send_logs(responses.application_api_key,
-                              log_handler.COMPLETE_ZIP_PATH);
+        responses = connections.send_logs(responses.application_api_key,
+                                          log_handler.COMPLETE_ZIP_PATH);
+        
+        if (responses.api_authenticated) {
+            GUI.application_table.getItems().add(application);
+        } else {
+            application.removeLocalApplication();
+        }
     }
 }
