@@ -194,6 +194,7 @@ public class MyUI extends UI {
 
             this.logtable.setSizeFull();
             logtable.addItemClickListener(event -> {// Java 8
+                subWindow.close();
                 LogItem log = new LogItem(event.getItem());
                 
                 subWindow.setHeight("800");
@@ -210,7 +211,7 @@ public class MyUI extends UI {
                 Label subWindowLogdateLabel = new Label("Log date: "+log.log_date);
                 Label subWindowLogEventLabel = new Label(log.log_event);
                 
-                Panel logPanel = new Panel("Log");
+                Panel logPanel = new Panel("Event");
                 logPanel.setSizeFull();
                 logPanel.setContent(subWindowLogEventLabel);
                 
