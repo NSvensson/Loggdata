@@ -2,6 +2,7 @@ package logaggregatorclient;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -155,6 +156,7 @@ public final class Connections {
             while ((bytes_read = input_stream.read(buffer)) != -1) {
                 output_stream.write(buffer, 0, bytes_read);
             }
+            
             output_stream.flush();
             input_stream.close();
             writer.append(LINE_FEED);
@@ -171,9 +173,17 @@ public final class Connections {
                 
                 ServerResponses responses = new ServerResponses();
                 
-                responses.application_id = connection.getHeaderField("application-id");
-                responses.application_name = connection.getHeaderField("application-name");
-                responses.application_update_interval = connection.getHeaderField("update-interval");
+                String api_authenticated;
+                if ((api_authenticated = connection.getHeaderField("api-authenticated")) != null && api_authenticated.equals("true")) {
+
+                    responses.api_authenticated = true;
+                    responses.application_id = connection.getHeaderField("application-id");
+                    responses.application_name = connection.getHeaderField("application-name");
+                    responses.application_update_interval = connection.getHeaderField("update-interval");
+                } else if ((api_authenticated = connection.getHeaderField("api-authenticated")) != null && api_authenticated.equals("false")) {
+                    
+                    responses.api_authenticated = false;
+                }
                 
                 connection.disconnect();
                 
@@ -189,7 +199,7 @@ public final class Connections {
     
     public class ServerResponses {
         
-        public String api_authenticated = null;
+        public boolean api_authenticated = false;
         public String application_id = null;
         public String application_name = null;
         public String application_update_interval = null;

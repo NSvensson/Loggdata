@@ -35,6 +35,8 @@ public class GUI extends Application {
     private final Button start_updates_button = new Button("Start updates");
     private final Button stop_updates_button = new Button("Stop updates");
     
+    public static final TableView<Configurations.Application> application_table = new TableView();
+    
     public static final String COMBOBOX_HOURS = "Hours";
     public static final String COMBOBOX_MINUTES = "Minutes";
     public static final String COMBOBOX_SECONDS = "Seconds";
@@ -50,48 +52,6 @@ public class GUI extends Application {
         Maybe a login window or something similar could be created here.
         */
         this.applications = Configurations.getApplicationConfigurations();
-        
-        this.start_updates_button.setDisable(false);
-        this.start_updates_button.setOnAction((ActionEvent e) -> {
-            automatic_update.loadApplications();
-            automatic_update.startAllUpdaters();
-            
-            if (stop_updates_button.isDisable()) stop_updates_button.setDisable(false);
-            if (!start_updates_button.isDisable()) start_updates_button.setDisable(true);
-        });
-        
-        this.stop_updates_button.setDisable(true);
-        this.stop_updates_button.setOnAction((ActionEvent e) -> {
-            automatic_update.stopAllUpdaters();
-            
-            if (start_updates_button.isDisable()) start_updates_button.setDisable(false);
-            if (!stop_updates_button.isDisable()) stop_updates_button.setDisable(true);
-        });
-        
-        if (Configurations.client_configurations_found) {
-            primaryStage.setScene(startupMenu(primaryStage));
-        } else {
-            primaryStage.setScene(noConfigScene(primaryStage));
-        }
-        
-        primaryStage.show();
-    }
-    
-    private Scene startupMenu(Stage primaryStage) {
-        GridPane grid = new GridPane();
-        grid.setAlignment(Pos.CENTER);
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(25, 25, 25, 25));
-        
-        Text title = new Text("Application logs on this device.");
-        title.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
-        grid.add(title, 0, 0, 5, 1);
-        
-        TableView<Configurations.Application> table = new TableView();
-        for (Configurations.Application application : this.applications) {
-            table.getItems().add(application);
-        }
         
         TableColumn<Configurations.Application, String> application_name_column = new TableColumn<>("Application name");
         application_name_column.setMinWidth(150);
@@ -111,8 +71,50 @@ public class GUI extends Application {
             return new ReadOnlyStringWrapper(cell_data.getValue().log_uri);
         });
         
-        table.getColumns().addAll(application_name_column, update_interval_column, local_source_column);
-        grid.add(table, 0, 1, 5, 1);
+        application_table.getColumns().addAll(application_name_column, update_interval_column, local_source_column);
+        
+        this.start_updates_button.setDisable(false);
+        this.start_updates_button.setOnAction((ActionEvent e) -> {
+            automatic_update.loadApplications();
+            automatic_update.startAllUpdaters();
+            
+            if (stop_updates_button.isDisable()) stop_updates_button.setDisable(false);
+            if (!start_updates_button.isDisable()) start_updates_button.setDisable(true);
+        });
+        
+        this.stop_updates_button.setDisable(true);
+        this.stop_updates_button.setOnAction((ActionEvent e) -> {
+            automatic_update.stopAllUpdaters();
+            
+            if (start_updates_button.isDisable()) start_updates_button.setDisable(false);
+            if (!stop_updates_button.isDisable()) stop_updates_button.setDisable(true);
+        });
+        
+        if (Configurations.client_configurations_found) {
+            for (Configurations.Application application : this.applications) {
+                application_table.getItems().add(application);
+            }
+            
+            primaryStage.setScene(startupMenu(primaryStage));
+        } else {
+            primaryStage.setScene(noConfigScene(primaryStage));
+        }
+        
+        primaryStage.show();
+    }
+    
+    private Scene startupMenu(Stage primaryStage) {
+        GridPane grid = new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(25, 25, 25, 25));
+        
+        Text title = new Text("Application logs on this device.");
+        title.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        grid.add(title, 0, 0, 5, 1);
+        
+        grid.add(application_table, 0, 1, 5, 1);
         
         HBox start_updates_button_hbox = new HBox(10);
         start_updates_button_hbox.setAlignment(Pos.BOTTOM_LEFT);

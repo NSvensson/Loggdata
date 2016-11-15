@@ -57,12 +57,13 @@ public class GUIJUnitTest {
     public void tearDown() {
         System.out.println(" Logout Successfully");
 
-    driver.quit();
+    //driver.quit();
     }
 
     // TODO add test methods here.
     // The methods must be annotated with annotation @Test. For example:
     //
+    /*
     @Test
      public void Login_test() {
          Login_page.txtbx_UserName(driver).sendKeys("admin");
@@ -115,10 +116,17 @@ public class GUIJUnitTest {
      
      ManageCompaniesPage.Click_back_edit(driver).click();
      
+   //-------------------------------Delete company----------------------------------  
      
+     ManageCompaniesPage.select_company_to_delete(driver).click();
      
+     ManageCompaniesPage.Click_delete_company(driver).click();
      
-     
+    ManageCompaniesPage.Click_yes(driver).click();
+    
+    ManageCompaniesPage.Click_confirm_yes(driver);
+             
+   //-------          
      
      ManageCompaniesPage.Click_back_again(driver).click();
      ManageUserPage.Logout(driver).click();
@@ -168,6 +176,44 @@ public class GUIJUnitTest {
      //ManageUserPage.Back_frm_userspage(driver).click();
      ManageCompaniesPage.Click_back_again(driver).click();
      ManageUserPage.Logout(driver).click(); 
+     }*/
+     
+     
+     @Test
+     public void Manage_application_Test() {
+         Login_page.txtbx_UserName(driver).sendKeys("admin");
+
+     Login_page.txtbx_Password(driver).sendKeys("admin");
+
+     Login_page.btn_LogIn(driver).click();
+     
+     String verifytext = driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[2]/div/div[2]/div/div[2]/div")).getText();
+     Assert.assertTrue(verifytext.toLowerCase().contains("your log"));
+     System.out.println(" Login Successfully" +  verifytext);
+     
+     
+     ManageApplicationsPage.Manage_applications(driver).click();
+     
+     String verify_enter_map = ManageApplicationsPage.entered_Manage_applications(driver).getText();
+     Assert.assertTrue(verify_enter_map.toLowerCase().contains("create application"));
+     System.out.println("entered manage application page   " +  verify_enter_map);
+     
+     ManageApplicationsPage.Create_applications(driver).click();
+     
+     String verify_enter_createapp = ManageApplicationsPage.entered_Create_applications_grid(driver).getText();
+     Assert.assertTrue(verify_enter_createapp.toLowerCase().contains("application name"));
+     System.out.println("entered create application grid   " +  verify_enter_createapp);
+     
+     ManageApplicationsPage.Applications_name(driver).sendKeys("cha");
+     ManageApplicationsPage.Update_intervall(driver).sendKeys("90");
+     ManageApplicationsPage.Create_application_button(driver).click();
+     ManageApplicationsPage.Create_applications_back_button(driver).click();
+     ManageApplicationsPage.Back_frm_manage_applications_page(driver).click();
+     
+     ManageUserPage.Logout(driver).click();
+     
+     
+     
      }
 
 

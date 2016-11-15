@@ -85,25 +85,46 @@ public final class AutomaticUpdate {
                         application.line_two,
                         application.line_three
                 );
-
+                
                 Connections.ServerResponses responses = connections.send_logs(
                         application.api_key,
                         log_handler.COMPLETE_ZIP_PATH
                 );
+                
+                if (responses != null) {
+                    if (responses.api_authenticated) {
+                        application.updateApplicationConfigurations(
+                                responses.application_name,
+                                application.log_uri,
+                                application.api_key,
+                                responses.application_update_interval,
+                                log_handler.last_read_line_one,
+                                log_handler.last_read_line_two,
+                                log_handler.last_read_line_three
+                        );
 
-                if (log_handler.last_read_line_one != null &&
-                    log_handler.last_read_line_two != null &&
-                    log_handler.last_read_line_three != null) {
+                        for (Configurations.Application item : GUI.application_table.getItems()) {
+                            if (item.ID.equals(application.ID)) {
+                                GUI.application_table.getItems()
+                                                     .set(
+                                                             GUI.application_table.getItems()
+                                                                                  .indexOf(item),
+                                                             application
+                                                     );
+                                break;
+                            }
+                        }
+                    } else {
+                        for (Configurations.Application item : GUI.application_table.getItems()) {
+                            if (item.ID.equals(application.ID)) {
+                                GUI.application_table.getItems().remove(item);
+                                break;
+                            }
+                        }
 
-                    application.updateApplicationConfigurations(
-                            responses.application_name,
-                            application.log_uri,
-                            application.api_key,
-                            responses.application_update_interval,
-                            log_handler.last_read_line_one,
-                            log_handler.last_read_line_two,
-                            log_handler.last_read_line_three
-                    );
+                        application.removeLocalApplication();
+                        super.cancel();
+                    }
                 }
             }
         }

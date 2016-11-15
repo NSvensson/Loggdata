@@ -135,7 +135,12 @@ public class LogHandler {
                 this.last_read_line_two = resultsArray[1][0] + resultsArray[1][1];
                 this.last_read_line_three = resultsArray[2][0] + resultsArray[2][1];
             }
+        } else {
+            this.last_read_line_one = line_one;
+            this.last_read_line_two = line_two;
+            this.last_read_line_three = line_three;
         }
+        
         packLog(resultsArray);
     }
     

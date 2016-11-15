@@ -197,6 +197,7 @@ public final class Configurations {
                 } else {
                     properties.setProperty(KEY_APPLICATION_IDS, "");
                     application_IDs = null;
+                    generateApplicationPropertiesFile();
                 }
                 
                 properties_output_stream = new FileOutputStream(CLIENT_CONFIGURATIONS_FILE_PATH);
@@ -223,6 +224,72 @@ public final class Configurations {
     
     public static void clearApplicationIDs() {
         updateApplicationIDs(null);
+    }
+    
+    private static void removeApplicationByID(String application_id) {
+        if (application_id != null) {
+            readPropertiesFile();
+            
+            if (application_IDs != null &&
+                application_IDs.length >= 1 &&
+                application_IDs[0] != null
+            ) {
+                
+                File properties_file = new File(CLIENT_CONFIGURATIONS_FILE_PATH);
+
+                if (properties_file.exists() && !properties_file.isDirectory()) {
+                    Properties properties = new Properties();
+                    FileInputStream properties_input_stream = null;
+                    FileOutputStream properties_output_stream = null;
+
+                    client_configurations_found = true;
+
+                    try {
+                        properties_input_stream = new FileInputStream(properties_file);
+                        properties.load(properties_input_stream);
+                        properties_input_stream.close();
+                        
+                        if (application_IDs.length == 1) {
+                            properties.setProperty(KEY_APPLICATION_IDS, "");
+                            application_IDs = null;
+                        } else {
+                            String application_id_string = "";
+                            for (String existing_application_id : application_IDs) {
+                                if (!existing_application_id.equals(application_id))
+                                    application_id_string += existing_application_id + APPLICATION_SEPERATOR;
+                            }
+
+                            if (application_id_string.endsWith(APPLICATION_SEPERATOR))
+                                application_id_string = application_id_string.substring(
+                                        0, application_id_string.length() - APPLICATION_SEPERATOR.length()
+                                );
+
+                            properties.setProperty(KEY_APPLICATION_IDS, application_id_string);
+                            application_IDs = application_id_string.split(APPLICATION_SEPERATOR);
+                        }
+                        
+                        properties_output_stream = new FileOutputStream(CLIENT_CONFIGURATIONS_FILE_PATH);
+                        properties.store(properties_output_stream, null);
+                        
+                    } catch (IOException e) {
+                        System.out.println("Client update application ids properties file exception: " + e);
+                    } finally {
+                        if (properties_input_stream != null) {
+                            try { properties_input_stream.close(); }
+                            catch (IOException e) { System.out.println("Properties update application ids properties file input stream close exception: " + e); }
+                        }
+
+                        if (properties_output_stream != null) {
+                            try { properties_output_stream.close(); }
+                            catch (IOException e) { System.out.println("Properties update application ids properties file output stream close exception: " + e); }
+                        }
+                    }
+                } else {
+                    // Properties file not found error handeling here
+                    client_configurations_found = false;
+                }
+            }
+        }
     }
     
     public static Application newApplication(String new_application_id) {
@@ -267,7 +334,7 @@ public final class Configurations {
         private final String KEY_LINE_THREE;
         
         public final String ID;
-
+        
         public String application_name = null;
         public String log_uri = null;
         public String api_key = null;
@@ -301,7 +368,7 @@ public final class Configurations {
                 Properties properties = new Properties();
                 FileInputStream properties_input_stream = null;
                 FileOutputStream properties_output_stream = null;
-
+                
                 try {
                     properties_input_stream = new FileInputStream(properties_file);
                     properties.load(properties_input_stream);
@@ -335,7 +402,7 @@ public final class Configurations {
                         properties.setProperty(this.KEY_UPDATE_INTERVAL, update_interval);
                         this.update_interval = update_interval;
                     } else {
-                        properties.setProperty(this.update_interval, "");
+                        properties.setProperty(this.KEY_UPDATE_INTERVAL, "");
                         this.update_interval = null;
                     }
 
@@ -343,7 +410,7 @@ public final class Configurations {
                         properties.setProperty(this.KEY_LINE_ONE, line_one);
                         this.line_one = line_one;
                     } else {
-                        properties.setProperty(this.line_one, "");
+                        properties.setProperty(this.KEY_LINE_ONE, "");
                         this.line_one = null;
                     }
 
@@ -351,7 +418,7 @@ public final class Configurations {
                         properties.setProperty(this.KEY_LINE_TWO, line_two);
                         this.line_two = line_two;
                     } else {
-                        properties.setProperty(this.line_two, "");
+                        properties.setProperty(this.KEY_LINE_TWO, "");
                         this.line_two = null;
                     }
 
@@ -359,7 +426,7 @@ public final class Configurations {
                         properties.setProperty(this.KEY_LINE_THREE, line_three);
                         this.line_three = line_three;
                     } else {
-                        properties.setProperty(this.line_three, "");
+                        properties.setProperty(this.KEY_LINE_THREE, "");
                         this.line_three = null;
                     }
 
@@ -416,6 +483,78 @@ public final class Configurations {
                 // Properties file not found error handeling here
                 generateApplicationPropertiesFile();
             }
+        }
+        
+        public void removeLocalApplication() {
+            File properties_file = new File(APPLICATION_CONFIGURATIONS_FILE_PATH);
+            
+            if (properties_file.exists() && !properties_file.isDirectory()) {
+                Properties properties = new Properties();
+                FileInputStream properties_input_stream = null;
+                FileOutputStream properties_output_stream = null;
+                
+                try {
+                    properties_input_stream = new FileInputStream(properties_file);
+                    properties.load(properties_input_stream);
+                    properties_input_stream.close();
+
+                    if (properties.containsKey(this.KEY_APPLICATION_NAME)) {
+                        properties.remove(this.KEY_APPLICATION_NAME);
+                        this.application_name = null;
+                    }
+                    
+                    if (properties.containsKey(this.KEY_LOG_URI)) {
+                        properties.remove(this.KEY_LOG_URI);
+                        this.log_uri = null;
+                    }
+
+                    if (properties.containsKey(this.KEY_API_KEY)) {
+                        properties.remove(this.KEY_API_KEY);
+                        this.api_key = null;
+                    }
+                    
+                    if (properties.containsKey(this.KEY_UPDATE_INTERVAL)) {
+                        properties.remove(this.KEY_UPDATE_INTERVAL);
+                        this.update_interval = null;
+                    }
+                    
+                    if (properties.containsKey(this.KEY_LINE_ONE)) {
+                        properties.remove(this.KEY_LINE_ONE);
+                        this.line_one = null;
+                    }
+                    
+                    if (properties.containsKey(this.KEY_LINE_TWO)) {
+                        properties.remove(this.KEY_LINE_TWO);
+                        this.line_two = null;
+                    }
+                    
+                    if (properties.containsKey(this.KEY_LINE_THREE)) {
+                        properties.remove(this.KEY_LINE_THREE);
+                        this.line_three = null;
+                    }
+                    
+                    properties_output_stream = new FileOutputStream(properties_file);
+                    properties.store(properties_output_stream, null);
+
+                } catch (IOException e) {
+                    System.out.println("Remove application configurations properties file exception: " + e);
+                } finally {
+                    if (properties_input_stream != null) {
+                        try { properties_input_stream.close(); }
+                        catch (IOException e) { System.out.println("Remove application configurations properties file input stream close exception: " + e); }
+                    }
+
+                    if (properties_output_stream != null) {
+                        try { properties_output_stream.close(); }
+                        catch (IOException e) { System.out.println("Remove application configurations properties file output stream close exception: " + e); }
+                    }
+                }
+            } else {
+                // Properties file not found error handeling here
+                generateApplicationPropertiesFile();
+            }
+            
+            removeApplicationByID(this.ID);
         }
     }
 }
