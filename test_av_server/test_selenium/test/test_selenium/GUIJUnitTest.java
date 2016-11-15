@@ -57,15 +57,15 @@ public class GUIJUnitTest {
     public void tearDown() {
         System.out.println(" Logout Successfully");
 
-    //driver.quit();
+    driver.quit();
     }
 
     // TODO add test methods here.
     // The methods must be annotated with annotation @Test. For example:
     //
-    /*
+    
     @Test
-     public void Login_test() {
+     public void Manage_companies_test() {
          Login_page.txtbx_UserName(driver).sendKeys("admin");
 
      Login_page.txtbx_Password(driver).sendKeys("admin");
@@ -176,7 +176,7 @@ public class GUIJUnitTest {
      //ManageUserPage.Back_frm_userspage(driver).click();
      ManageCompaniesPage.Click_back_again(driver).click();
      ManageUserPage.Logout(driver).click(); 
-     }*/
+     }
      
      
      @Test

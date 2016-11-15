@@ -23,6 +23,7 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
@@ -160,6 +161,8 @@ public class MyUI extends UI {
         public final Button manage_applications = new Button("Manage applications");
         public final Button manage_usergroups = new Button("Manage user groups");
         
+        public final Window subWindow = new Window("Event information");
+        
         public ViewLogsLayout() {
             
             this.tableContainer.addContainerProperty(this.HIDDEN_COLUMN_IDENTIFIER, String.class, null);
@@ -187,6 +190,49 @@ public class MyUI extends UI {
             gTitleLayout.addComponent(testLbl,0,0);
 
             this.logtable.setSizeFull();
+            logtable.addItemClickListener(event -> {// Java 8
+                subWindow.close();
+                LogItem log = new LogItem(event.getItem());
+                
+                subWindow.setHeight("800");
+                subWindow.setWidth("1200");
+                //Grid layout to add the componets to
+                GridLayout subInformationLayout = new GridLayout(1,3);
+                subInformationLayout.setMargin(true);
+                subInformationLayout.setSizeFull();
+                subWindow.setContent(subInformationLayout);
+                
+                HorizontalLayout titelLayout = new HorizontalLayout();
+                Label subWindowApplicationLabel = new Label("Application: "+ log.application_name);
+                subWindowApplicationLabel.setStyleName("title_padding");
+                Label subWindowLogdateLabel = new Label("Log date: "+log.log_date);
+                Label subWindowLogEventLabel = new Label(log.log_event);
+                
+                Panel logPanel = new Panel("Event");
+                logPanel.setSizeFull();
+                logPanel.setContent(subWindowLogEventLabel);
+                
+                titelLayout.addComponent(subWindowApplicationLabel);
+                titelLayout.addComponent(subWindowLogdateLabel);
+                subInformationLayout.addComponent(titelLayout, 0, 0);
+                subInformationLayout.addComponent(logPanel, 0, 1);
+                subInformationLayout.setRowExpandRatio(1, 1);
+                
+                Button closeButton = new Button("Close");
+                closeButton.addClickListener(new Button.ClickListener() {
+                    @Override
+                    public void buttonClick(Button.ClickEvent event) {
+                        subWindow.close();
+                    }
+                });
+                subInformationLayout.addComponent(closeButton,0,2);
+                subInformationLayout.setComponentAlignment(closeButton, Alignment.BOTTOM_RIGHT);
+                
+                subWindow.center();
+                addWindow(subWindow);
+                
+            });
+            
 
             this.comboBoxContainer.addContainerProperty(this.HIDDEN_COLUMN_IDENTIFIER, String.class, null);
             this.comboBoxContainer.addContainerProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER, String.class, null);
@@ -235,6 +281,7 @@ public class MyUI extends UI {
             loglayout.setComponentAlignment(buttonLayout, Alignment.TOP_RIGHT);
             
             HorizontalLayout administrationLayout = new HorizontalLayout();
+            
             manage_users.addClickListener(new Button.ClickListener() {
                 @Override
                 public void buttonClick(Button.ClickEvent event){ 
@@ -243,6 +290,7 @@ public class MyUI extends UI {
                     nav.navigateTo(manageUsersView);
                 }
             });
+            
             manage_companies.addClickListener(new Button.ClickListener() {
                 @Override
                 public void buttonClick(Button.ClickEvent event){
@@ -251,6 +299,7 @@ public class MyUI extends UI {
                     nav.navigateTo(manageCompaniesView);
                 }
             });
+            
             manage_applications.addClickListener(new Button.ClickListener() {
                 @Override
                 public void buttonClick(Button.ClickEvent event){
@@ -319,7 +368,7 @@ public class MyUI extends UI {
                                 newLog.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(application.id);
                                 newLog.getItemProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER).setValue(application.name);
                                 newLog.getItemProperty(this.DATE_COLUMN_NAME_IDENTIFIER).setValue(log.date);
-                                newLog.getItemProperty(this.EVENT_COLUMN_NAME_IDENTIFIER).setValue(log.event.replaceAll("\n", " "));
+                                newLog.getItemProperty(this.EVENT_COLUMN_NAME_IDENTIFIER).setValue(log.event);
                             }
                             Item newChoice = comboBoxContainer.getItem(comboBoxContainer.addItem());
                             newChoice.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(application.id);
@@ -361,6 +410,20 @@ public class MyUI extends UI {
                 });
             } else {
                 nav.navigateTo(loginView);
+            }
+        }
+        
+        public class LogItem {
+        
+            public final String application_name;
+            public final String log_date;
+            public final String log_event;
+            
+            public LogItem(Item item) {
+                
+                this.application_name = item.getItemProperty(APPLICATION_NAME_COLUMN_IDENTIFIER).getValue().toString();
+                this.log_date = item.getItemProperty(DATE_COLUMN_NAME_IDENTIFIER).getValue().toString();
+                this.log_event = item.getItemProperty(EVENT_COLUMN_NAME_IDENTIFIER).getValue().toString();
             }
         }
     }
