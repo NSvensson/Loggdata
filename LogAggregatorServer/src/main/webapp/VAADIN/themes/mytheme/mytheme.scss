@@ -59,10 +59,18 @@
         padding-top: 5px;
     }
     
+    .top_and_bot_padding{
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+    
     .v-grid-cell.red{
         background-color: #FFAAAA;
     }
     .v-grid-cell.yellow{
         background-color: #ffdb4d;
+    }
+    .v-grid-cell.orange{
+        background-color: #ff944d;
     }
 }

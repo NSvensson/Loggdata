@@ -170,6 +170,7 @@ public class MyUI extends UI {
             this.logtable.getColumn(this.HIDDEN_COLUMN_IDENTIFIER).setHidden(true);
             this.logtable.getColumn(this.APPLICATION_NAME_COLUMN_IDENTIFIER).setWidth(200);
             this.logtable.getColumn(this.DATE_COLUMN_NAME_IDENTIFIER).setWidth(200);
+            this.logtable.getColumn(this.EVENT_COLUMN_NAME_IDENTIFIER).setWidthUndefined();
             
             setWidth("100%");
             setHeight("100%");
@@ -288,6 +289,15 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            manage_users.setEnabled(false);
+            manage_users.setVisible(false);
+            manage_companies.setEnabled(false);
+            manage_companies.setVisible(false);
+            manage_applications.setEnabled(false);
+            manage_applications.setVisible(false);
+            manage_usergroups.setEnabled(false);
+            manage_usergroups.setVisible(false);
+            
             logtable.deselectAll();
             tableContainer.removeAllItems();
             if (user != null && user.is_authenticated) {
@@ -309,7 +319,7 @@ public class MyUI extends UI {
                                 newLog.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(application.id);
                                 newLog.getItemProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER).setValue(application.name);
                                 newLog.getItemProperty(this.DATE_COLUMN_NAME_IDENTIFIER).setValue(log.date);
-                                newLog.getItemProperty(this.EVENT_COLUMN_NAME_IDENTIFIER).setValue(log.event);
+                                newLog.getItemProperty(this.EVENT_COLUMN_NAME_IDENTIFIER).setValue(log.event.replaceAll("\n", " "));
                             }
                             Item newChoice = comboBoxContainer.getItem(comboBoxContainer.addItem());
                             newChoice.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(application.id);
@@ -344,7 +354,8 @@ public class MyUI extends UI {
                                                     .toLowerCase();
                             
                             if (logEvent.contains("error")) return "red";
-                            if (logEvent.contains("failure") || logEvent.contains("failed")) return "yellow";
+                            else if (logEvent.contains("failure") || logEvent.contains("failed")) return "yellow";
+                            else if (logEvent.contains("exception")) return "orange";
                             else return null;
                         } else return null;
                 });
@@ -641,7 +652,7 @@ public class MyUI extends UI {
                                 company_name.getContainerProperty(company_name.getValue(), HIDDEN_COLUMN_IDENTIFIER).getValue().toString(),
                                 user_group_name.getContainerProperty(user_group_name.getValue(), HIDDEN_COLUMN_IDENTIFIER).getValue().toString())) {
                             System.out.println("User created.");
-                            Notification.show("  User created  ",
+                            Notification.show("\tUser created\t",
                             Notification.TYPE_HUMANIZED_MESSAGE);
                         } else {
                             System.out.println("User not created.");
@@ -2282,12 +2293,18 @@ public class MyUI extends UI {
             //adding the componets to the grid
             createUserGroupsLayout.addComponent(createUserGroupsTitel,0,0);
             createUserGroupsLayout.addComponent(userGroupNameField,0,1);
+            userGroupNameField.addStyleName("apps_padding");
             createUserGroupsLayout.addComponent(create_User_Groups_Name_Label,1,1);
             createUserGroupsLayout.addComponent(viewLogsCheckbox,0,2);
+            viewLogsCheckbox.addStyleName("apps_padding");
             createUserGroupsLayout.addComponent(manageApplicationCheckbox,0,3);
+            manageApplicationCheckbox.addStyleName("apps_padding");
             createUserGroupsLayout.addComponent(manageUsersCheckbox,0,4);
+            manageUsersCheckbox.addStyleName("apps_padding");
             createUserGroupsLayout.addComponent(manageCompaniesCheckbox,0,5);
+            manageCompaniesCheckbox.addStyleName("apps_padding");
             createUserGroupsLayout.addComponent(manageUserGroupsCheckbox,0,6);
+            manageUserGroupsCheckbox.addStyleName("apps_padding");
             createUserGroupsLayout.addComponent(bLayout,0,7);
             
             //adding the createCompanyLayout to the mainLayout
