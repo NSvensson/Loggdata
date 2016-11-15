@@ -2,7 +2,6 @@ package logaggregatorclient;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -24,6 +23,13 @@ public final class Connections {
         this.checkConfigurations();
     }
     
+    public void clearErrorMessages() {
+        if (this.AUTHENTICATION_ERROR_MESSAGE != null) this.AUTHENTICATION_ERROR_MESSAGE = null;
+        
+        if (this.APPLICATION_NAME_ERROR_MESSAGE != null) this.APPLICATION_NAME_ERROR_MESSAGE = null;
+        if (this.UPDATE_INTERVAL_ERROR_MESSAGE != null) this.UPDATE_INTERVAL_ERROR_MESSAGE = null;
+    }
+    
     public void checkConfigurations() {
         Configurations.readPropertiesFile();
         
@@ -41,6 +47,8 @@ public final class Connections {
         try {
             URL url_object = new URL(this.url);
             HttpURLConnection connection = (HttpURLConnection) url_object.openConnection();
+            
+            connection.setConnectTimeout(5000);
             
             connection.setRequestMethod("GET");
             connection.setRequestProperty("client-action", "authenticate");

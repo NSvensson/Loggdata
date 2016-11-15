@@ -23,6 +23,8 @@ import javafx.stage.Stage;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.text.TextAlignment;
+import javafx.stage.WindowEvent;
 
 public class GUI extends Application {
     
@@ -51,6 +53,12 @@ public class GUI extends Application {
         
         Maybe a login window or something similar could be created here.
         */
+        primaryStage.setOnCloseRequest((WindowEvent e) -> {
+            automatic_update.stopAllUpdaters();
+            primaryStage.close();
+            System.exit(0);
+        });
+        
         this.applications = Configurations.getApplicationConfigurations();
         
         TableColumn<Configurations.Application, String> application_name_column = new TableColumn<>("Application name");
@@ -194,12 +202,7 @@ public class GUI extends Application {
     }
     
     private Scene newApplicationScene(Stage primaryStage) {
-        final FileChooser fileChooser = new FileChooser();
-        final ComboBox interval = new ComboBox();
-        interval.getItems().addAll(COMBOBOX_HOURS,
-                                   COMBOBOX_MINUTES,
-                                   COMBOBOX_SECONDS);
-        interval.getSelectionModel().selectFirst();
+        this.connections.clearErrorMessages();
         
         primaryStage.setTitle("Register service");
         GridPane grid = new GridPane();
@@ -208,27 +211,45 @@ public class GUI extends Application {
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
         
-        Label app_name = new Label("App name");
-        grid.add(app_name, 0, 0);
-        Label inter = new Label("Interval");
-        grid.add(inter, 0, 4);      
-        Label servname = new Label("Source");
-        grid.add(servname, 0, 2);
+        final ComboBox interval_combobox = new ComboBox();
+        interval_combobox.getItems().addAll(COMBOBOX_HOURS,
+                                            COMBOBOX_MINUTES,
+                                            COMBOBOX_SECONDS);
+        
+        interval_combobox.getSelectionModel().selectFirst();
+        interval_combobox.setMinWidth(70);
+        interval_combobox.setMaxWidth(140);
+        grid.add(interval_combobox, 1, 5);
+        
+        Label application_name_label = new Label("Application name");
+        grid.add(application_name_label, 0, 0);
+        
+        Label application_local_source_label = new Label("Application source");
+        grid.add(application_local_source_label, 0, 2);
+        
+        Label update_interval_label = new Label("Update interval");
+        grid.add(update_interval_label, 0, 4);
         
         TextField textfield_application_name = new TextField();
-        grid.add(textfield_application_name,0,1);
-        TextField textfield_application_source = new TextField();
-        TextField textfield_update_interval = new TextField();
-        grid.add(textfield_application_source,0,3);
-        grid.add(textfield_update_interval,0,5);
-        grid.add(interval,1,5);
+        grid.add(textfield_application_name, 0, 1, 2, 1);
         
-        Button browse = new Button("Browse");
-        grid.add(browse, 1, 3);
-        browse.setOnAction(new EventHandler<ActionEvent>(){
+        TextField textfield_application_source = new TextField();
+        grid.add(textfield_application_source, 0, 3);
+        
+        TextField textfield_update_interval = new TextField();
+        grid.add(textfield_update_interval, 0, 5);
+        
+        final FileChooser file_chooser = new FileChooser();
+        
+        Button browse_button = new Button("Browse");
+        grid.add(browse_button, 1, 3);
+        browse_button.setMinWidth(interval_combobox.getMinWidth());
+        browse_button.setMaxWidth(interval_combobox.getMaxWidth());
+        browse_button.setPrefWidth(interval_combobox.getPrefWidth());
+        browse_button.setOnAction(new EventHandler<ActionEvent>(){
             @Override
             public void handle(final ActionEvent e){
-                File logfile = fileChooser.showOpenDialog(primaryStage);
+                File logfile = file_chooser.showOpenDialog(primaryStage);
                 if (logfile != null){
                   textfield_application_source.setText(logfile.getAbsolutePath());
                 }
@@ -236,9 +257,9 @@ public class GUI extends Application {
             }
         });
         
-        Button exportbtn = new Button("Export");
-        grid.add(exportbtn, 0, 6);
-        exportbtn.setOnAction((ActionEvent e) -> {
+        Button export_button = new Button("Export");
+        grid.add(export_button, 0, 6);
+        export_button.setOnAction((ActionEvent e) -> {
             String tmpName, tmpSource, tmpInterval;
             if ((tmpName = textfield_application_name.getText()) != null &&
                  tmpName.length() >= 1 && (
@@ -247,24 +268,25 @@ public class GUI extends Application {
                  tmpInterval = textfield_update_interval.getText()) != null &&
                  tmpInterval.length() >= 1
             ) {
-                
-                exportbtn.setDisable(true);
+                export_button.setDisable(true);
                 newApplication(tmpName,
                                tmpSource,
                                tmpInterval,
-                               interval.getValue().toString());
+                               interval_combobox.getValue().toString());
                 applications = Configurations.getApplicationConfigurations();
                 primaryStage.setScene(startupMenu(primaryStage));
             }
         });
         
-        Button logout = new Button("Return");
-        grid.add(logout,1,6);
-        logout.setOnAction(e -> primaryStage.setScene(startupMenu(primaryStage)));
+        Button return_button = new Button("Return");
+        return_button.setOnAction(e -> primaryStage.setScene(startupMenu(primaryStage)));
         
-        Scene app = new Scene(grid);
+        HBox return_button_hbox = new HBox(10);
+        return_button_hbox.setAlignment(Pos.BOTTOM_RIGHT);
+        return_button_hbox.getChildren().add(return_button);
+        grid.add(return_button_hbox, 1, 6);
         
-        return app;
+        return new Scene(grid, 350, 270);
     }
     
     private Scene noConfigScene(Stage primaryStage) {
@@ -292,7 +314,7 @@ public class GUI extends Application {
         decline_button.setOnAction(e -> System.exit(0));
         grid.add(decline_button, 1, 3);
 
-        return new Scene(grid);
+        return new Scene(grid, 350, 270);
     }
 
     private Scene configInputPromptScene(Stage primaryStage) {
@@ -306,6 +328,7 @@ public class GUI extends Application {
         grid.add(prompt_description, 0, 0, 2, 1);
 
         TextField url_input = new TextField();
+        if (Configurations.server_URL != null) url_input.setText(Configurations.server_URL);
         grid.add(url_input, 0, 1, 2, 1);
 
         Button accept_button = new Button("Done");
@@ -325,6 +348,7 @@ public class GUI extends Application {
     }
 
     private void loginCheck(String username, String password, Stage primaryStage) {
+        this.connections.clearErrorMessages();
         
         this.username = username;
         this.password = DataManaging.hashString(password);
