@@ -651,7 +651,7 @@ public class Administration {
          * @return ApplicationRow containing the information of the application related to the authenticated API key.
          */
         public ApplicationRow authenticate_API_key(String api_key) {
-            if (user_groups.manage_applications) {
+            if (user_groups.manage_applications && api_key != null) {
                 database_connection.connect();
                 
                 String[] columnQuery = {
