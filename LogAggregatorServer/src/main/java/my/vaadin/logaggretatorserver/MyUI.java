@@ -144,7 +144,6 @@ public class MyUI extends UI {
     //ViewLogsLayout start
     public class ViewLogsLayout extends GridLayout implements View {
         
-//        public final String HIDDEN_LOG_OBJECT_COLUMN_IDENTIFIER = "log_object";
         public final String HIDDEN_COLUMN_IDENTIFIER = "id";
         public final String APPLICATION_NAME_COLUMN_IDENTIFIER = "Application";
         public final String DATE_COLUMN_NAME_IDENTIFIER = "Date";
@@ -166,13 +165,11 @@ public class MyUI extends UI {
         
         public ViewLogsLayout() {
             
-//            this.tableContainer.addContainerProperty(this.HIDDEN_LOG_OBJECT_COLUMN_IDENTIFIER, LogRow.class, null);
             this.tableContainer.addContainerProperty(this.HIDDEN_COLUMN_IDENTIFIER, String.class, null);
             this.tableContainer.addContainerProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER, String.class, null);
             this.tableContainer.addContainerProperty(this.DATE_COLUMN_NAME_IDENTIFIER, String.class, null);
             this.tableContainer.addContainerProperty(this.EVENT_COLUMN_NAME_IDENTIFIER, String.class, null);
             
-//            this.logtable.getColumn(this.HIDDEN_LOG_OBJECT_COLUMN_IDENTIFIER).setHidden(true);
             this.logtable.getColumn(this.HIDDEN_COLUMN_IDENTIFIER).setHidden(true);
             this.logtable.getColumn(this.APPLICATION_NAME_COLUMN_IDENTIFIER).setWidth(200);
             this.logtable.getColumn(this.DATE_COLUMN_NAME_IDENTIFIER).setWidth(200);
@@ -368,7 +365,6 @@ public class MyUI extends UI {
                         if (application.logs != null) {
                             for (LogRow log : application.logs) {
                                 Item newLog = tableContainer.addItem(log.id);
-//                                newLog.getItemProperty(this.HIDDEN_LOG_OBJECT_COLUMN_IDENTIFIER).setValue(log);
                                 newLog.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(application.id);
                                 newLog.getItemProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER).setValue(application.name);
                                 newLog.getItemProperty(this.DATE_COLUMN_NAME_IDENTIFIER).setValue(log.date);
@@ -422,13 +418,6 @@ public class MyUI extends UI {
             public final String application_name;
             public final String log_date;
             public final String log_event;
-            
-            public LogItem(String application_name, String log_date, String log_event) {
-                
-                this.application_name = application_name;
-                this.log_date = log_date;
-                this.log_event = log_event;
-            }
             
             public LogItem(Item item) {
                 
