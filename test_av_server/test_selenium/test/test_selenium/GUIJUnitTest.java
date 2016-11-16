@@ -23,7 +23,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
  *
  * @author josanbir
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+//@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class GUIJUnitTest {
     private static WebDriver driver = null;
     
@@ -36,7 +36,7 @@ public class GUIJUnitTest {
     
     @AfterClass
     public static void tearDownClass() {
-    }
+        }
     
     @Before
     public void setUp() {
@@ -55,7 +55,7 @@ public class GUIJUnitTest {
     
     @After
     public void tearDown() {
-        System.out.println(" Logout Successfully");
+        System.out.println("To quit the browser");
 
     driver.quit();
     }
@@ -216,7 +216,4 @@ public class GUIJUnitTest {
      
      }
 
-
-     
-     
 }
