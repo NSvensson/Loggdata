@@ -242,7 +242,7 @@ public class Administration {
          * @return true if the user information was updated, false if there was an issue.
          */
         public boolean edit(CurrentUser user_information, String first_name, String last_name, String email, String username, String password, String company_id, String user_group_id) {
-            if (this.user_groups.manage_users && !user_information.id.equals(this.settings.ADMINISTRATOR_ID)) {
+            if (this.user_groups.manage_users && !this.settings.ADMINISTRATOR_ID.equals(user_information.id)) {
                 ArrayList<String> columns = new ArrayList<>();
                 ArrayList<Object> values = new ArrayList<>();
                 database_connection.connect();
@@ -374,7 +374,7 @@ public class Administration {
          * @return true if the user was removed or doesn't exist, false if there was an issue.
          */
         public boolean remove(String id) {
-            if (this.user_groups.manage_users && id != null && !id.equals(this.settings.ADMINISTRATOR_ID)) {
+            if (this.user_groups.manage_users && id != null && !this.settings.ADMINISTRATOR_ID.equals(id)) {
                 HashMap whereQuery = new HashMap();
                 whereQuery.put("id", id);
                 
@@ -850,7 +850,7 @@ public class Administration {
          * @return true if the company information was updated, false if there was an issue.
          */
         public boolean edit(CompanyRow company_information, String name, String website, String details) {
-            if (this.user_groups.manage_users && !company_information.id.equals(this.settings.ADMINISTRATOR_COMPANY_ID)) {
+            if (this.user_groups.manage_users && !this.settings.ADMINISTRATOR_COMPANY_ID.equals(company_information.id)) {
                 ArrayList<String> columns = new ArrayList<>();
                 ArrayList<Object> values = new ArrayList<>();
                 
@@ -917,7 +917,7 @@ public class Administration {
          * @return true if the company was removed or doesn't exist, false if there was an issue.
          */
         public boolean remove(String id) {
-            if (this.user_groups.manage_companies && id != null && !id.equals(this.settings.ADMINISTRATOR_COMPANY_ID)) {
+            if (this.user_groups.manage_companies && id != null && !this.settings.ADMINISTRATOR_COMPANY_ID.equals(id)) {
                 String[] columnQuery = { "id" };
 
                 HashMap whereQuery = new HashMap();
@@ -1061,7 +1061,7 @@ public class Administration {
          * @return true if the user group was updated, false if there was an issue.
          */
         public boolean edit(UserGroups group_information, String name, boolean view_logs, boolean manage_applications, boolean manage_users, boolean manage_companies, boolean manage_groups) {
-            if (this.user_groups.manage_groups) {
+            if (this.user_groups.manage_groups && !this.settings.ADMINISTRATOR_USER_GROUP.equals(group_information.id)) {
                 ArrayList<String> columns = new ArrayList<>();
                 ArrayList<Object> values = new ArrayList<>();
                 
@@ -1131,7 +1131,7 @@ public class Administration {
          * @return true if the user group was removed or doesn't exist, false if there was an issue.
          */
         public boolean remove(String id) {
-            if (this.user_groups.manage_groups && id != null && !id.equals(this.settings.ADMINISTRATOR_USER_GROUP)) {
+            if (this.user_groups.manage_groups && id != null && !this.settings.ADMINISTRATOR_USER_GROUP.equals(id)) {
                 String[] columnQuery = { "id" };
 
                 HashMap whereQuery = new HashMap();
@@ -1226,7 +1226,9 @@ public class Administration {
          * @return An array of CompanyRow objects containing each found company's information.
          */
         public CompanyRow[] companies() {
-            if (this.user_groups.manage_companies) {
+            if (this.user_groups.manage_companies ||
+                this.user_groups.manage_applications ||
+                this.user_groups.manage_users) {
                 
                 String[] columnQuery = {
                         "id",

@@ -492,8 +492,17 @@ public class MyUI extends UI {
             createUser.addClickListener(new Button.ClickListener() {
                 @Override
                 public void buttonClick(Button.ClickEvent event) {
-                    tableContainer.removeAllItems();
-                    nav.navigateTo(createUserView);
+                    CompanyRow[] companies;
+                    if ((companies = administration.object_collections.companies()) != null &&
+                         companies.length >= 1 &&
+                         companies[0] != null) {
+                        
+                        tableContainer.removeAllItems();
+                        nav.navigateTo(createUserView);
+                    } else {
+                        Notification.show("No user company found in the database.\n" +
+                                          "Please create a company before attempting to create a user.", Notification.Type.WARNING_MESSAGE);
+                    }
                 }
             });
 
@@ -1613,8 +1622,17 @@ public class MyUI extends UI {
             createApplicationButton.addClickListener(new Button.ClickListener() {
                 @Override
                 public void buttonClick(Button.ClickEvent event) {
-                    tableContainer.removeAllItems();
-                    nav.navigateTo(createApplicationView);
+                    CompanyRow[] companies;
+                    if ((companies = administration.object_collections.companies()) != null &&
+                         companies.length >= 1 &&
+                         companies[0] != null) {
+                        
+                        tableContainer.removeAllItems();
+                        nav.navigateTo(createApplicationView);
+                    } else {
+                        Notification.show("No user company found in the database.\n" +
+                                          "Please create a company before attempting to create a application.", Notification.Type.WARNING_MESSAGE);
+                    }
                 }
             });
 
@@ -1792,6 +1810,8 @@ public class MyUI extends UI {
             this.company_container.addContainerProperty(this.NAME_COLUMN_IDENTIFIER, String.class, null);
             
             this.company_name.setItemCaptionPropertyId(this.NAME_COLUMN_IDENTIFIER);
+            this.company_name.setNullSelectionAllowed(false);
+            this.company_name.setTextInputAllowed(false);
             
             application_Name_Label.setVisible(false);
             application_update_interval_Label.setVisible(false);
@@ -1929,6 +1949,8 @@ public class MyUI extends UI {
         this.company_container.addContainerProperty(this.NAME_COLUMN_IDENTIFIER, String.class, null);
             
             this.company_name.setItemCaptionPropertyId(this.NAME_COLUMN_IDENTIFIER);
+            this.company_name.setNullSelectionAllowed(false);
+            this.company_name.setTextInputAllowed(false);
             
             application_Name_Label.setVisible(false);
             application_update_interval_Label.setVisible(false);
@@ -2036,9 +2058,14 @@ public class MyUI extends UI {
                     applicationNameField.setValue(selectedApplication.name);
                     uppdateIntevalField.setValue(selectedApplication.update_interval);
                     
-                    for (CompanyRow company : administration.object_collections.companies()) {
-                        Item newItem = company_container.addItem(company.id);
-                        newItem.getItemProperty(this.NAME_COLUMN_IDENTIFIER).setValue(company.name);
+                    if (selectedApplication.company.id.equals("1")) {
+                        Item newItem = company_container.addItem(selectedApplication.company.id);
+                        newItem.getItemProperty(this.NAME_COLUMN_IDENTIFIER).setValue(selectedApplication.company.name);
+                    } else {
+                        for (CompanyRow company : administration.object_collections.companies()) {
+                            Item newItem = company_container.addItem(company.id);
+                            newItem.getItemProperty(this.NAME_COLUMN_IDENTIFIER).setValue(company.name);
+                        }
                     }
                     
                     company_name.setValue(selectedApplication.company.id);
@@ -2127,9 +2154,12 @@ public class MyUI extends UI {
 
                     if (selected != null) {
                         selectedUserGroup = new UserGroups(selected.toString());
-                        System.out.println("Selected user group id: " + selectedUserGroup.id);
-                        tableContainer.removeAllItems();
-                        nav.navigateTo(editUserGroupsView);
+                        if (!administration.user_group.settings.ADMINISTRATOR_USER_GROUP.equals(selectedUserGroup.id)) {
+                            tableContainer.removeAllItems();
+                            nav.navigateTo(editUserGroupsView);
+                        } else {
+                            Notification.show("Editing this user group is not allowed!", Notification.Type.WARNING_MESSAGE);
+                        }
                     } else {
                         System.out.println("Nothing selected.");
                     }
@@ -2144,92 +2174,95 @@ public class MyUI extends UI {
                     
                     if (selected != null) {
                         selectedApplication = new ApplicationRow(selected.toString(), false);
-                        subConfirmWindow.setHeight(250,Unit.PIXELS);
-                        subConfirmWindow.setWidth(350,Unit.PIXELS);
-                        subConfirmWindow.setResizable(false);
-
-                        GridLayout subConfirmLayout = new GridLayout(1,4);
-                        subConfirmLayout.setMargin(true);
-                        subConfirmLayout.setSizeFull();
-                        subConfirmWindow.setContent(subConfirmLayout);
-
-                        // Put some components in it
-                        Label titelConfirmWindow = new Label("Delete user group");
-                        subConfirmLayout.addComponent(titelConfirmWindow, 0, 0);
-                        Label contentConfirmWindow = new Label("You are about to delete "+selectedUserGroup.name+"!\nAre you sure?");
-                        subConfirmLayout.addComponent(contentConfirmWindow, 0, 1);
                         
-                        Button confirmButton = new Button("Yes");
-                        confirmButton.addClickListener(new Button.ClickListener() {
-                            @Override
-                            public void buttonClick(Button.ClickEvent event) {
-                                
-                                GridLayout subExtraConfirmLayout = new GridLayout(1,3);
-                                subExtraConfirmLayout.setMargin(true);
-                                subExtraConfirmLayout.setSizeFull();
-                                subConfirmWindow.setContent(subExtraConfirmLayout);
-                                
-                                Label ConfirmWindowLabel = new Label("This will also delete all \n"
-                                                                    +"users that are still part of "+selectedUserGroup.name);
-                                subExtraConfirmLayout.addComponent(ConfirmWindowLabel, 0, 0);
-                                Label contentConfirmWindow = new Label("\nAre you sure?");
-                                subExtraConfirmLayout.addComponent(contentConfirmWindow, 0, 1);
-                                
-                                Button confirmExtra = new Button("Yes");
-                                confirmExtra.addClickListener(new Button.ClickListener() {
-                                    @Override
-                                    public void buttonClick(Button.ClickEvent event) {
-                                        if (administration.user_group.remove(selectedUserGroup.id)) {
-                                            tableContainer.removeItem(selected);
-                                            subConfirmWindow.close();
-                                        } else {
+                        if (!administration.user_group.settings.ADMINISTRATOR_USER_GROUP.equals(selectedUserGroup.id)) {
+
+                            subConfirmWindow.setHeight(250,Unit.PIXELS);
+                            subConfirmWindow.setWidth(350,Unit.PIXELS);
+                            subConfirmWindow.setResizable(false);
+
+                            GridLayout subConfirmLayout = new GridLayout(1,4);
+                            subConfirmLayout.setMargin(true);
+                            subConfirmLayout.setSizeFull();
+                            subConfirmWindow.setContent(subConfirmLayout);
+
+                            // Put some components in it
+                            Label titelConfirmWindow = new Label("Delete user group");
+                            subConfirmLayout.addComponent(titelConfirmWindow, 0, 0);
+                            Label contentConfirmWindow = new Label("You are about to delete "+selectedUserGroup.name+"!\nAre you sure?");
+                            subConfirmLayout.addComponent(contentConfirmWindow, 0, 1);
+
+                            Button confirmButton = new Button("Yes");
+                            confirmButton.addClickListener(new Button.ClickListener() {
+                                @Override
+                                public void buttonClick(Button.ClickEvent event) {
+
+                                    GridLayout subExtraConfirmLayout = new GridLayout(1,3);
+                                    subExtraConfirmLayout.setMargin(true);
+                                    subExtraConfirmLayout.setSizeFull();
+                                    subConfirmWindow.setContent(subExtraConfirmLayout);
+
+                                    Label ConfirmWindowLabel = new Label("This will also delete all \n"
+                                                                        +"users that are still part of "+selectedUserGroup.name);
+                                    subExtraConfirmLayout.addComponent(ConfirmWindowLabel, 0, 0);
+                                    Label contentConfirmWindow = new Label("\nAre you sure?");
+                                    subExtraConfirmLayout.addComponent(contentConfirmWindow, 0, 1);
+
+                                    Button confirmExtra = new Button("Yes");
+                                    confirmExtra.addClickListener(new Button.ClickListener() {
+                                        @Override
+                                        public void buttonClick(Button.ClickEvent event) {
+                                            if (administration.user_group.remove(selectedUserGroup.id)) {
+                                                tableContainer.removeItem(selected);
+                                                subConfirmWindow.close();
+                                            } else {
+                                            }
                                         }
-                                    }
-                                });
-                                
-                                Button declineButton = new Button("No");
-                                declineButton.addClickListener(new Button.ClickListener() {
-                                    @Override
-                                    public void buttonClick(Button.ClickEvent event) {
-                                        subConfirmWindow.close();
-                                    }
-                                });
-                                HorizontalLayout bLayout = new HorizontalLayout();
-                                bLayout.addComponent(confirmExtra);
-                                bLayout.addComponent(declineButton);
-                        
-                                 subExtraConfirmLayout.addComponent(bLayout, 0, 2);
-                                // Center it in the browser window
-                                subConfirmWindow.center();
+                                    });
 
-                                // Open it in the UI
-                                
-//                                addWindow(subConfirmWindow);
-//                                
-                            }
-                        });
-                                
-                        Button declineButton = new Button("No");
-                        declineButton.addClickListener(new Button.ClickListener() {
-                            @Override
-                            public void buttonClick(Button.ClickEvent event) {
-                                subConfirmWindow.close();
-                            }
-                        });
-                        
-                        //Adding buttons to the window
-                        HorizontalLayout bLayout = new HorizontalLayout();
-                        bLayout.addComponent(confirmButton);
-                        bLayout.addComponent(declineButton);
-                        
-                        subConfirmLayout.addComponent(bLayout, 0, 2);
-                        // Center it in the browser window
-                        subConfirmWindow.center();
+                                    Button declineButton = new Button("No");
+                                    declineButton.addClickListener(new Button.ClickListener() {
+                                        @Override
+                                        public void buttonClick(Button.ClickEvent event) {
+                                            subConfirmWindow.close();
+                                        }
+                                    });
+                                    HorizontalLayout bLayout = new HorizontalLayout();
+                                    bLayout.addComponent(confirmExtra);
+                                    bLayout.addComponent(declineButton);
 
-                        // Open it in the UI
-                        addWindow(subConfirmWindow);
+                                     subExtraConfirmLayout.addComponent(bLayout, 0, 2);
+                                    // Center it in the browser window
+                                    subConfirmWindow.center();
+
+                                    // Open it in the UI
+
+                                }
+                            });
+
+                            Button declineButton = new Button("No");
+                            declineButton.addClickListener(new Button.ClickListener() {
+                                @Override
+                                public void buttonClick(Button.ClickEvent event) {
+                                    subConfirmWindow.close();
+                                }
+                            });
+
+                            //Adding buttons to the window
+                            HorizontalLayout bLayout = new HorizontalLayout();
+                            bLayout.addComponent(confirmButton);
+                            bLayout.addComponent(declineButton);
+
+                            subConfirmLayout.addComponent(bLayout, 0, 2);
+                            // Center it in the browser window
+                            subConfirmWindow.center();
+
+                            // Open it in the UI
+                            addWindow(subConfirmWindow);
                     
-                            //If user removed
+                        } else {
+                            Notification.show("Removing this user group is not allowed!", Notification.Type.WARNING_MESSAGE);
+                        }
                     } else {
                             //If user not removed
                     }
