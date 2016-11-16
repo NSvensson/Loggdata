@@ -3,6 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+package test_selenium;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -10,14 +11,20 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  *
  * @author josanbir
  */
-public class testcaseTwo {
+
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+	GUIJUnitTest.class,GUIoneJUnitTest.class,GUItwoJUnitTest.class,GUIthreeJUnitTest.class,GUIfourJUnitTest.class})
+public class GUItestSuite {
     
-    public testcaseTwo() {
+    public GUItestSuite() {
     }
     
     @BeforeClass
@@ -39,8 +46,6 @@ public class testcaseTwo {
     // TODO add test methods here.
     // The methods must be annotated with annotation @Test. For example:
     //
-    @Test
-     public void testcase2() {
-     System.out.println("Hello im in test case two");
-     }
+    // @Test
+    // public void hello() {}
 }
