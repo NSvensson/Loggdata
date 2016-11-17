@@ -56,6 +56,7 @@ public class UserGroups {
     }
     
     public UserGroups(boolean manage_applications) {
+        this.id = "0";
         this.manage_applications = manage_applications;
     }
 }

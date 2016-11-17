@@ -1,5 +1,6 @@
 package my.vaadin.logaggretatorserver;
 
+import com.vaadin.annotations.PreserveOnRefresh;
 import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.Theme;
@@ -38,6 +39,7 @@ import com.vaadin.ui.Window;
  * overridden to add component to the user interface and initialize non-component functionality.
  */
 @Theme("mytheme")
+@PreserveOnRefresh
 public class MyUI extends UI {
     private final String loginView = "";
     private final String logsView = "Logs";
@@ -62,6 +64,7 @@ public class MyUI extends UI {
     private UserGroups selectedUserGroup = null;
     
     private Navigator nav = new Navigator(this, this);
+    private View current_view;
     
     @Override
     protected void init(VaadinRequest vaadinRequest) {
@@ -69,7 +72,7 @@ public class MyUI extends UI {
         
         getPage().setTitle("Log server");
         
-        nav.addView(loginView, new LoginLayout());
+        nav.addView(loginView, (current_view = new LoginLayout()));
         nav.addView(logsView, new ViewLogsLayout());
         nav.addView(createUserView, new CreateUserLayout());
         nav.addView(createCompanyView, new CreateCompanyLayout());
@@ -134,6 +137,8 @@ public class MyUI extends UI {
         
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            current_view = this;
+            
             usernameTextField.clear();
             passwordTextField.clear();
         }
@@ -273,6 +278,15 @@ public class MyUI extends UI {
                 }
             });
             
+            Button refresh = new Button("Refresh");
+            refresh.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    refresh_logs_view();
+                }
+            });
+            
+            buttonLayout.addComponent(refresh);
             buttonLayout.addComponent(out);
             buttonLayout.setComponentAlignment(out, Alignment.TOP_RIGHT);
             
@@ -337,6 +351,8 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            current_view = this;
+            
             manage_users.setEnabled(false);
             manage_users.setVisible(false);
             manage_companies.setEnabled(false);
@@ -358,9 +374,7 @@ public class MyUI extends UI {
                 this.app_name.setValue(standardChoiceId);
                 
                 if (user.applications != null) {
-                    
                     for (ApplicationRow application : user.applications) {
-                        
                         if (application.logs != null) {
                             for (LogRow log : application.logs) {
                                 Item newLog = tableContainer.addItem(log.id);
@@ -593,6 +607,7 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            current_view = this;
             
             usertable.deselectAll();
             tableContainer.removeAllItems();
@@ -816,6 +831,8 @@ public class MyUI extends UI {
         
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            current_view = this;
+            
             administration.user.settings.clear_error_messages();
             
             first_name_label.setVisible(false);
@@ -1065,6 +1082,7 @@ public class MyUI extends UI {
         
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            current_view = this;
             
             userFnameField.clear();
             userLnameField.clear();
@@ -1295,6 +1313,8 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            current_view = this;
+            
             companyTable.deselectAll();
             tableContainer.removeAllItems();
             if (user != null && user.is_authenticated) {
@@ -1423,6 +1443,8 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            current_view = this;
+
             companyNameField.clear();
             companyWebsiteField.clear();
             companyDetailsField.clear();
@@ -1542,6 +1564,7 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            current_view = this;
             
             companyNameField.clear();
             companyWebsiteField.clear();
@@ -1762,6 +1785,8 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            current_view = this;
+
             applicationTable.deselectAll();
             tableContainer.removeAllItems();
             if (user != null && user.is_authenticated) {
@@ -1903,6 +1928,7 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            current_view = this;
             
             applicationNameField.clear();
             company_container.removeAllItems();
@@ -1928,7 +1954,7 @@ public class MyUI extends UI {
     //CreateApplicationLayout end
     
     //EditApplicationLayout start
-    public class EditApplicationLayout extends GridLayout implements View{
+    public class EditApplicationLayout extends GridLayout implements View {
         
         public final String NAME_COLUMN_IDENTIFIER = "Name";
         
@@ -2045,6 +2071,7 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            current_view = this;
             
             applicationNameField.clear();
             company_container.removeAllItems();
@@ -2278,6 +2305,8 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            current_view = this;
+            
             userGroupTable.deselectAll();
             tableContainer.removeAllItems();
             if (user != null && user.is_authenticated) {
@@ -2408,6 +2437,7 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            current_view = this;
             
             userGroupNameField.clear();
             viewLogsCheckbox.setValue(true);
@@ -2526,6 +2556,7 @@ public class MyUI extends UI {
 
         @Override
         public void enter(ViewChangeListener.ViewChangeEvent event) {
+            current_view = this;
             
             userGroupNameField.clear();
             viewLogsCheckbox.setValue(false);
@@ -2557,5 +2588,18 @@ public class MyUI extends UI {
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
     @VaadinServletConfiguration(ui = MyUI.class, productionMode = false)
     public static class MyUIServlet extends VaadinServlet {
+    }
+    
+    @Override
+    public void refresh(VaadinRequest request) {
+        refresh_logs_view();
+    }
+    
+    public void refresh_logs_view() {
+        if (current_view instanceof ViewLogsLayout && user.is_authenticated) {
+            user.load_available_applications();
+            nav.addView(logsView, new ViewLogsLayout());
+            nav.navigateTo(logsView);
+        }
     }
 }

@@ -118,6 +118,9 @@ public class CurrentUser {
             }
             
             this.applications = results;
+        } else {
+            
+            this.applications = null;
         }
     }
 }

@@ -28,7 +28,6 @@ public class DataManaging {
         if (api_key != null) {
             
             ServerDataBase database_connection = new ServerDataBase();
-            database_connection.connect();
 
             String[] columnQuery = {
                     "id",
@@ -42,7 +41,9 @@ public class DataManaging {
             HashMap whereQuery = new HashMap();
             whereQuery.put("api_key", api_key);
 
+            database_connection.connect();
             String[][] select = database_connection.select(columnQuery, "application", whereQuery);
+            database_connection.close();
 
             if (select != null && select.length == 1 && select[0].length == columnQuery.length) {
                 return new ApplicationRow(
