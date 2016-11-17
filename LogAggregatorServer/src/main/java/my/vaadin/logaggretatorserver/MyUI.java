@@ -190,7 +190,7 @@ public class MyUI extends UI {
             gTitleLayout.addComponent(testLbl,0,0);
 
             this.logtable.setSizeFull();
-            logtable.addItemClickListener(event -> {// Java 8
+            logtable.addItemClickListener(event -> {
                 subWindow.close();
                 LogItem log = new LogItem(event.getItem());
                 

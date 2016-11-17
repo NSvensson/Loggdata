@@ -17,35 +17,37 @@ public class CurrentUser {
     private final ServerDataBase database_connection = new ServerDataBase();
     
     public CurrentUser(String username, String password, boolean load_applications) {
-        String[] columnQuery = {
-                    "id",
-                    "company_id",
-                    "first_name",
-                    "last_name",
-                    "email",
-                    "username",
-                    "user_group_id"
-        };
+        if (username != null && password != null) {
+            String[] columnQuery = {
+                        "id",
+                        "company_id",
+                        "first_name",
+                        "last_name",
+                        "email",
+                        "username",
+                        "user_group_id"
+            };
 
-        HashMap whereQuery = new HashMap();
-        whereQuery.put("username", username);
-        whereQuery.put("password", password);
-        
-        this.database_connection.connect();
-        String[][] select = this.database_connection.select(columnQuery, "user", whereQuery);
-        this.database_connection.close();
+            HashMap whereQuery = new HashMap();
+            whereQuery.put("username", username);
+            whereQuery.put("password", password);
 
-        if (select != null && select.length == 1 && select[0].length == columnQuery.length) {
-            // Authenticated.
-            this.is_authenticated = true;
-            this.id = select[0][0];
-            this.company = new CompanyRow(select[0][1]);
-            this.first_name = select[0][2];
-            this.last_name = select[0][3];
-            this.email = select[0][4];
-            this.username = select[0][5];
-            this.user_group = new UserGroups(select[0][6]);
-            if (load_applications) load_available_applications();
+            this.database_connection.connect();
+            String[][] select = this.database_connection.select(columnQuery, "user", whereQuery);
+            this.database_connection.close();
+
+            if (select != null && select.length == 1 && select[0].length == columnQuery.length) {
+                // Authenticated.
+                this.is_authenticated = true;
+                this.id = select[0][0];
+                this.company = new CompanyRow(select[0][1]);
+                this.first_name = select[0][2];
+                this.last_name = select[0][3];
+                this.email = select[0][4];
+                this.username = select[0][5];
+                this.user_group = new UserGroups(select[0][6]);
+                if (load_applications) load_available_applications();
+            } 
         }
     }
 
