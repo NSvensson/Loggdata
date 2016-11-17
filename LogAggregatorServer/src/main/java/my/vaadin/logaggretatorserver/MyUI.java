@@ -551,7 +551,7 @@ public class MyUI extends UI {
                         confirmButton.addClickListener(new Button.ClickListener() {
                             @Override
                             public void buttonClick(Button.ClickEvent event) {
-                                if (administration.user.remove(selectedUser.id)) {
+                                if (administration.user.remove(selectedUser)) {
                                     tableContainer.removeItem(selected);
                                     subConfirmWindow.close();
                                 }
@@ -600,7 +600,7 @@ public class MyUI extends UI {
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_users) {
 
-                    administration = new Administration(user.user_group);
+                    administration = new Administration(user.user_group, user.company);
                     
                     for (CurrentUser userRow : administration.object_collections.users()) {
                         Item userItem = tableContainer.addItem(userRow.id);
@@ -840,7 +840,7 @@ public class MyUI extends UI {
                     company_name.removeAllItems();
                     user_group_name.removeAllItems();
                     
-                    administration = new Administration(user.user_group);
+                    administration = new Administration(user.user_group, user.company);
                     
                     for (CompanyRow company : administration.object_collections.companies()) {
                         Item newItem = company_container.getItem(company_container.addItem());
@@ -1079,7 +1079,7 @@ public class MyUI extends UI {
                     company_name.removeAllItems();
                     user_group_name.removeAllItems();
                     
-                    administration = new Administration(user.user_group);
+                    administration = new Administration(user.user_group, user.company);
                     
                     for (CompanyRow company : administration.object_collections.companies()) {
                         Item newItem = company_container.addItem(company.id);
@@ -1301,7 +1301,7 @@ public class MyUI extends UI {
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_companies) {
                     
-                    administration = new Administration(user.user_group);
+                    administration = new Administration(user.user_group, user.company);
                     
                     for (CompanyRow companyRow : administration.object_collections.companies()) {
                         Item userItem = tableContainer.addItem(companyRow.id);
@@ -1429,7 +1429,7 @@ public class MyUI extends UI {
             companyDetailsField.clear();
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_companies) {
-                    administration = new Administration(user.user_group);
+                    administration = new Administration(user.user_group, user.company);
                 } else {
                     nav.navigateTo(logsView);
                 }
@@ -1549,7 +1549,7 @@ public class MyUI extends UI {
             companyDetailsField.clear();
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_companies && selectedCompany != null) {
-                    administration = new Administration(user.user_group);
+                    administration = new Administration(user.user_group, user.company);
                     
                     companyNameField.setValue(selectedCompany.name);
                     if (selectedCompany.website != null) companyWebsiteField.setValue(selectedCompany.website);
@@ -1696,7 +1696,7 @@ public class MyUI extends UI {
                                 confirmExtra.addClickListener(new Button.ClickListener() {
                                     @Override
                                     public void buttonClick(Button.ClickEvent event) {
-                                        if (administration.application.remove(selectedApplication.id)) {
+                                        if (administration.application.remove(selectedApplication)) {
                                             tableContainer.removeItem(selected);
                                             subConfirmWindow.close();
                                         } else {
@@ -1768,7 +1768,7 @@ public class MyUI extends UI {
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_applications) {
 
-                    administration = new Administration(user.user_group);
+                    administration = new Administration(user.user_group, user.company);
                     
                     for (ApplicationRow applicationRow : administration.object_collections.applications()) {
                         Item userItem = tableContainer.addItem(applicationRow.id);
@@ -1910,7 +1910,7 @@ public class MyUI extends UI {
             uppdateIntevalField.clear();
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_applications) {
-                    administration = new Administration(user.user_group);
+                    administration = new Administration(user.user_group, user.company);
                      
                    
                     for (CompanyRow company : administration.object_collections.companies()) {
@@ -2053,7 +2053,7 @@ public class MyUI extends UI {
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_applications) {
                     
-                    administration = new Administration(user.user_group);
+                    administration = new Administration(user.user_group, user.company);
                     
                     applicationNameField.setValue(selectedApplication.name);
                     uppdateIntevalField.setValue(selectedApplication.update_interval);
@@ -2284,7 +2284,7 @@ public class MyUI extends UI {
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_companies) {
 
-                    administration = new Administration(user.user_group);
+                    administration = new Administration(user.user_group, user.company);
                     
                     for (UserGroups UserRow : administration.object_collections.user_groups()) {
                         Item userItem = tableContainer.addItem(UserRow.id);
@@ -2418,7 +2418,7 @@ public class MyUI extends UI {
             manageUserGroupsCheckbox.setValue(false);
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_companies) {
-                    administration = new Administration(user.user_group);
+                    administration = new Administration(user.user_group, user.company);
                 } else {
                     nav.navigateTo(logsView);
                 }
@@ -2536,7 +2536,7 @@ public class MyUI extends UI {
             manageUserGroupsCheckbox.setValue(false);
             if (user != null && user.is_authenticated) {
                 if (user.user_group.manage_companies) {
-                    administration = new Administration(user.user_group);
+                    administration = new Administration(user.user_group, user.company);
                     
                     userGroupNameField.setValue(selectedUserGroup.name);
                     viewLogsCheckbox.setValue(selectedUserGroup.view_logs);

@@ -19,21 +19,22 @@ public class Administration {
      * Constructs the Administration object.
      * 
      * @param user_groups UserGroups object
+     * @param user_company CompanyRow object
      */
-    public Administration(UserGroups user_groups) {
+    public Administration(UserGroups user_groups, CompanyRow user_company) {
         
-        this.user = new User(user_groups);
-        this.application = new Application(user_groups);
-        this.company = new Company(user_groups);
+        this.user = new User(user_groups, user_company);
+        this.application = new Application(user_groups, user_company);
+        this.company = new Company(user_groups, user_company);
         this.user_group = new UserGroup(user_groups);
-        this.object_collections = new ObjectCollections(user_groups);
+        this.object_collections = new ObjectCollections(user_groups, user_company);
     }
     
     /**
      * Constructs a Administration object with zero administration rights.
      */
     public Administration() {
-        this(new UserGroups());
+        this(new UserGroups(), new CompanyRow());
     }
     
     //Administration.User object start.
@@ -44,11 +45,13 @@ public class Administration {
          */
         public final Settings settings;
         private final UserGroups user_groups;
+        private final CompanyRow user_company;
         
-        public User(UserGroups user_groups) {
+        public User(UserGroups user_groups, CompanyRow user_company) {
             
             this.settings = new Settings();
             this.user_groups = user_groups;
+            this.user_company = user_company;
         }
         
         //User settings start.
@@ -99,7 +102,9 @@ public class Administration {
          * @return true if user was created, false if there was an issue.
          */
         public boolean create(String first_name, String last_name, String email, String username, String password, String company_id, String user_group_id) {
-            if (this.user_groups.manage_users) {
+            if (this.user_groups.manage_users &&
+                    (this.user_groups.id.equals(user_group.settings.ADMINISTRATOR_USER_GROUP) || this.user_company.id.equals(company_id))) {
+                
                 boolean proceed = true;
                 database_connection.connect();
                 
@@ -242,7 +247,9 @@ public class Administration {
          * @return true if the user information was updated, false if there was an issue.
          */
         public boolean edit(CurrentUser user_information, String first_name, String last_name, String email, String username, String password, String company_id, String user_group_id) {
-            if (this.user_groups.manage_users && !this.settings.ADMINISTRATOR_ID.equals(user_information.id)) {
+            if (this.user_groups.manage_users && !this.settings.ADMINISTRATOR_ID.equals(user_information.id)  &&
+                    (this.user_groups.id.equals(user_group.settings.ADMINISTRATOR_USER_GROUP) || this.user_company.id.equals(user_information.company.id))) {
+                
                 ArrayList<String> columns = new ArrayList<>();
                 ArrayList<Object> values = new ArrayList<>();
                 database_connection.connect();
@@ -370,13 +377,15 @@ public class Administration {
          * Removes the user related to the provided id.
          * The provided user's id can't belong to the main administrator.
          * 
-         * @param id Id related to the user being removed.
+         * @param user_information CurrentUser object representing the user being removed.
          * @return true if the user was removed or doesn't exist, false if there was an issue.
          */
-        public boolean remove(String id) {
-            if (this.user_groups.manage_users && id != null && !this.settings.ADMINISTRATOR_ID.equals(id)) {
+        public boolean remove(CurrentUser user_information) {
+            if (this.user_groups.manage_users && user_information != null && !this.settings.ADMINISTRATOR_ID.equals(user_information.id) &&
+                    (this.user_groups.id.equals(user_group.settings.ADMINISTRATOR_USER_GROUP) || this.user_company.id.equals(user_information.company.id))) {
+
                 HashMap whereQuery = new HashMap();
-                whereQuery.put("id", id);
+                whereQuery.put("id", user_information.id);
                 
                 database_connection.connect();
                 database_connection.delete_row("user", whereQuery);
@@ -400,11 +409,13 @@ public class Administration {
          */
         public final Settings settings;
         private final UserGroups user_groups;
+        private final CompanyRow user_company;
         
-        public Application(UserGroups user_groups) {
+        public Application(UserGroups user_groups, CompanyRow user_company) {
             
             this.settings = new Settings();
             this.user_groups = user_groups;
+            this.user_company = user_company;
         }
         
         //Application settings start.
@@ -441,7 +452,9 @@ public class Administration {
          * @return An ApplicationRow object containing the information for the application created, returns null if there was an issue.
          */
         public ApplicationRow create(String company_id, String name, String log_type, String update_interval) {
-            if (user_groups.manage_applications) {
+            if (user_groups.manage_applications &&
+                    (this.user_groups.id.equals(user_group.settings.ADMINISTRATOR_USER_GROUP) || this.user_company.id.equals(company_id))) {
+                
                 boolean proceed = true;
                 database_connection.connect();
                 
@@ -536,7 +549,9 @@ public class Administration {
          * @return true if application was updated, false if there was an issue.
          */
         public boolean edit(ApplicationRow application_information, String company_id, String name, String log_type, String update_interval) {
-            if (this.user_groups.manage_applications) {
+            if (this.user_groups.manage_applications &&
+                    (this.user_groups.id.equals(user_group.settings.ADMINISTRATOR_USER_GROUP) || this.user_company.id.equals(application_information.company.id))) {
+                
                 ArrayList<String> columns = new ArrayList<>();
                 ArrayList<Object> values = new ArrayList<>();
                 database_connection.connect();
@@ -618,19 +633,21 @@ public class Administration {
         /**
          * Removes the application related to the provided id along with all logs related to this application.
          * 
-         * @param id Id related to the application being removed.
+         * @param application_information ApplicationRow object representing the application you're removing.
          * @return true if the application was removed or doesn't exist, false if there was an issue.
          */
-        public boolean remove(String id) {
-            if (this.user_groups.manage_applications && id != null) {
+        public boolean remove(ApplicationRow application_information) {
+            if (this.user_groups.manage_applications && application_information != null &&
+                    (this.user_groups.id.equals(user_group.settings.ADMINISTRATOR_USER_GROUP) || this.user_company.id.equals(application_information.company.id))) {
+                
                 HashMap whereQuery = new HashMap();
-                whereQuery.put("application_id", id);
+                whereQuery.put("application_id", application_information.id);
                 
                 database_connection.connect();
                 database_connection.delete_row("log", whereQuery);
                 
                 whereQuery.clear();
-                whereQuery.put("id", id);
+                whereQuery.put("id", application_information.id);
                 
                 database_connection.delete_row("application", whereQuery);
                 database_connection.close();
@@ -643,64 +660,24 @@ public class Administration {
         }
         //Remove application method end.
         
-        //Authenticate API key method start.
-        /**
-         * Authenticates the provided API key.
-         * 
-         * @param api_key API key being authenticated.
-         * @return ApplicationRow containing the information of the application related to the authenticated API key.
-         */
-        public ApplicationRow authenticate_API_key(String api_key) {
-            if (user_groups.manage_applications && api_key != null) {
-                database_connection.connect();
-                
-                String[] columnQuery = {
-                        "id",
-                        "company_id",
-                        "name",
-                        "latest_update",
-                        "update_interval",
-                        "log_type"
-                };
-
-                HashMap whereQuery = new HashMap();
-                whereQuery.put("api_key", api_key);
-
-                String[][] select = database_connection.select(columnQuery, "application", whereQuery);
-
-                if (select != null && select.length == 1 && select[0].length == columnQuery.length) {
-                    return new ApplicationRow(
-                            select[0][0],
-                            select[0][1],
-                            select[0][2],
-                            select[0][3],
-                            select[0][4],
-                            api_key,
-                            select[0][5],
-                            false
-                    );
-                }
-            }
-            return null;
-        }
-        //Authenticate API key method end.
-        
         //Insert logs method start.
         /**
          * Inserts logs to an existing application.
          * 
-         * @param id The id of the application the logs belong to.
+         * @param application_information ApplicationRow object representing the application the logs belong to.
          * @param logs A two dimensional array containing the logs being inserted into the database.
          * @return true of the logs were inserted, false if there was an issue.
          */
-        public boolean insert_logs(String id, String[][] logs) {
-            if (user_groups.manage_applications) {
+        public boolean insert_logs(ApplicationRow application_information, String[][] logs) {
+            if (user_groups.manage_applications &&
+                    (this.user_groups.id.equals(user_group.settings.ADMINISTRATOR_USER_GROUP) || this.user_company.id.equals(application_information.company.id))) {
+                
                 database_connection.connect();
                 
                 String[] columnQuery = { "id" };
 
                 HashMap whereQuery = new HashMap();
-                whereQuery.put("id", id);
+                whereQuery.put("id", application_information.id);
 
                 String[][] select = database_connection.select(columnQuery, "application", whereQuery);
 
@@ -715,7 +692,7 @@ public class Administration {
                     Object[][] values = new Object[logs.length][3];
                     
                     for (int i = 0; i < logs.length; i++) {
-                        values[i] = new Object[] { id, logs[i][0], logs[i][1] };
+                        values[i] = new Object[] { application_information.id, logs[i][0], logs[i][1] };
                     }
                     
                     database_connection.insert(columnQuery, values, "log");
@@ -723,7 +700,7 @@ public class Administration {
                     columnQuery = new String[] { "latest_update" };
                     
                     whereQuery.clear();
-                    whereQuery.put("id", id);
+                    whereQuery.put("id", application_information.id);
                     
                     Object[] latest_update = { new Timestamp(new Date().getTime()) };
                     
@@ -748,11 +725,13 @@ public class Administration {
          */
         public final Settings settings;
         private final UserGroups user_groups;
+        private final CompanyRow user_company;
         
-        public Company(UserGroups user_groups) {
+        public Company(UserGroups user_groups, CompanyRow user_company) {
             
             this.settings = new Settings();
             this.user_groups = user_groups;
+            this.user_company = user_company;
         }
 
         //Company settings start.
@@ -784,12 +763,13 @@ public class Administration {
          * Creates a new company in the company table.
          * 
          * @param name The name of the new company.
-         * @param website The website of the new company - can be null.
+         * @param website The web site of the new company - can be null.
          * @param details Extra details of the new company - can be null.
          * @return true if a new company was created, false if there was an issue.
          */
         public boolean create(String name, String website, String details) {
-            if (this.user_groups.manage_users) {
+            if (this.user_groups.manage_companies && this.user_groups.id.equals(user_group.settings.ADMINISTRATOR_USER_GROUP)) {
+                
                 ArrayList<String> columns = new ArrayList<>();
                 ArrayList<Object> values = new ArrayList<>();
                 
@@ -850,7 +830,9 @@ public class Administration {
          * @return true if the company information was updated, false if there was an issue.
          */
         public boolean edit(CompanyRow company_information, String name, String website, String details) {
-            if (this.user_groups.manage_users && !this.settings.ADMINISTRATOR_COMPANY_ID.equals(company_information.id)) {
+            if (this.user_groups.manage_companies && !this.settings.ADMINISTRATOR_COMPANY_ID.equals(company_information.id) &&
+                    (this.user_groups.id.equals(user_group.settings.ADMINISTRATOR_USER_GROUP) || this.user_company.id.equals(company_information.id))) {
+                
                 ArrayList<String> columns = new ArrayList<>();
                 ArrayList<Object> values = new ArrayList<>();
                 
@@ -917,9 +899,12 @@ public class Administration {
          * @return true if the company was removed or doesn't exist, false if there was an issue.
          */
         public boolean remove(String id) {
-            if (this.user_groups.manage_companies && id != null && !this.settings.ADMINISTRATOR_COMPANY_ID.equals(id)) {
+            if (this.user_groups.manage_companies && this.user_groups.manage_users && this.user_groups.manage_applications &&
+                    id != null && !this.settings.ADMINISTRATOR_COMPANY_ID.equals(id) &&
+                    this.user_groups.id.equals(user_group.settings.ADMINISTRATOR_USER_GROUP)) {
+                
                 String[] columnQuery = { "id" };
-
+                
                 HashMap whereQuery = new HashMap();
                 whereQuery.put("company_id", id);
 
@@ -928,7 +913,7 @@ public class Administration {
 
                 if (select != null && select.length >= 1 && select[0].length == columnQuery.length) {
                     for (String[] row : select) {
-                        user.remove(row[0]);
+                        user.remove(new CurrentUser(row[0]));
                     }
                 }
                 
@@ -936,7 +921,7 @@ public class Administration {
 
                 if (select != null && select.length >= 1 && select[0].length == columnQuery.length) {
                     for (String[] row : select) {
-                        application.remove(row[0]);
+                        application.remove(new ApplicationRow(row[0]));
                     }
                 }
                 
@@ -1131,7 +1116,7 @@ public class Administration {
          * @return true if the user group was removed or doesn't exist, false if there was an issue.
          */
         public boolean remove(String id) {
-            if (this.user_groups.manage_groups && id != null && !this.settings.ADMINISTRATOR_USER_GROUP.equals(id)) {
+            if (this.user_groups.manage_groups && this.user_groups.manage_users && id != null && !this.settings.ADMINISTRATOR_USER_GROUP.equals(id)) {
                 String[] columnQuery = { "id" };
 
                 HashMap whereQuery = new HashMap();
@@ -1142,7 +1127,7 @@ public class Administration {
 
                 if (select != null && select.length >= 1 && select[0].length == columnQuery.length) {
                     for (String[] row : select) {
-                        user.remove(row[0]);
+                        user.remove(new CurrentUser(row[0]));
                     }
                 }
                 
@@ -1167,10 +1152,12 @@ public class Administration {
     public class ObjectCollections {
         
         private final UserGroups user_groups;
+        private final CompanyRow user_company;
         
-        public ObjectCollections(UserGroups user_groups) {
+        public ObjectCollections(UserGroups user_groups, CompanyRow user_company) {
             
             this.user_groups = user_groups;
+            this.user_company = user_company;
         }
         
         //CurrentUser collection begin.
@@ -1200,16 +1187,21 @@ public class Administration {
                     ArrayList<CurrentUser> results = new ArrayList<>();
                     
                     for (String[] row : select) {
-                        if (!row[0].equals(user.settings.ADMINISTRATOR_ID)) {
-                            results.add(new CurrentUser(
-                                    row[0],
-                                    row[1],
-                                    row[2],
-                                    row[3],
-                                    row[4],
-                                    row[5],
-                                    row[6]
-                            ));
+                        
+                        CurrentUser found_user = new CurrentUser(
+                                row[0],
+                                row[1],
+                                row[2],
+                                row[3],
+                                row[4],
+                                row[5],
+                                row[6]
+                        );
+                        
+                        if (this.user_groups.id.equals(user_group.settings.ADMINISTRATOR_USER_GROUP) ||
+                                (!found_user.id.equals(user.settings.ADMINISTRATOR_ID) && this.user_company.id.equals(found_user.company.id))) {
+                            
+                            results.add(found_user);
                         }
                     }
                     return results.toArray(new CurrentUser[results.size()]);
@@ -1246,13 +1238,18 @@ public class Administration {
                     ArrayList<CompanyRow> results = new ArrayList<>();
                     
                     for (String[] row : select) {
-                        if (!row[0].equals(company.settings.ADMINISTRATOR_COMPANY_ID)) {
-                            results.add(new CompanyRow(
-                                    row[0],
-                                    row[1],
-                                    row[2],
-                                    row[3]
-                            ));
+                        
+                        CompanyRow found_company = new CompanyRow(
+                                row[0],
+                                row[1],
+                                row[2],
+                                row[3]
+                        );
+                        
+                        if (this.user_groups.id.equals(user_group.settings.ADMINISTRATOR_USER_GROUP) || 
+                                (!found_company.id.equals(company.settings.ADMINISTRATOR_COMPANY_ID) && this.user_company.id.equals(found_company.id))) {
+                            
+                            results.add(found_company);
                         }
                     }
                     return results.toArray(new CompanyRow[results.size()]);
@@ -1286,20 +1283,27 @@ public class Administration {
                 database_connection.close();
 
                 if (select != null && select.length >= 1 && select[0].length == columnQuery.length) {
-                    UserGroups[] results = new UserGroups[select.length];
+                    ArrayList<UserGroups> results = new ArrayList<>();
                     
-                    for (int i = 0; i < select.length; i++) {
-                        results[i] = new UserGroups(
-                                select[i][0],
-                                select[i][1],
-                                select[i][2],
-                                select[i][3],
-                                select[i][4],
-                                select[i][5],
-                                select[i][6]
+                    for (String[] row : select) {
+                        
+                        UserGroups found_user_group = new UserGroups(
+                                row[0],
+                                row[1],
+                                row[2],
+                                row[3],
+                                row[4],
+                                row[5],
+                                row[6]
                         );
+                        
+                        if (this.user_groups.id.equals(user_group.settings.ADMINISTRATOR_USER_GROUP) ||
+                                !found_user_group.id.equals(user_group.settings.ADMINISTRATOR_USER_GROUP)) {
+                            
+                            results.add(found_user_group);
+                        }
                     }
-                    return results;
+                    return results.toArray(new UserGroups[results.size()]);
                 }
             }
             return null;
@@ -1330,21 +1334,27 @@ public class Administration {
                 database_connection.close();
 
                 if (select != null && select.length >= 1 && select[0].length == columnQuery.length) {
-                    ApplicationRow[] results = new ApplicationRow[select.length];
+                    ArrayList<ApplicationRow> results = new ArrayList<>();
                     
-                    for (int i = 0; i < select.length; i++) {
-                        results[i] = new ApplicationRow(
-                                select[i][0],
-                                select[i][1],
-                                select[i][2],
-                                select[i][3],
-                                select[i][4],
-                                select[i][5],
-                                select[i][6],
+                    for (String[] row : select) {
+                        ApplicationRow found_application = new ApplicationRow(
+                                row[0],
+                                row[1],
+                                row[2],
+                                row[3],
+                                row[4],
+                                row[5],
+                                row[6],
                                 false
                         );
+                        
+                        if (this.user_groups.id.equals(user_group.settings.ADMINISTRATOR_USER_GROUP) ||
+                                this.user_company.id.equals(found_application.company.id)) {
+                            
+                            results.add(found_application);
+                        }
                     }
-                    return results;
+                    return results.toArray(new ApplicationRow[results.size()]);
                 }
             }
             return null;

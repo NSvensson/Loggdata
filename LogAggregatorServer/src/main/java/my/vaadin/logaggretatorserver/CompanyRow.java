@@ -41,4 +41,9 @@ public class CompanyRow {
         if (website != null) this.website = website;
         if (details != null) this.details = details;
     }
+    
+    public CompanyRow() {
+    
+        this.id = "0";
+    }
 }

@@ -140,7 +140,7 @@ public class ClientServlet extends HttpServlet {
                         request.getHeader("password"),
                         false);
                 
-                Administration administration = new Administration(user.user_group);
+                Administration administration = new Administration(user.user_group, user.company);
                 
                 ApplicationRow created_application = administration.application.create(
                         user.company.id,
@@ -195,9 +195,8 @@ public class ClientServlet extends HttpServlet {
             Check if the provided API key is valid and obtain the id related to 
             the key, then pick out the file from the multipart request.
             */
-            Administration administration = new Administration(new UserGroups(true));
             
-            ApplicationRow application = administration.application.authenticate_API_key(request.getHeader("api-key"));
+            ApplicationRow application = DataManaging.authenticate_API_key(request.getHeader("api-key"));
             
             Part given_file;
             if (application != null && (given_file = request.getPart("file")) != null) {
@@ -299,7 +298,9 @@ public class ClientServlet extends HttpServlet {
                                 is built, we send it to the administration object to process and insert
                                 the logs found.
                                 */
-                                if (administration.application.insert_logs(application.id, results)) System.out.println("Logs successfully inserted.");
+                                
+                                Administration administration = new Administration(new UserGroups(true), application.company);
+                                if (administration.application.insert_logs(application, results)) System.out.println("Logs successfully inserted.");
                                 else System.out.println("Logs unsuccessfully inserted.");
                             }
                         }
