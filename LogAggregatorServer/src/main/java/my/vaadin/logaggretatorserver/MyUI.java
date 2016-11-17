@@ -132,7 +132,7 @@ public class MyUI extends UI {
                     }
                 }
             });
-            layout.addComponent(loginbtn,0,3);
+            layout.addComponent(loginbtn, 0, 3);
         }
         
         @Override
@@ -237,7 +237,6 @@ public class MyUI extends UI {
                 
             });
             
-
             this.comboBoxContainer.addContainerProperty(this.HIDDEN_COLUMN_IDENTIFIER, String.class, null);
             this.comboBoxContainer.addContainerProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER, String.class, null);
             
@@ -297,37 +296,45 @@ public class MyUI extends UI {
             
             manage_users.addClickListener(new Button.ClickListener() {
                 @Override
-                public void buttonClick(Button.ClickEvent event){ 
-                    tableContainer.removeAllItems();
-                    comboBoxContainer.removeAllItems();
-                    nav.navigateTo(manageUsersView);
+                public void buttonClick(Button.ClickEvent event) {
+                    if (user.user_group.manage_users) {
+                        tableContainer.removeAllItems();
+                        comboBoxContainer.removeAllItems();
+                        nav.navigateTo(manageUsersView);
+                    }
                 }
             });
             
             manage_companies.addClickListener(new Button.ClickListener() {
                 @Override
-                public void buttonClick(Button.ClickEvent event){
-                    tableContainer.removeAllItems();
-                    comboBoxContainer.removeAllItems();
-                    nav.navigateTo(manageCompaniesView);
+                public void buttonClick(Button.ClickEvent event) {
+                    if (user.user_group.manage_companies) {
+                        tableContainer.removeAllItems();
+                        comboBoxContainer.removeAllItems();
+                        nav.navigateTo(manageCompaniesView);
+                    }
                 }
             });
             
             manage_applications.addClickListener(new Button.ClickListener() {
                 @Override
-                public void buttonClick(Button.ClickEvent event){
-                    tableContainer.removeAllItems();
-                    comboBoxContainer.removeAllItems();
-                    nav.navigateTo(manageApplicationView);
+                public void buttonClick(Button.ClickEvent event) {
+                    if (user.user_group.manage_applications) {
+                        tableContainer.removeAllItems();
+                        comboBoxContainer.removeAllItems();
+                        nav.navigateTo(manageApplicationView);
+                    }
                 }
             });
             
             manage_usergroups.addClickListener(new Button.ClickListener() {
                 @Override
-                public void buttonClick(Button.ClickEvent event){
-                    tableContainer.removeAllItems();
-                    comboBoxContainer.removeAllItems();
-                    nav.navigateTo(manageUserGroupsView);
+                public void buttonClick(Button.ClickEvent event) {
+                    if (user.user_group.manage_groups) {
+                        tableContainer.removeAllItems();
+                        comboBoxContainer.removeAllItems();
+                        nav.navigateTo(manageUserGroupsView);
+                    }
                 }
             });
             
@@ -2310,8 +2317,8 @@ public class MyUI extends UI {
             userGroupTable.deselectAll();
             tableContainer.removeAllItems();
             if (user != null && user.is_authenticated) {
-                if (user.user_group.manage_companies) {
-
+                if (user.user_group.manage_groups) {
+                    
                     administration = new Administration(user.user_group, user.company);
                     
                     for (UserGroups UserRow : administration.object_collections.user_groups()) {
@@ -2445,8 +2452,9 @@ public class MyUI extends UI {
             manageUsersCheckbox.setValue(false);
             manageCompaniesCheckbox.setValue(false);
             manageUserGroupsCheckbox.setValue(false);
+            
             if (user != null && user.is_authenticated) {
-                if (user.user_group.manage_companies) {
+                if (user.user_group.manage_groups) {
                     administration = new Administration(user.user_group, user.company);
                 } else {
                     nav.navigateTo(logsView);
@@ -2564,8 +2572,9 @@ public class MyUI extends UI {
             manageUsersCheckbox.setValue(false);
             manageCompaniesCheckbox.setValue(false);
             manageUserGroupsCheckbox.setValue(false);
+            
             if (user != null && user.is_authenticated) {
-                if (user.user_group.manage_companies) {
+                if (user.user_group.manage_groups) {
                     administration = new Administration(user.user_group, user.company);
                     
                     userGroupNameField.setValue(selectedUserGroup.name);

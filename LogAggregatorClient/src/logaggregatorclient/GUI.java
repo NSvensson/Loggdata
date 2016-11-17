@@ -23,7 +23,6 @@ import javafx.stage.Stage;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.WindowEvent;
 
 public class GUI extends Application {
@@ -196,9 +195,7 @@ public class GUI extends Application {
         return_button_hbox.getChildren().add(return_button);
         grid.add(return_button_hbox, 0, 4);
         
-        Scene login = new Scene(grid, 350, 270);
-        
-        return login;
+        return new Scene(grid, 350, 270);
     }
     
     private Scene newApplicationScene(Stage primaryStage) {
@@ -248,10 +245,10 @@ public class GUI extends Application {
         browse_button.setPrefWidth(interval_combobox.getPrefWidth());
         browse_button.setOnAction(new EventHandler<ActionEvent>(){
             @Override
-            public void handle(final ActionEvent e){
+            public void handle(final ActionEvent e) {
                 File logfile = file_chooser.showOpenDialog(primaryStage);
-                if (logfile != null){
-                  textfield_application_source.setText(logfile.getAbsolutePath());
+                if (logfile != null) {
+                    textfield_application_source.setText(logfile.getAbsolutePath());
                 }
                 
             }
@@ -259,7 +256,7 @@ public class GUI extends Application {
         
         Button export_button = new Button("Export");
         grid.add(export_button, 0, 6);
-        export_button.setOnAction((ActionEvent e) -> {
+        export_button.setOnAction(e -> {
             String tmpName, tmpSource, tmpInterval;
             if ((tmpName = textfield_application_name.getText()) != null &&
                  tmpName.length() >= 1 && (
@@ -341,7 +338,7 @@ public class GUI extends Application {
         grid.add(accept_button, 0, 2);
         
         Button decline_button = new Button("Cancel");
-        decline_button.setOnAction(e -> primaryStage.setScene(loginScene(primaryStage)));
+        decline_button.setOnAction(e -> primaryStage.setScene(startupMenu(primaryStage)));
         grid.add(decline_button, 1, 2);
 
         return new Scene(grid, 350, 270);
@@ -396,5 +393,4 @@ public class GUI extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-    
 }
