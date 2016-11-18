@@ -52,3 +52,20 @@ glassfish{ver}/glassfish/domains/{domännamn}/config/LogServerConfig.properties
 
 
 Domännamnet som NetBeans använder brukar heta “domain1”.
+
+Databasens URL bör skrivas som till exempel:
+
+```
+#!
+
+localhost:3306/logdatacollector
+
+```
+Då URL:en innehåller:
+
+```
+#!
+
+{databas serverns adress}/{databasens namn}
+
+```
