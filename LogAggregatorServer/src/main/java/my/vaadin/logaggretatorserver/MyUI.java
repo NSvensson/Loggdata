@@ -13,6 +13,7 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.shared.ui.grid.ScrollDestination;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
@@ -178,6 +179,7 @@ public class MyUI extends UI {
             this.logtable.getColumn(this.APPLICATION_NAME_COLUMN_IDENTIFIER).setWidth(200);
             this.logtable.getColumn(this.DATE_COLUMN_NAME_IDENTIFIER).setWidth(200);
             this.logtable.getColumn(this.EVENT_COLUMN_NAME_IDENTIFIER).setWidthUndefined();
+            this.logtable.getColumn(this.EVENT_COLUMN_NAME_IDENTIFIER).setResizable(false);
             
             setWidth("100%");
             setHeight("100%");
@@ -195,6 +197,7 @@ public class MyUI extends UI {
 
             this.logtable.setSizeFull();
             logtable.addItemClickListener(event -> {
+                logtable.scrollTo(event.getItemId(), ScrollDestination.START);
                 subWindow.close();
                 LogItem log = new LogItem(event.getItem());
                 
