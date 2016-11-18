@@ -623,15 +623,18 @@ public class MyUI extends UI {
 
                     administration = new Administration(user.user_group, user.company);
                     
-                    for (CurrentUser userRow : administration.object_collections.users()) {
-                        Item userItem = tableContainer.addItem(userRow.id);
-                        userItem.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(userRow.id);
-                        userItem.getItemProperty(this.FIRST_NAME_COLUMN_IDENTIFIER).setValue(userRow.first_name);
-                        userItem.getItemProperty(this.LAST_NAME_NAME_COLUMN_IDENTIFIER).setValue(userRow.last_name);
-                        userItem.getItemProperty(this.EMAIL_COLUMN_IDENTIFIER).setValue(userRow.email);
-                        userItem.getItemProperty(this.USERNAME_COLUMN_IDENTIFIER).setValue(userRow.username);
-                        userItem.getItemProperty(this.USER_COMPANY_COLUMN_IDENTIFIER).setValue(userRow.company.name);
-                        userItem.getItemProperty(this.USER_GROUP_COLUMN_IDENTIFIER).setValue(userRow.user_group.name);
+                    CurrentUser[] found_users;
+                    if ((found_users = administration.object_collections.users()) != null) {
+                        for (CurrentUser userRow : found_users) {
+                            Item userItem = tableContainer.addItem(userRow.id);
+                            userItem.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(userRow.id);
+                            userItem.getItemProperty(this.FIRST_NAME_COLUMN_IDENTIFIER).setValue(userRow.first_name);
+                            userItem.getItemProperty(this.LAST_NAME_NAME_COLUMN_IDENTIFIER).setValue(userRow.last_name);
+                            userItem.getItemProperty(this.EMAIL_COLUMN_IDENTIFIER).setValue(userRow.email);
+                            userItem.getItemProperty(this.USERNAME_COLUMN_IDENTIFIER).setValue(userRow.username);
+                            userItem.getItemProperty(this.USER_COMPANY_COLUMN_IDENTIFIER).setValue(userRow.company.name);
+                            userItem.getItemProperty(this.USER_GROUP_COLUMN_IDENTIFIER).setValue(userRow.user_group.name);
+                        }
                     }
                 } else {
                     nav.navigateTo(logsView);
@@ -1801,13 +1804,16 @@ public class MyUI extends UI {
 
                     administration = new Administration(user.user_group, user.company);
                     
-                    for (ApplicationRow applicationRow : administration.object_collections.applications()) {
-                        Item userItem = tableContainer.addItem(applicationRow.id);
-                        userItem.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(applicationRow.id);
-                        userItem.getItemProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER).setValue(applicationRow.name);
-                        userItem.getItemProperty(this.UPDATE_INTERVAL_COLUMN_IDENTIFIER).setValue(applicationRow.update_interval);
-                        userItem.getItemProperty(this.LATEST_UPDATE_COLUMN_IDENTIFIER).setValue(applicationRow.latest_update);
-                        userItem.getItemProperty(this.COMPANY_COLUMN_IDENTIFIER).setValue(applicationRow.company.name);
+                    ApplicationRow[] found_applications;
+                    if ((found_applications = administration.object_collections.applications()) != null) {
+                        for (ApplicationRow applicationRow : found_applications) {
+                            Item userItem = tableContainer.addItem(applicationRow.id);
+                            userItem.getItemProperty(this.HIDDEN_COLUMN_IDENTIFIER).setValue(applicationRow.id);
+                            userItem.getItemProperty(this.APPLICATION_NAME_COLUMN_IDENTIFIER).setValue(applicationRow.name);
+                            userItem.getItemProperty(this.UPDATE_INTERVAL_COLUMN_IDENTIFIER).setValue(applicationRow.update_interval);
+                            userItem.getItemProperty(this.LATEST_UPDATE_COLUMN_IDENTIFIER).setValue(applicationRow.latest_update);
+                            userItem.getItemProperty(this.COMPANY_COLUMN_IDENTIFIER).setValue(applicationRow.company.name);
+                        }
                     }
                 } else {
                     nav.navigateTo(logsView);
@@ -2206,7 +2212,7 @@ public class MyUI extends UI {
                     Object selected = ((SingleSelectionModel) userGroupTable.getSelectionModel()).getSelectedRow();
                     
                     if (selected != null) {
-                        selectedApplication = new ApplicationRow(selected.toString(), false);
+                        selectedUserGroup = new UserGroups(selected.toString());
                         
                         if (!administration.user_group.settings.ADMINISTRATOR_USER_GROUP.equals(selectedUserGroup.id)) {
 
